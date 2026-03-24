@@ -40,8 +40,9 @@ backend/test_db.js
 backend/test_login_debug.js
 backend/test_register.js
 
-# Logs
-npm-debug.log*
+# Vercel
+.vercel/
+.vercel_build_output/
 yarn-debug.log*
 yarn-error.log*
 logs/
