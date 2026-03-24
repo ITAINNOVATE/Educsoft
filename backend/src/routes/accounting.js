@@ -28,21 +28,38 @@ router.get('/stats', protect, authorize('ADMIN', 'ACCOUNTANT', 'DIRECTOR'), asyn
         const [dayPayments, monthPayments, totalPayments, filteredPayments, studentCount, classCount] = await Promise.all([
             prisma.payment.aggregate({
                 _sum: { amount: true },
-                where: { paymentDate: { gte: startOfDay } }
+                where: { 
+                    paymentDate: { gte: startOfDay },
+                    establishmentId: req.user.establishmentId
+                }
             }),
             prisma.payment.aggregate({
                 _sum: { amount: true },
-                where: { paymentDate: { gte: startOfMonth } }
-            }),
-            prisma.payment.aggregate({
-                _sum: { amount: true } // Absolute total
+                where: { 
+                    paymentDate: { gte: startOfMonth },
+                    establishmentId: req.user.establishmentId
+                }
             }),
             prisma.payment.aggregate({
                 _sum: { amount: true },
-                where: dateFilter // Filtered total
+                where: { establishmentId: req.user.establishmentId } 
             }),
-            prisma.student.count({ where: { status: 'ACTIVE' } }),
-            prisma.class.count()
+            prisma.payment.aggregate({
+                _sum: { amount: true },
+                where: { 
+                    ...dateFilter,
+                    establishmentId: req.user.establishmentId
+                }
+            }),
+            prisma.student.count({ 
+                where: { 
+                    status: 'ACTIF',
+                    establishmentId: req.user.establishmentId
+                } 
+            }),
+            prisma.class.count({
+                where: { establishmentId: req.user.establishmentId }
+            })
         ]);
 
         // If date filter is applied, 'revenueTotal' returns the filtered amount
@@ -78,7 +95,10 @@ const { calculateStudentFinancials } = require('../utils/finance');
 router.get('/debts', protect, authorize('ADMIN', 'ACCOUNTANT'), async (req, res) => {
     try {
         const students = await prisma.student.findMany({
-            where: { status: 'ACTIF' }, // Note: Using 'ACTIF' instead of 'ACTIVE' based on schema default
+            where: { 
+                status: 'ACTIF',
+                establishmentId: req.user.establishmentId
+            }, // Note: Using 'ACTIF' instead of 'ACTIVE' based on schema default
             include: {
                 enrollments: { include: { class: { include: { fees: true } } } },
                 payments: true

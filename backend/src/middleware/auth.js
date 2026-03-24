@@ -18,8 +18,13 @@ const protect = async (req, res, next) => {
 
             req.user = await prisma.user.findUnique({
                 where: { id: decoded.id },
-                select: { id: true, email: true, role: true, firstName: true, lastName: true },
+                select: { id: true, email: true, role: true, firstName: true, lastName: true, establishmentId: true },
             });
+
+            // If Super Admin, use the establishmentId from token (context switching)
+            if (req.user && req.user.role === 'SUPER_ADMIN') {
+                req.user.establishmentId = decoded.establishmentId;
+            }
 
             if (!req.user) {
                 return res.status(401).json({ message: 'Not authorized, user not found' });

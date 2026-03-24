@@ -12,6 +12,7 @@ const router = express.Router();
 router.get('/school-years', protect, async (req, res) => {
     try {
         const years = await prisma.schoolYear.findMany({
+            where: { establishmentId: req.user.establishmentId },
             orderBy: { startDate: 'desc' },
         });
         res.json(years);
@@ -33,7 +34,10 @@ router.post('/school-years', protect, authorize('ADMIN', 'DIRECTOR'), async (req
         if (current) {
             console.log('Unsetting previous current school years...');
             await prisma.schoolYear.updateMany({
-                where: { current: true },
+                where: { 
+                    current: true,
+                    establishmentId: req.user.establishmentId
+                },
                 data: { current: false },
             });
         }
@@ -45,6 +49,7 @@ router.post('/school-years', protect, authorize('ADMIN', 'DIRECTOR'), async (req
                 startDate: new Date(startDate),
                 endDate: new Date(endDate),
                 current: !!current,
+                establishmentId: req.user.establishmentId
             },
         });
         console.log('Success:', year);
@@ -65,7 +70,10 @@ router.get('/classes', protect, async (req, res) => {
 
     try {
         const classes = await prisma.class.findMany({
-            where: schoolYearId ? { schoolYearId } : {},
+            where: {
+                establishmentId: req.user.establishmentId,
+                ...(schoolYearId ? { schoolYearId } : {})
+            },
             include: {
                 schoolYear: true,
                 fees: true
@@ -89,6 +97,7 @@ router.post('/classes', protect, authorize('ADMIN', 'DIRECTOR'), async (req, res
                 name,
                 level,
                 schoolYearId,
+                establishmentId: req.user.establishmentId
             },
         });
         res.status(201).json(newClass);

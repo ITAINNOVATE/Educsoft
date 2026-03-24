@@ -10,14 +10,32 @@ const router = express.Router();
 // @route   POST /api/auth/login
 // @access  Public
 router.post('/login', async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, establishmentCode } = req.body;
+
+    if (!establishmentCode) {
+        return res.status(400).json({ message: 'Code établissement requis' });
+    }
 
     try {
-        // Allow login with simplified identifiers or full email
-        // Allow login with simplified identifiers (stored in email field)
-        const user = await prisma.user.findFirst({ 
+        // 1. Check Establishment
+        const establishment = await prisma.establishment.findUnique({
+            where: { code: establishmentCode }
+        });
+
+        if (!establishment) {
+            return res.status(404).json({ message: 'Établissement non trouvé' });
+        }
+
+        // 2. Find User
+        // Priority 1: User in this establishment
+        // Priority 2: Super Admin (can login to any establishment)
+        let user = await prisma.user.findFirst({ 
             where: { 
-                email: { equals: email, mode: 'insensitive' } 
+                email: { equals: email, mode: 'insensitive' },
+                OR: [
+                    { establishmentId: establishment.id },
+                    { role: 'SUPER_ADMIN' }
+                ]
             } 
         });
 
@@ -39,7 +57,16 @@ router.post('/login', async (req, res) => {
                 lastName: user.lastName,
                 email: user.email,
                 role: user.role,
-                token: jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '30d' }),
+                establishmentId: user.role === 'SUPER_ADMIN' ? establishment.id : user.establishmentId,
+                establishmentName: establishment.name,
+                token: jwt.sign(
+                    { 
+                        id: user.id, 
+                        establishmentId: user.role === 'SUPER_ADMIN' ? establishment.id : user.establishmentId 
+                    }, 
+                    process.env.JWT_SECRET, 
+                    { expiresIn: '30d' }
+                ),
             });
         } else {
             console.warn(`Failed login attempt for email: ${email}`);

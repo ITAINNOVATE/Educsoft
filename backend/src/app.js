@@ -26,6 +26,7 @@ const accountingRoutes = require('./routes/accounting');
 const teacherPaymentRoutes = require('./routes/teacherPayments');
 
 const userRoutes = require('./routes/users');
+const establishmentRoutes = require('./routes/establishments');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/config', configRoutes);
@@ -35,5 +36,6 @@ app.use('/api/accounting', accountingRoutes);
 app.use('/api/teacher-payments', teacherPaymentRoutes);
 
 app.use('/api/users', userRoutes);
+app.use('/api/establishments', establishmentRoutes);
 
 module.exports = app;

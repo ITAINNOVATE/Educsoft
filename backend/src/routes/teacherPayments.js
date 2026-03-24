@@ -9,9 +9,7 @@ const router = express.Router();
 // @access  Private (Admin & Accountant)
 router.get('/', protect, authorize(['ADMIN', 'ACCOUNTANT']), async (req, res) => {
     try {
-        const { teacherId, period, type } = req.query;
-
-        const where = {};
+        const where = { establishmentId: req.user.establishmentId };
         if (teacherId) where.teacherId = teacherId;
         if (period) where.period = period;
         if (type) where.type = type;
@@ -46,7 +44,8 @@ router.post('/', protect, authorize(['ADMIN', 'ACCOUNTANT']), async (req, res) =
                 period,
                 type,
                 notes,
-                reference
+                reference,
+                establishmentId: req.user.establishmentId
             }
         });
 
@@ -68,7 +67,8 @@ router.get('/stats', protect, authorize(['ADMIN', 'ACCOUNTANT']), async (req, re
             by: ['type'],
             _sum: { amount: true },
             where: {
-                period: { startsWith: String(currentYear) }
+                period: { startsWith: String(currentYear) },
+                establishmentId: req.user.establishmentId
             }
         });
 

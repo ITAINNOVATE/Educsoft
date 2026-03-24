@@ -15,7 +15,9 @@ import {
     FileText,
     Upload,
     Download,
-    CheckCircle
+    CheckCircle,
+    Camera,
+    CreditCard
 } from 'lucide-react';
 
 const Students = () => {
@@ -206,22 +208,48 @@ const Students = () => {
         }
     };
 
-    const handleFileUpload = async (e) => {
+    
+    
+    const handlePhotoUpload = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        const form = new FormData();
-        form.append('document', file);
-        form.append('name', file.name);
+        
+        const formData = new FormData();
+        formData.append('photo', file);
+        
         try {
             setUploading(true);
-            await axios.post(`${API_BASE}/students/${selectedStudent.id}/documents`, form, {
-                headers: { Authorization: `Bearer ${user.token}`, 'Content-Type': 'multipart/form-data' }
+            await axios.post(`${API_BASE}/students/${selectedStudent.id}/photo`, formData, {
+                headers: { 
+                    Authorization: `Bearer ${user.token}`,
+                    'Content-Type': 'multipart/form-data' 
+                }
             });
-            fetchData();
+            alert('Photo mise à jour !');
+            openDetails(selectedStudent); // Refresh details
         } catch (error) {
-            alert('Erreur upload');
+            console.error('Error uploading photo:', error);
+            alert('Erreur lors de l\'upload de la photo.');
         } finally {
             setUploading(false);
+        }
+    };
+
+    const handleDownloadCard = async () => {
+        try {
+            const response = await axios.get(`${API_BASE}/students/${selectedStudent.id}/card`, {
+                headers: { Authorization: `Bearer ${user.token}` },
+                responseType: 'blob'
+            });
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `Carte_${selectedStudent.regNumber}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (error) {
+            alert('Erreur lors du téléchargement de la carte.');
         }
     };
 
@@ -389,8 +417,25 @@ const Students = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '2rem' }}>
                     <aside>
                         <div className="card" style={{ textAlign: 'center', position: 'sticky', top: '2rem' }}>
-                            <div style={{ width: '120px', height: '120px', borderRadius: '50%', backgroundColor: '#e0f2f1', margin: '0 auto 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', fontSize: '3rem', fontWeight: '800' }}>
-                                {selectedStudent.firstName[0]}{selectedStudent.lastName[0]}
+                            <div style={{ position: 'relative', width: '120px', height: '120px', margin: '0 auto 1.5rem' }}>
+                                {selectedStudent.photoUrl ? (
+                                    <img 
+                                        src={`${API_BASE.replace('/api', '')}${selectedStudent.photoUrl}`} 
+                                        alt="Profil" 
+                                        style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', border: '3px solid #e0f2f1' }}
+                                    />
+                                ) : (
+                                    <div style={{ width: '100%', height: '100%', borderRadius: '50%', backgroundColor: '#e0f2f1', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', fontSize: '3rem', fontWeight: '800' }}>
+                                        {selectedStudent.firstName[0]}{selectedStudent.lastName[0]}
+                                    </div>
+                                )}
+                                
+                                {user && user.role !== 'ACCOUNTANT' && (
+                                    <label style={{ position: 'absolute', bottom: '0', right: '0', backgroundColor: 'var(--primary)', color: 'white', padding: '6px', borderRadius: '50%', cursor: 'pointer', boxShadow: '0 2px 4px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <Camera size={16} />
+                                        <input type="file" style={{ display: 'none' }} onChange={handlePhotoUpload} accept="image/*" />
+                                    </label>
+                                )}
                             </div>
                             <h2 style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>{selectedStudent.lastName} {selectedStudent.firstName}</h2>
                             <span style={{ display: 'inline-block', padding: '0.25rem 0.75rem', borderRadius: '20px', backgroundColor: selectedStudent.status === 'ACTIF' ? '#e8f5e9' : '#ffebee', color: selectedStudent.status === 'ACTIF' ? '#2e7d32' : '#c62828', fontSize: '0.75rem', fontWeight: 'bold', marginBottom: '1.5rem' }}>
@@ -406,15 +451,16 @@ const Students = () => {
                                 </div>
                             </div>
 
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '1.5rem' }}>
+                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '1.5rem' }}>
                                 <button className="btn btn-primary" style={{ width: '100%' }} onClick={handleDownloadDossier}><Download size={16} /> Fiche Élève PDF</button>
+                                <button className="btn" style={{ width: '100%', backgroundColor: '#1a237e', color: 'white' }} onClick={handleDownloadCard}><CreditCard size={16} /> Imprimer Carte ID</button>
                             </div>
                         </div>
                     </aside>
 
                     <main className="card" style={{ padding: '0' }}>
                         <nav style={{ display: 'flex', borderBottom: '1px solid #eee', backgroundColor: '#fafafa' }}>
-                            {['BIO', 'PARENTS', 'HISTORY', 'DOCUMENTS', 'FINANCE'].map(tab => (
+                            {['BIO', 'CARTE', 'PARENTS', 'HISTORY', 'DOCUMENTS', 'FINANCE'].map(tab => (
                                 <button
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
@@ -579,6 +625,59 @@ const Students = () => {
                                         </div>
                                     )}
                                 </form>
+                            )}
+
+                            {activeTab === 'CARTE' && (
+                                <div style={{ textAlign: 'center', padding: '2rem' }}>
+                                    <h4 style={{ marginBottom: '2rem' }}>Aperçu des Informations de la Carte</h4>
+                                    <div style={{ 
+                                        width: '400px', 
+                                        height: '250px', 
+                                        margin: '0 auto', 
+                                        border: '2px solid #1a237e', 
+                                        borderRadius: '15px', 
+                                        position: 'relative', 
+                                        overflow: 'hidden',
+                                        textAlign: 'left',
+                                        backgroundColor: 'white',
+                                        boxShadow: '0 10px 20px rgba(0,0,0,0.1)'
+                                    }}>
+                                        {/* Header */}
+                                        <div style={{ backgroundColor: '#1a237e', color: 'white', padding: '10px', textAlign: 'center' }}>
+                                            <div style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>INSTITUT DE TECHNOLOGIE APPLIQUÉE</div>
+                                            <div style={{ fontSize: '0.6rem' }}>Année Scolaire: {selectedStudent.enrollments[0]?.schoolYear?.name || '---'}</div>
+                                        </div>
+
+                                        <div style={{ padding: '15px', display: 'flex', gap: '15px' }}>
+                                            {/* Photo */}
+                                            <div style={{ width: '100px', height: '120px', border: '1px solid #ddd', overflow: 'hidden' }}>
+                                                {selectedStudent.photoUrl ? (
+                                                    <img src={`${API_BASE.replace('/api', '')}${selectedStudent.photoUrl}`} alt="Eleve" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                ) : (
+                                                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ccc' }}>PHOTO</div>
+                                                )}
+                                            </div>
+
+                                            {/* Info */}
+                                            <div style={{ flex: 1, fontSize: '0.75rem' }}>
+                                                <div style={{ marginBottom: '5px' }}><strong>MATRICULE:</strong> {selectedStudent.regNumber}</div>
+                                                <div style={{ marginBottom: '5px' }}><strong>NOM:</strong> {selectedStudent.lastName}</div>
+                                                <div style={{ marginBottom: '5px' }}><strong>PRÉNOM:</strong> {selectedStudent.firstName}</div>
+                                                <div style={{ marginBottom: '5px' }}><strong>NÉ(E) LE:</strong> {new Date(selectedStudent.dob).toLocaleDateString()}</div>
+                                                <div style={{ marginBottom: '5px' }}><strong>À:</strong> {selectedStudent.pob}</div>
+                                                <div style={{ marginBottom: '5px', color: '#d32f2f' }}><strong>CLASSE:</strong> {selectedStudent.enrollments[0]?.class?.name || '---'}</div>
+                                            </div>
+                                        </div>
+
+                                        {/* Bottom bar */}
+                                        <div style={{ position: 'absolute', bottom: '0', width: '100%', backgroundColor: '#1a237e', color: 'white', fontSize: '0.5rem', textAlign: 'center', padding: '4px' }}>
+                                            EDUSOFT - EXCELLENCE & DISCIPLINE
+                                        </div>
+                                    </div>
+                                    <button className="btn btn-primary" style={{ marginTop: '2rem' }} onClick={handleDownloadCard}>
+                                        Télécharger le PDF de la Carte (Prêt à imprimer)
+                                    </button>
+                                </div>
                             )}
 
                             {activeTab === 'PARENTS' && (

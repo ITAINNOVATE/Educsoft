@@ -82,7 +82,7 @@ router.post('/', protect, authorize('ADMIN', 'ACCOUNTANT', 'SECRETARY'), auditLo
 
     try {
         const result = await prisma.$transaction(async (tx) => {
-            const receiptCount = await tx.payment.count();
+            const receiptCount = await tx.payment.count({ where: { establishmentId: req.user.establishmentId } });
             const receiptNumber = `REC-${new Date().getFullYear()}-${String(receiptCount + 1).padStart(5, '0')}`;
 
             const payment = await tx.payment.create({
@@ -94,7 +94,8 @@ router.post('/', protect, authorize('ADMIN', 'ACCOUNTANT', 'SECRETARY'), auditLo
                     method,
                     notes,
                     receiptNumber,
-                    paymentDate: new Date()
+                    paymentDate: new Date(),
+                    establishmentId: req.user.establishmentId
                 }
             });
 
@@ -112,7 +113,10 @@ router.post('/', protect, authorize('ADMIN', 'ACCOUNTANT', 'SECRETARY'), auditLo
 router.get('/student/:studentId', protect, async (req, res) => {
     try {
         const payments = await prisma.payment.findMany({
-            where: { studentId: req.params.studentId },
+            where: { 
+                studentId: req.params.studentId,
+                establishmentId: req.user.establishmentId
+            },
             orderBy: { paymentDate: 'desc' }
         });
         res.json(payments);
@@ -127,8 +131,11 @@ const { generateReceiptPDF } = require('../utils/receipt');
 // @route   GET /api/payments/receipt/:paymentId
 router.get('/receipt/:paymentId', protect, async (req, res) => {
     try {
-        const payment = await prisma.payment.findUnique({
-            where: { id: req.params.paymentId },
+        const payment = await prisma.payment.findFirst({
+            where: { 
+                id: req.params.paymentId,
+                establishmentId: req.user.establishmentId
+            },
             include: {
                 student: {
                     include: {
@@ -192,7 +199,10 @@ router.get('/search-students', protect, async (req, res) => {
         }
 
         const students = await prisma.student.findMany({
-            where,
+            where: { 
+                ...where,
+                establishmentId: req.user.establishmentId
+            },
             include: {
                 enrollments: {
                     include: { class: { include: { fees: true } } },
@@ -243,7 +253,8 @@ router.get('/daily-summary', protect, async (req, res) => {
 
         const payments = await prisma.payment.findMany({
             where: {
-                paymentDate: { gte: today }
+                paymentDate: { gte: today },
+                establishmentId: req.user.establishmentId
             },
             include: { student: true }
         });
@@ -265,6 +276,7 @@ router.get('/daily-summary', protect, async (req, res) => {
 router.get('/student/all', protect, async (req, res) => {
     try {
         const payments = await prisma.payment.findMany({
+            where: { establishmentId: req.user.establishmentId },
             include: { student: { include: { enrollments: { include: { class: true } } } } },
             orderBy: { paymentDate: 'desc' },
             take: 15

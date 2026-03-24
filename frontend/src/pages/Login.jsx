@@ -6,6 +6,7 @@ import { LogIn, ShieldCheck, AlertCircle } from 'lucide-react';
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [establishmentCode, setEstablishmentCode] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
@@ -17,7 +18,7 @@ const Login = () => {
         setError('');
         setIsLoading(true);
 
-        const result = await login(email, password);
+        const result = await login(email, password, establishmentCode);
         if (result.success) {
             navigate('/dashboard');
         } else {
@@ -46,8 +47,8 @@ const Login = () => {
                     <ShieldCheck size={48} color="var(--primary)" />
                 </div>
 
-                <h1 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>INSTITUT DE TECHNOLOGIE APPLIQUEE</h1>
-                <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>Portail de Gestion Scolaire (ITA)</p>
+                <h1 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>EDUSOFT - SAAS</h1>
+                <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>Portail de Gestion Mutli-Établissements</p>
 
                 {error && (
                     <div style={{
@@ -67,6 +68,17 @@ const Login = () => {
                 )}
 
                 <form onSubmit={handleSubmit}>
+                    <div className="form-group" style={{ textAlign: 'left' }}>
+                        <label className="form-label">Code Établissement</label>
+                        <input
+                            type="text"
+                            className="form-input"
+                            placeholder="Ex: ITA2026"
+                            value={establishmentCode}
+                            onChange={(e) => setEstablishmentCode(e.target.value)}
+                            required
+                        />
+                    </div>
                     <div className="form-group" style={{ textAlign: 'left' }}>
                         <label className="form-label">Identifiant</label>
                         <input

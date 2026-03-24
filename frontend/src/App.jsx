@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 
 import Users from './pages/Users';
 import Accounting from './pages/Accounting';
+import SuperAdmin from './pages/SuperAdmin';
 
 import { useState } from 'react';
 import './index.css';
@@ -20,7 +21,7 @@ const ProtectedRoute = ({ children, roleRequired }) => {
 
   if (roleRequired) {
     const roles = Array.isArray(roleRequired) ? roleRequired : [roleRequired];
-    if (!roles.includes(user.role)) {
+    if (!roles.includes(user.role) && user.role !== 'SUPER_ADMIN') {
       return <Navigate to="/dashboard" />;
     }
   }
@@ -36,7 +37,10 @@ const Layout = () => {
     <div style={{ display: 'flex', minHeight: '100vh' }}>
       {/* Sidebar - Simple version for now */}
       <aside style={{ width: '260px', backgroundColor: 'var(--primary-dark)', color: 'white', padding: '2rem 1rem', display: 'flex', flexDirection: 'column' }}>
-        <h2 style={{ fontSize: '1.25rem', marginBottom: '2rem', textAlign: 'center' }}>EDUSOFT</h2>
+        <h2 style={{ fontSize: '1.25rem', marginBottom: '0.5rem', textAlign: 'center' }}>EDUSOFT</h2>
+        <div style={{ fontSize: '0.7rem', opacity: 0.8, textAlign: 'center', marginBottom: '2rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+          {user?.establishmentName || 'SYSTÈME GLOBAL'}
+        </div>
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
           {/* Dashboard - Visible to all */}
           <SidebarLink to="/dashboard" label="Tableau de Bord" />
@@ -64,8 +68,13 @@ const Layout = () => {
 
 
           {/* Users - Admin only */}
-          {user && user.role === 'ADMIN' && (
+          {(user && (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN')) && (
             <SidebarLink to="/users" label="Utilisateurs" />
+          )}
+
+          {/* System Admin - Super Admin only */}
+          {user && user.role === 'SUPER_ADMIN' && (
+            <SidebarLink to="/system" label="🏠 Établissements" />
           )}
 
           <button onClick={logout} style={{ marginTop: '1.5rem', padding: '0.75rem', borderRadius: '8px', border: 'none', backgroundColor: '#c62828', color: 'white', fontWeight: 'bold', cursor: 'pointer' }}>Déconnexion</button>
@@ -146,6 +155,11 @@ function App() {
             {/* Accounting - Admin and Accountant */}
             <Route element={<ProtectedRoute roleRequired={['ADMIN', 'ACCOUNTANT']} />}>
               <Route path="/accounting" element={<Accounting />} />
+            </Route>
+
+            {/* Super Admin - System Management */}
+            <Route element={<ProtectedRoute roleRequired="SUPER_ADMIN" />}>
+              <Route path="/system" element={<SuperAdmin />} />
             </Route>
           </Route>
 

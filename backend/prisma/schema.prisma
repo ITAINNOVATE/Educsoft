@@ -11,14 +11,41 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+model Establishment {
+  id            String    @id @default(uuid())
+  name          String
+  code          String    @unique // e.g., ITA2026
+  address       String?
+  phone         String?
+  email         String?
+  logoUrl       String?
+  isActive      Boolean   @default(true)
+  
+  users             User[]
+  students          Student[]
+  parents           Parent[]
+  schoolYears       SchoolYear[]
+  classes           Class[]
+  payments          Payment[]
+  teacherPayments   TeacherPayment[]
+  auditLogs         AuditLog[]
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
 model User {
   id            String    @id @default(uuid())
   email         String    @unique
   password      String
   firstName     String
   lastName      String
-  role          String    // ADMIN, DIRECTOR, ACCOUNTANT, SECRETARY, TEACHER, PARENT
+  role          String    // SUPER_ADMIN, ADMIN, DIRECTOR, ACCOUNTANT, SECRETARY, TEACHER, PARENT
   lastLogin     DateTime?
+  
+  establishmentId String?
+  establishment   Establishment? @relation(fields: [establishmentId], references: [id])
+  
   logs          AuditLog[]
   payments      TeacherPayment[]
   createdAt     DateTime  @default(now())
@@ -27,7 +54,7 @@ model User {
 
 model Student {
   id                String      @id @default(uuid())
-  regNumber         String      @unique
+  regNumber         String      // Unique per establishment (handled in logic or compound index)
   firstName         String
   lastName          String
   dob               DateTime
@@ -45,6 +72,9 @@ model Student {
   disciplinaryRecord String?
   status            String      @default("ACTIF") // ACTIF, SUSPENDU, TRANSFERE, ABANDON, DIPLOME, ARCHIVE
   
+  establishmentId   String
+  establishment     Establishment @relation(fields: [establishmentId], references: [id])
+  
   enrollments       Enrollment[]
   parents           ParentStudent[]
   payments          Payment[]
@@ -53,6 +83,8 @@ model Student {
   
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
+
+  @@unique([regNumber, establishmentId]) // regNumber is unique per school
 }
 
 model Parent {
@@ -64,6 +96,10 @@ model Parent {
   email           String?
   address         String
   occupation      String?
+  
+  establishmentId String
+  establishment   Establishment @relation(fields: [establishmentId], references: [id])
+  
   students        ParentStudent[]
   
   createdAt       DateTime    @default(now())
@@ -105,14 +141,23 @@ model SchoolYear {
   endDate     DateTime
   current     Boolean      @default(false)
   
+  establishmentId String
+  establishment   Establishment @relation(fields: [establishmentId], references: [id])
+  
   enrollments Enrollment[]
   classes     Class[]
+
+  @@unique([name, establishmentId])
 }
 
 model Class {
   id          String       @id @default(uuid())
   name        String       // e.g., CP1, 6eme, Terminale
   level       String       // MATERNELLE, PRIMAIRE, COLLEGE, LYCEE
+  
+  establishmentId String
+  establishment   Establishment @relation(fields: [establishmentId], references: [id])
+  
   enrollments Enrollment[]
   schoolYearId String
   schoolYear   SchoolYear  @relation(fields: [schoolYearId], references: [id])
@@ -137,11 +182,16 @@ model Payment {
   feeName       String?  // e.g., Scolarité 1ère Tranche
   amount        Float
   method        String   // CASH, MOBILE_MONEY, CARD, TRANSFER
-  receiptNumber String   @unique
+  receiptNumber String   // Unique per establishment handled by logic
   paymentDate   DateTime @default(now())
   notes         String?
   
+  establishmentId String
+  establishment   Establishment @relation(fields: [establishmentId], references: [id])
+  
   student       Student  @relation(fields: [studentId], references: [id])
+
+  @@unique([receiptNumber, establishmentId])
 }
 
 model Document {
@@ -174,6 +224,10 @@ model AuditLog {
   userId    String
   details   String?  @db.Text
   ip        String?
+  
+  establishmentId String?
+  establishment   Establishment? @relation(fields: [establishmentId], references: [id])
+  
   user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
 }
@@ -187,6 +241,9 @@ model TeacherPayment {
   type          String   @default("SALARY") // SALARY, HOURLY, ADVANCE, BONUS
   notes         String?
   reference     String?  // Check No, Transaction ID
+  
+  establishmentId String
+  establishment   Establishment @relation(fields: [establishmentId], references: [id])
   
   teacher       User     @relation(fields: [teacherId], references: [id])
 }

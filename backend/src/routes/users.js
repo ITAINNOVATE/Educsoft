@@ -11,7 +11,9 @@ const router = express.Router();
 // @access  Private (Admin only)
 router.get('/', protect, authorize('ADMIN'), async (req, res) => {
     try {
+        const where = req.user.role === 'SUPER_ADMIN' ? {} : { establishmentId: req.user.establishmentId };
         const users = await prisma.user.findMany({
+            where,
             select: {
                 id: true,
                 firstName: true,
@@ -19,7 +21,8 @@ router.get('/', protect, authorize('ADMIN'), async (req, res) => {
                 email: true,
                 role: true,
                 lastLogin: true,
-                createdAt: true
+                createdAt: true,
+                establishment: { select: { name: true, code: true } }
             },
             orderBy: { createdAt: 'desc' }
         });
@@ -50,7 +53,8 @@ router.post('/', protect, authorize('ADMIN'), auditLog('CREATE_USER'), async (re
                 lastName,
                 email,
                 password: hashedPassword,
-                role
+                role,
+                establishmentId: req.user.establishmentId
             },
             select: {
                 id: true,

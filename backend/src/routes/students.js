@@ -9,17 +9,30 @@ const fs = require('fs');
 const router = express.Router();
 
 // Configure Multer for document uploads
-const storage = multer.diskStorage({
+const upload = multer({ storage });
+
+// Configure Multer for student photos
+const photoStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const dir = 'uploads/documents';
+        const dir = 'uploads/photos';
         if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
         cb(null, dir);
     },
     filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${file.originalname}`);
+        cb(null, `photo-${req.params.id}-${Date.now()}${path.extname(file.originalname)}`);
     }
 });
-const upload = multer({ storage });
+const uploadPhoto = multer({ 
+    storage: photoStorage,
+    limits: { fileSize: 2 * 1024 * 1024 }, // 2MB limit
+    fileFilter: (req, file, cb) => {
+        const filetypes = /jpeg|jpg|png/;
+        const mimetype = filetypes.test(file.mimetype);
+        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+        if (mimetype && extname) return cb(null, true);
+        cb(new Error('Only images are allowed (jpeg, jpg, png)'));
+    }
+});
 
 // @desc    Register a new student
 // @route   POST /api/students/register
@@ -47,7 +60,7 @@ router.post('/register', protect, authorize('ADMIN', 'SECRETARY', 'DIRECTOR'), a
     try {
         const result = await prisma.$transaction(async (tx) => {
             // 1. Generate Matricule (Unique)
-            const count = await tx.student.count();
+            const count = await tx.student.count({ where: { establishmentId: req.user.establishmentId } });
             const matricule = `STU${new Date().getFullYear()}${String(count + 1).padStart(4, '0')}`;
 
             // 2. Create Student
@@ -56,7 +69,8 @@ router.post('/register', protect, authorize('ADMIN', 'SECRETARY', 'DIRECTOR'), a
                     ...finalStudentData,
                     regNumber: matricule,
                     dob: new Date(finalStudentData.dob),
-                    status: finalStudentData.status || 'ACTIF'
+                    status: finalStudentData.status || 'ACTIF',
+                    establishmentId: req.user.establishmentId
                 }
             });
 
@@ -67,11 +81,11 @@ router.post('/register', protect, authorize('ADMIN', 'SECRETARY', 'DIRECTOR'), a
                 const { relation, isPrimary, isEmergency, ...cleanParentData } = p;
 
                 let parentRecord = await tx.parent.findFirst({
-                    where: { phonePrimary: cleanParentData.phonePrimary }
+                    where: { phonePrimary: cleanParentData.phonePrimary, establishmentId: req.user.establishmentId }
                 });
 
                 if (!parentRecord) {
-                    parentRecord = await tx.parent.create({ data: cleanParentData });
+                    parentRecord = await tx.parent.create({ data: { ...cleanParentData, establishmentId: req.user.establishmentId } });
                 }
 
                 await tx.parentStudent.create({
@@ -121,15 +135,17 @@ router.post('/register', protect, authorize('ADMIN', 'SECRETARY', 'DIRECTOR'), a
 router.get('/', protect, async (req, res) => {
     try {
         const students = await prisma.student.findMany({
+            where: { establishmentId: req.user.establishmentId },
             include: {
                 enrollments: {
-                    include: { class: true, schoolYear: true },
-                    where: { schoolYear: { current: true } }
+                    where: { schoolYear: { current: true } },
+                    include: { class: true, schoolYear: true }
                 },
                 parents: {
                     include: { parent: true }
                 }
-            }
+            },
+            orderBy: { lastName: 'asc' }
         });
         res.json(students);
     } catch (error) {
@@ -139,15 +155,16 @@ router.get('/', protect, async (req, res) => {
 
 const { calculateStudentFinancials } = require('../utils/finance');
 
-// ... (other imports)
-
 // @desc    Get student by ID
 // @route   GET /api/students/:id
 // @access  Private
 router.get('/:id', protect, async (req, res) => {
     try {
-        const student = await prisma.student.findUnique({
-            where: { id: req.params.id },
+        const student = await prisma.student.findFirst({
+            where: { 
+                id: req.params.id,
+                establishmentId: req.user.establishmentId
+            },
             include: {
                 enrollments: { include: { class: { include: { fees: true } }, schoolYear: true } },
                 parents: { include: { parent: true } },
@@ -257,6 +274,25 @@ router.post('/:id/documents', protect, upload.single('document'), async (req, re
     }
 });
 
+// @desc    Upload student profile photo
+// @route   POST /api/students/:id/photo
+router.post('/:id/photo', protect, uploadPhoto.single('photo'), async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
+
+        const photoUrl = `/uploads/photos/${req.file.filename}`;
+        
+        const student = await prisma.student.update({
+            where: { id: req.params.id },
+            data: { photoUrl }
+        });
+
+        res.json({ message: 'Photo updated successfully', photoUrl: student.photoUrl });
+    } catch (error) {
+        res.status(500).json({ message: 'Error uploading photo', error: error.message });
+    }
+});
+
 // @desc    Update document status/info
 // @route   PUT /api/students/:id/documents/:docId
 router.put('/:id/documents/:docId', protect, authorize('ADMIN', 'SECRETARY'), async (req, res) => {
@@ -294,6 +330,7 @@ router.post('/:id/history', protect, authorize('ADMIN', 'SECRETARY'), async (req
 });
 
 const { generateStudentDossierPDF } = require('../utils/studentDossier');
+const { generateStudentCardPDF } = require('../utils/studentCard');
 
 // @desc    Download student dossier PDF
 // @route   GET /api/students/:id/pdf
@@ -327,6 +364,28 @@ router.get('/:id/pdf', protect, async (req, res) => {
     } catch (error) {
         console.error('PDF Generation Error:', error);
         res.status(500).json({ message: 'Error generating PDF', error: error.message });
+    }
+});
+
+// @desc    Download student ID Card PDF
+// @route   GET /api/students/:id/card
+router.get('/:id/card', protect, async (req, res) => {
+    try {
+        const student = await prisma.student.findUnique({
+            where: { id: req.params.id },
+            include: {
+                enrollments: { include: { class: true, schoolYear: true } }
+            }
+        });
+
+        if (!student) return res.status(404).json({ message: 'Student not found' });
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `inline; filename=Carte_${student.regNumber}.pdf`);
+
+        generateStudentCardPDF(student, res);
+    } catch (error) {
+        res.status(500).json({ message: 'Error generating card', error: error.message });
     }
 });
 
