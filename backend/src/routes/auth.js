@@ -15,7 +15,11 @@ router.post('/login', async (req, res) => {
     try {
         // Allow login with simplified identifiers or full email
         // Allow login with simplified identifiers (stored in email field)
-        const user = await prisma.user.findUnique({ where: { email } });
+        const user = await prisma.user.findFirst({ 
+            where: { 
+                email: { equals: email, mode: 'insensitive' } 
+            } 
+        });
 
         if (user && (await bcrypt.compare(password, user.password))) {
             // Update last login (fire and forget / safe update)

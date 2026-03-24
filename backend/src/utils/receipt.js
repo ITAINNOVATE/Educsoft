@@ -4,8 +4,23 @@ const fs = require('fs');
 const generateReceiptPDF = (payment, student, res) => {
     const doc = new PDFDocument({ size: 'A5', margin: 40 });
 
-    // Stream directly to response
-    doc.pipe(res);
+    const buffers = [];
+    doc.on('data', buffers.push.bind(buffers));
+    doc.on('end', () => {
+        const pdfData = Buffer.concat(buffers);
+        if (!res.headersSent) {
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Length', pdfData.length);
+            res.send(pdfData);
+        }
+    });
+
+    doc.on('error', (err) => {
+        console.error('PDF Generation Error:', err);
+        if (!res.headersSent) {
+            res.status(500).send('Error generating PDF');
+        }
+    });
 
     // Business Header
     doc.fontSize(20).fillColor('#004d40').text('INSTITUT DE TECHNOLOGIE APPLIQUEE', { align: 'center', weight: 'bold' });
@@ -56,11 +71,7 @@ const generateReceiptPDF = (payment, student, res) => {
 
     // REMAINING BALANCE SECTION
     if (student.financials) {
-        // Calculate remaining for the specific category of the fee if possible, otherwise global
-        // For simplicity on receipt, we usually show Global Remaining or Category Remaining
-        // Let's show Global Remaining for now as it's the most important for the parent
         const remaining = student.financials.global.remaining;
-
         doc.fontSize(10).text(`Reste à payer (Total):`, 210, doc.y);
         doc.fontSize(11).fillColor(remaining > 0 ? '#c62828' : '#2e7d32')
             .text(`${remaining.toLocaleString()} FCFA`, 300, doc.y, { align: 'right', weight: 'bold' });
@@ -83,23 +94,6 @@ const generateReceiptPDF = (payment, student, res) => {
 
     // Footer
     doc.fontSize(8).fillColor('#999').text('Ce reçu est généré électroniquement et ne nécessite pas de cachet physique pour être valide.', 40, doc.page.height - 40, { align: 'center' });
-
-    // Handle stream errors and cleanup
-    const cleanup = () => {
-        doc.unpipe(res);
-        if (!doc.closed) doc.end();
-    };
-
-    res.on('close', cleanup);
-    res.on('finish', cleanup);
-
-    doc.on('error', (err) => {
-        console.error('PDF Generation Error:', err);
-        cleanup();
-        if (!res.headersSent) {
-            res.status(500).send('Error generating PDF');
-        }
-    });
 
     doc.end();
 };
