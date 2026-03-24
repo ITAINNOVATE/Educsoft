@@ -1,0 +1,192 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  password      String
+  firstName     String
+  lastName      String
+  role          String    // ADMIN, DIRECTOR, ACCOUNTANT, SECRETARY, TEACHER, PARENT
+  lastLogin     DateTime?
+  logs          AuditLog[]
+  payments      TeacherPayment[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Student {
+  id                String      @id @default(uuid())
+  regNumber         String      @unique
+  firstName         String
+  lastName          String
+  dob               DateTime
+  pob               String      // Place of Birth
+  gender            String
+  nationality       String?     @default("Béninoise")
+  birthCertNumber   String?
+  address           String
+  photoUrl          String?
+  bloodGroup        String?     // A+, A-, B+, B-, AB+, AB-, O+, O-
+  medicalInfo       String?     // Allergies, disabilities, etc.
+  handicap          String?
+  adminObservations String?
+  internalNotes     String?
+  disciplinaryRecord String?
+  status            String      @default("ACTIF") // ACTIF, SUSPENDU, TRANSFERE, ABANDON, DIPLOME, ARCHIVE
+  
+  enrollments       Enrollment[]
+  parents           ParentStudent[]
+  payments          Payment[]
+  documents         Document[]
+  schoolHistory     SchoolHistory[]
+  
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+}
+
+model Parent {
+  id              String      @id @default(uuid())
+  firstName       String
+  lastName        String
+  phonePrimary    String
+  phoneSecondary  String?
+  email           String?
+  address         String
+  occupation      String?
+  students        ParentStudent[]
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model ParentStudent {
+  id          String   @id @default(uuid())
+  studentId   String
+  parentId    String
+  relation    String   // MERE, PERE, TUTEUR, etc.
+  isPrimary   Boolean  @default(true)
+  isEmergency Boolean  @default(false)
+  student     Student  @relation(fields: [studentId], references: [id])
+  parent      Parent   @relation(fields: [parentId], references: [id])
+
+  @@unique([studentId, parentId])
+}
+
+model Enrollment {
+  id            String      @id @default(uuid())
+  studentId     String
+  classId       String
+  schoolYearId  String
+  status        String      @default("PENDING") // PENDING, VALIDATED, REJECTED
+  
+  student       Student     @relation(fields: [studentId], references: [id])
+  class         Class       @relation(fields: [classId], references: [id])
+  schoolYear    SchoolYear  @relation(fields: [schoolYearId], references: [id])
+
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model SchoolYear {
+  id          String       @id @default(uuid())
+  name        String       // e.g., 2025-2026
+  startDate   DateTime
+  endDate     DateTime
+  current     Boolean      @default(false)
+  
+  enrollments Enrollment[]
+  classes     Class[]
+}
+
+model Class {
+  id          String       @id @default(uuid())
+  name        String       // e.g., CP1, 6eme, Terminale
+  level       String       // MATERNELLE, PRIMAIRE, COLLEGE, LYCEE
+  enrollments Enrollment[]
+  schoolYearId String
+  schoolYear   SchoolYear  @relation(fields: [schoolYearId], references: [id])
+  
+  fees        Fee[]
+}
+
+model Fee {
+  id          String   @id @default(uuid())
+  name        String   // e.g., Registration, Tuition, Transport, etc.
+  amount      Float
+  category    String   @default("ANNUAL_OBLIGATORY") // ANNUAL_OBLIGATORY, OPTIONAL, OCCASIONAL
+  type        String   @default("TUITION") // TUITION, REGISTRATION, TRANSPORT, CANTEEN, UNIFORM, BOOKS, EXAM, ACTIVITY, HEALTH, INTERNAT, PENALTY, DIPLOMA, OTHER
+  classId     String
+  class       Class    @relation(fields: [classId], references: [id])
+}
+
+model Payment {
+  id            String   @id @default(uuid())
+  studentId     String
+  feeId         String?  // Optional: Link to a specific fee
+  feeName       String?  // e.g., Scolarité 1ère Tranche
+  amount        Float
+  method        String   // CASH, MOBILE_MONEY, CARD, TRANSFER
+  receiptNumber String   @unique
+  paymentDate   DateTime @default(now())
+  notes         String?
+  
+  student       Student  @relation(fields: [studentId], references: [id])
+}
+
+model Document {
+  id        String   @id @default(uuid())
+  name      String   // Birth Certificate, Photo, etc.
+  type      String
+  url       String
+  status    String   @default("VALID") // VALID, EXPIRED, PENDING
+  expiryDate DateTime?
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SchoolHistory {
+  id           String   @id @default(uuid())
+  studentId    String
+  schoolYear   String   // e.g., 2023-2024
+  className    String
+  schoolName   String   @default("EDUSOFT")
+  result       String   // ADMIS, REDOUBLANT, EXCLU, TRANSFERE
+  average      Float?
+  student      Student  @relation(fields: [studentId], references: [id])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String
+  userId    String
+  details   String?  @db.Text
+  ip        String?
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model TeacherPayment {
+  id            String   @id @default(uuid())
+  teacherId     String
+  amount        Float
+  paymentDate   DateTime @default(now())
+  period        String   // e.g., "2025-10" for October 2025
+  type          String   @default("SALARY") // SALARY, HOURLY, ADVANCE, BONUS
+  notes         String?
+  reference     String?  // Check No, Transaction ID
+  
+  teacher       User     @relation(fields: [teacherId], references: [id])
+}
