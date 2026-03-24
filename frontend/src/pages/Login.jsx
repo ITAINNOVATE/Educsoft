@@ -119,7 +119,7 @@ const Login = () => {
                 </form>
 
                 <div style={{ marginTop: '2rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-                    Authentification sécurisée • EduSoft v1.0
+                    Authentification sécurisée • EduSoft v1.1 - SAAS
                 </div>
             </div>
         </div>
