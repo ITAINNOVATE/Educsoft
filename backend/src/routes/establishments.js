@@ -40,7 +40,11 @@ router.post('/', protect, authorize('SUPER_ADMIN'), async (req, res) => {
 
         res.status(201).json(establishment);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error("Establishment Creation Error:", error);
+        res.status(500).json({ 
+            message: 'Erreur lors de la création de l établissement', 
+            error: error.message 
+        });
     }
 });
 

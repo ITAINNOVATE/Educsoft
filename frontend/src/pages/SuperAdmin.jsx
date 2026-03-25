@@ -40,7 +40,9 @@ const SuperAdmin = () => {
             setNewEst({ name: '', code: '', email: '', phone: '', address: '' });
             fetchEstablishments();
         } catch (error) {
-            alert(error.response?.data?.message || 'Erreur lors de la création');
+            const msg = error.response?.data?.message || 'Erreur lors de la création';
+            const detail = error.response?.data?.error ? ` (${error.response.data.error})` : '';
+            alert(msg + detail);
         }
     };
 
