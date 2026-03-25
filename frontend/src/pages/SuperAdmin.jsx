@@ -41,7 +41,10 @@ const SuperAdmin = () => {
             fetchEstablishments();
         } catch (error) {
             const msg = error.response?.data?.message || 'Erreur lors de la création';
-            const detail = error.response?.data?.error ? ` (${error.response.data.error})` : '';
+            const technicalError = error.response?.data?.error;
+            const detail = technicalError 
+                ? ` (${typeof technicalError === 'object' ? JSON.stringify(technicalError) : technicalError})` 
+                : '';
             alert(msg + detail);
         }
     };
