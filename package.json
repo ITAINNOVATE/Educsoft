@@ -6,8 +6,12 @@
     "frontend",
     "backend"
   ],
+  "dependencies": {
+    "@prisma/client": "^6.2.1",
+    "prisma": "^6.2.1"
+  },
   "scripts": {
-    "build": "cd backend && npx prisma generate && cd ../frontend && npm install && npm run build && cd .. && cp -rv frontend/dist/* .",
+    "build": "npx prisma generate --schema=backend/prisma/schema.prisma && cd frontend && npm install && npm run build && cd .. && cp -rv frontend/dist/* .",
     "dev:frontend": "npm run dev --workspace=frontend",
     "dev:backend": "npm run dev --workspace=backend",
     "build:frontend": "npm run build --workspace=frontend"
