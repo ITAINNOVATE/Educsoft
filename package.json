@@ -7,7 +7,7 @@
     "backend"
   ],
   "scripts": {
-    "build": "cd frontend && npm install && npm run build && cd .. && cp -rv frontend/dist/* .",
+    "build": "cd backend && npx prisma generate && cd ../frontend && npm install && npm run build && cd .. && cp -rv frontend/dist/* .",
     "dev:frontend": "npm run dev --workspace=frontend",
     "dev:backend": "npm run dev --workspace=backend",
     "build:frontend": "npm run build --workspace=frontend"

@@ -22,7 +22,7 @@ async function main() {
     console.log('✅ Establishment Created:', establishment.name);
 
     // 2. Create Super Admin
-    const hashedSuperPassword = await bcrypt.hash('SuperAdmin-2026!', 10);
+    const hashedSuperPassword = await bcrypt.hash('Admin@2026', 10);
     const superAdmin = await prisma.user.upsert({
         where: { email: 'superadmin@edusoft.bj' },
         update: {},
@@ -38,7 +38,7 @@ async function main() {
     console.log('✅ Super Admin Created:', superAdmin.email);
 
     // 3. Create Establishment Admin
-    const hashedAdminPassword = await bcrypt.hash('admin123', 10);
+    const hashedAdminPassword = await bcrypt.hash('Admin@2026', 10);
     const admin = await prisma.user.upsert({
         where: { email: 'admin@edusoft.bj' },
         update: {},
@@ -54,13 +54,20 @@ async function main() {
     console.log('✅ Establishment Admin Created:', admin.email);
 
     // 4. Create dummy school year for the establishment
-    const schoolYear = await prisma.schoolYear.create({
-        data: {
-          name: '2025-2026',
-          startDate: new Date('2025-09-01'),
-          endDate: new Date('2026-07-31'),
-          current: true,
-          establishmentId: establishment.id
+    const schoolYear = await prisma.schoolYear.upsert({
+        where: { 
+            name_establishmentId: {
+                name: '2025-2026',
+                establishmentId: establishment.id
+            }
+        },
+        update: {},
+        create: {
+            name: '2025-2026',
+            startDate: new Date('2025-09-01'),
+            endDate: new Date('2026-07-31'),
+            current: true,
+            establishmentId: establishment.id
         }
     });
     console.log('✅ School Year Created:', schoolYear.name);
