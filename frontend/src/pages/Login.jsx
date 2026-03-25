@@ -22,7 +22,8 @@ const Login = () => {
         if (result.success) {
             navigate('/dashboard');
         } else {
-            setError(result.message + (result.error ? ` (${result.error})` : ''));
+            const errorInfo = typeof result.error === 'object' ? JSON.stringify(result.error) : result.error;
+            setError(result.message + (errorInfo ? ` (${errorInfo})` : ''));
         }
         setIsLoading(false);
     };
