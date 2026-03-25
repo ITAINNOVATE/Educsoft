@@ -46,7 +46,7 @@ const Layout = () => {
           <SidebarLink to="/dashboard" label="Tableau de Bord" />
 
           {/* Configuration - Admin only */}
-          {user && user.role === 'ADMIN' && (
+          {user && (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') && (
             <SidebarLink to="/configuration" label="Configuration" />
           )}
 
@@ -56,12 +56,12 @@ const Layout = () => {
           )}
 
           {/* Payments - Admin and Accountant */}
-          {user && (user.role === 'ADMIN' || user.role === 'ACCOUNTANT') && (
+          {user && (user.role === 'ADMIN' || user.role === 'ACCOUNTANT' || user.role === 'SUPER_ADMIN') && (
             <SidebarLink to="/payments" label="Paiements" />
           )}
 
           {/* Accounting - Admin and Accountant */}
-          {user && (user.role === 'ADMIN' || user.role === 'ACCOUNTANT') && (
+          {user && (user.role === 'ADMIN' || user.role === 'ACCOUNTANT' || user.role === 'SUPER_ADMIN') && (
             <SidebarLink to="/accounting" label="Comptabilité" />
           )}
 

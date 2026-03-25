@@ -15,7 +15,7 @@ const Users = () => {
     const API_URL = `${config.API_URL}/users`;
 
     // Redirect if not admin (though backend protects it too)
-    if (user && user.role !== 'ADMIN') {
+    if (user && user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
         return <div style={{ padding: '2rem' }}>Accès refusé. Réservé aux administrateurs.</div>;
     }
 

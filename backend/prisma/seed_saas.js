@@ -25,23 +25,26 @@ async function main() {
     const hashedSuperPassword = await bcrypt.hash('Admin@2026', 10);
     const superAdmin = await prisma.user.upsert({
         where: { email: 'superadmin@edusoft.bj' },
-        update: {},
+        update: {
+            password: hashedSuperPassword
+        },
         create: {
             email: 'superadmin@edusoft.bj',
             password: hashedSuperPassword,
             firstName: 'Super',
             lastName: 'Admin',
             role: 'SUPER_ADMIN'
-            // establishmentId: null (System level)
         }
     });
-    console.log('✅ Super Admin Created:', superAdmin.email);
+    console.log('✅ Super Admin Updated/Created:', superAdmin.email);
 
     // 3. Create Establishment Admin
     const hashedAdminPassword = await bcrypt.hash('Admin@2026', 10);
     const admin = await prisma.user.upsert({
         where: { email: 'admin@edusoft.bj' },
-        update: {},
+        update: {
+            password: hashedAdminPassword
+        },
         create: {
             email: 'admin@edusoft.bj',
             password: hashedAdminPassword,
@@ -51,7 +54,7 @@ async function main() {
             establishmentId: establishment.id
         }
     });
-    console.log('✅ Establishment Admin Created:', admin.email);
+    console.log('✅ Establishment Admin Updated/Created:', admin.email);
 
     // 4. Create dummy school year for the establishment
     const schoolYear = await prisma.schoolYear.upsert({
