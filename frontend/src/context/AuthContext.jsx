@@ -33,6 +33,7 @@ export const AuthProvider = ({ children }) => {
             return {
                 success: false,
                 message: error.response?.data?.message || 'Login failed',
+                error: error.response?.data?.error || null,
             };
         }
     };

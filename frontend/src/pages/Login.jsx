@@ -22,7 +22,7 @@ const Login = () => {
         if (result.success) {
             navigate('/dashboard');
         } else {
-            setError(result.message);
+            setError(result.message + (result.error ? ` (${result.error})` : ''));
         }
         setIsLoading(false);
     };
