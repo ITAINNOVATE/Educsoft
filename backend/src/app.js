@@ -12,9 +12,21 @@ app.use(express.json());
 app.use(morgan('dev'));
 app.use('/uploads', express.static('uploads'));
 
+const { prisma } = require('./context');
+
 // Health check
 app.get('/health', (req, res) => {
     res.status(200).json({ status: 'OK', timestamp: new Date() });
+});
+
+app.get('/api/health-db', async (req, res) => {
+    try {
+        await prisma.$queryRaw`SELECT 1`;
+        res.json({ status: 'OK', database: 'Connected' });
+    } catch (error) {
+        console.error("DB Health Check Failed:", error);
+        res.status(500).json({ status: 'ERROR', message: error.message, stack: error.stack });
+    }
 });
 
 // Import routes
