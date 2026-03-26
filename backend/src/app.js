@@ -10,12 +10,12 @@ app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 
-// Status check
+// Status check (Independent of Prisma)
 app.get('/api/status', (req, res) => {
-  res.json({ status: 'OK', service: 'EDUSOFT-API' });
+  res.json({ status: 'OK', service: 'EDUSOFT-API', startup: 'Successful' });
 });
 
-// Import routes
+// Import routes (Prisma is lazy-loaded inside context.js used by these routes)
 const authRoutes = require('./routes/auth');
 const configRoutes = require('./routes/config');
 const studentRoutes = require('./routes/students');

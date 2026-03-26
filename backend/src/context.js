@@ -1,9 +1,27 @@
 const { PrismaClient } = require('@prisma/client');
 
-const prisma = new PrismaClient({
-  log: ['error', 'warn'],
-});
+let prismaInstance = null;
+
+function getPrisma() {
+    if (prismaInstance) return prismaInstance;
+    
+    try {
+        prismaInstance = new PrismaClient({
+            log: ['error', 'warn'],
+        });
+        return prismaInstance;
+    } catch (error) {
+        console.error("PRISMA_INIT_CRASH:", error);
+        return {
+            $queryRaw: () => { throw new Error("Prisma failed to initialize: " + error.message); },
+            user: { findUnique: () => { throw new Error("Prisma failed to initialize"); } },
+            establishment: { findUnique: () => { throw new Error("Prisma failed to initialize"); } }
+        };
+    }
+}
 
 module.exports = {
-  prisma,
+    get prisma() {
+        return getPrisma();
+    }
 };
