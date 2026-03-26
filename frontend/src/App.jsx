@@ -10,7 +10,9 @@ import Users from './pages/Users';
 import Accounting from './pages/Accounting';
 import SuperAdmin from './pages/SuperAdmin';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import config from './config';
 import './index.css';
 
 const ProtectedRoute = ({ children, roleRequired }) => {
@@ -29,18 +31,71 @@ const ProtectedRoute = ({ children, roleRequired }) => {
   return children ? children : <Outlet />;
 };
 
+
 // Sidebar Layout for Dashboard-ish pages
 const Layout = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, switchEstablishment } = useAuth();
   const [schoolYear, setSchoolYear] = useState('2025-2026');
+  const [establishments, setEstablishments] = useState([]);
+
+  useEffect(() => {
+    if (user?.role === 'SUPER_ADMIN') {
+      const fetchEsts = async () => {
+        try {
+          const res = await axios.get(`${config.API_URL}/establishments`, {
+            headers: { Authorization: `Bearer ${user.token}` }
+          });
+          setEstablishments(res.data);
+        } catch (err) {
+          console.error("Failed to fetch establishments", err);
+        }
+      };
+      fetchEsts();
+    }
+  }, [user]);
+
+  const handleSwitch = async (id) => {
+    const result = await switchEstablishment(id);
+    if (!result.success) {
+      alert(result.message);
+    }
+  };
+
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
       {/* Sidebar - Simple version for now */}
       <aside style={{ width: '260px', backgroundColor: 'var(--primary-dark)', color: 'white', padding: '2rem 1rem', display: 'flex', flexDirection: 'column' }}>
         <h2 style={{ fontSize: '1.25rem', marginBottom: '0.5rem', textAlign: 'center' }}>EDUSOFT</h2>
-        <div style={{ fontSize: '0.7rem', opacity: 0.8, textAlign: 'center', marginBottom: '2rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
-          {user?.establishmentName || 'SYSTÈME GLOBAL'}
-        </div>
+        
+        {user?.role === 'SUPER_ADMIN' ? (
+          <div style={{ marginBottom: '2rem' }}>
+            <label style={{ fontSize: '0.65rem', opacity: 0.7, marginBottom: '0.4rem', display: 'block', textTransform: 'uppercase' }}>Établissement Actif</label>
+            <select
+              value={user.establishmentId}
+              onChange={(e) => handleSwitch(e.target.value)}
+              style={{ 
+                width: '100%', 
+                padding: '0.6rem', 
+                borderRadius: '6px', 
+                background: 'rgba(255,255,255,0.15)', 
+                color: 'white', 
+                border: '1px solid rgba(255,255,255,0.1)', 
+                fontSize: '0.8rem', 
+                outline: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              {establishments.map(est => (
+                <option key={est.id} value={est.id} style={{ color: 'black' }}>{est.name}</option>
+              ))}
+            </select>
+          </div>
+        ) : (
+          <div style={{ fontSize: '0.7rem', opacity: 0.8, textAlign: 'center', marginBottom: '2rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+            {user?.establishmentName || 'SYSTÈME GLOBAL'}
+          </div>
+        )}
+
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
           {/* Dashboard - Visible to all */}
           <SidebarLink to="/dashboard" label="Tableau de Bord" />

@@ -78,11 +78,47 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// @desc    Get user profile
-// @route   GET /api/auth/profile
-// @access  Private
-router.get('/profile', protect, async (req, res) => {
-    res.json(req.user);
+// @desc    Switch active establishment (SUPER_ADMIN only)
+// @route   POST /api/auth/switch-establishment
+// @access  Private (SUPER_ADMIN only)
+router.post('/switch-establishment', protect, async (req, res) => {
+    const { establishmentId } = req.body;
+
+    if (req.user.role !== 'SUPER_ADMIN') {
+        return res.status(403).json({ message: 'Accès refusé. Réservé aux Super Admin.' });
+    }
+
+    try {
+        const establishment = await prisma.establishment.findUnique({
+            where: { id: establishmentId }
+        });
+
+        if (!establishment) {
+            return res.status(404).json({ message: 'Établissement non trouvé' });
+        }
+
+        const newToken = jwt.sign(
+            { id: req.user.id, establishmentId: establishment.id },
+            process.env.JWT_SECRET,
+            { expiresIn: '30d' }
+        );
+
+        res.json({
+            id: req.user.id,
+            firstName: req.user.firstName,
+            lastName: req.user.lastName,
+            email: req.user.email,
+            role: req.user.role,
+            establishmentId: establishment.id,
+            establishmentName: establishment.name,
+            token: newToken
+        });
+    } catch (error) {
+        console.error("Switch Establishment Error:", error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
 });
+
+// @desc    Get user profile
 
 module.exports = router;

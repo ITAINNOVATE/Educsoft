@@ -38,13 +38,33 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const switchEstablishment = async (establishmentId) => {
+        try {
+            const token = user?.token;
+            const response = await axios.post(`${API_URL}/switch-establishment`, 
+                { establishmentId },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            
+            setUser(response.data);
+            localStorage.setItem('user', JSON.stringify(response.data));
+            return { success: true };
+        } catch (error) {
+            console.error("Switch failed:", error);
+            return {
+                success: false,
+                message: error.response?.data?.message || 'Switch failed'
+            };
+        }
+    };
+
     const logout = () => {
         setUser(null);
         localStorage.removeItem('user');
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, loading }}>
+        <AuthContext.Provider value={{ user, login, logout, switchEstablishment, loading }}>
             {children}
         </AuthContext.Provider>
     );
