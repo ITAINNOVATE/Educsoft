@@ -1,20 +1,23 @@
 const { PrismaClient } = require('@prisma/client');
 
-let prisma;
+let prismaInstance;
 
-if (process.env.NODE_ENV === 'production') {
-    prisma = new PrismaClient({
-        log: ['error', 'warn'],
-    });
-} else {
-    // In development, use a global variable so that the value
-    // is preserved across module reloads caused by HMR.
-    if (!global.prisma) {
-        global.prisma = new PrismaClient({
+function getPrisma() {
+    if (prismaInstance) return prismaInstance;
+
+    if (process.env.NODE_ENV === 'production') {
+        prismaInstance = new PrismaClient({
             log: ['error', 'warn'],
         });
+    } else {
+        if (!global.prisma) {
+            global.prisma = new PrismaClient({
+                log: ['error', 'warn'],
+            });
+        }
+        prismaInstance = global.prisma;
     }
-    prisma = global.prisma;
+    return prismaInstance;
 }
 
 if (!process.env.DATABASE_URL) {
@@ -22,5 +25,7 @@ if (!process.env.DATABASE_URL) {
 }
 
 module.exports = {
-    prisma,
+    get prisma() {
+        return getPrisma();
+    }
 };
