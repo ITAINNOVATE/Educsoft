@@ -29,6 +29,17 @@ app.get('/api/health-db', async (req, res) => {
     }
 });
 
+app.get('/api/debug-env', (req, res) => {
+    res.json({
+        has_db_url: !!process.env.DATABASE_URL,
+        db_url_start: process.env.DATABASE_URL?.substring(0, 15),
+        has_jwt_secret: !!process.env.JWT_SECRET,
+        node_env: process.env.NODE_ENV,
+        cwd: process.cwd(),
+        dir: __dirname
+    });
+});
+
 // Import routes
 const authRoutes = require('./routes/auth');
 const configRoutes = require('./routes/config');
