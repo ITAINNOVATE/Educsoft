@@ -6,6 +6,11 @@ const { protect } = require('../middleware/auth');
 
 const router = express.Router();
 
+const JWT_SECRET = process.env.JWT_SECRET || 'EduSoft_Internal_Fallback_Secret_2026';
+if (!process.env.JWT_SECRET) {
+    console.warn("WARNING: JWT_SECRET environment variable is not defined. Using internal fallback.");
+}
+
 // @desc    Auth user & get token
 // @route   POST /api/auth/login
 // @access  Public
@@ -64,7 +69,7 @@ router.post('/login', async (req, res) => {
                         id: user.id, 
                         establishmentId: user.role === 'SUPER_ADMIN' ? establishment.id : user.establishmentId 
                     }, 
-                    process.env.JWT_SECRET, 
+                    JWT_SECRET, 
                     { expiresIn: '30d' }
                 ),
             });
@@ -99,7 +104,7 @@ router.post('/switch-establishment', protect, async (req, res) => {
 
         const newToken = jwt.sign(
             { id: req.user.id, establishmentId: establishment.id },
-            process.env.JWT_SECRET,
+            JWT_SECRET,
             { expiresIn: '30d' }
         );
 
