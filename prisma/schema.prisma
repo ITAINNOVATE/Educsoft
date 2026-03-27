@@ -21,6 +21,8 @@ model Establishment {
   email         String?
   logoUrl       String?
   isActive      Boolean   @default(true)
+  type          String?   // Maternelle, Primaire, etc.
+  typeOther     String?   // Specific description if 'Autre' is selected
   
   users             User[]
   students          Student[]

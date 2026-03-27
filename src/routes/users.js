@@ -72,6 +72,52 @@ router.post('/', protect, authorize('ADMIN', 'SUPER_ADMIN'), auditLog('CREATE_US
     }
 });
 
+// @desc    Update user
+// @route   PUT /api/users/:id
+// @access  Private (Admin only)
+router.put('/:id', protect, authorize('ADMIN', 'SUPER_ADMIN'), auditLog('UPDATE_USER'), async (req, res) => {
+    const { firstName, lastName, email, password, role } = req.body;
+
+    try {
+        const updateData = {};
+        if (firstName) updateData.firstName = firstName;
+        if (lastName) updateData.lastName = lastName;
+        if (role) updateData.role = role;
+        
+        if (email) {
+            const existingUser = await prisma.user.findFirst({
+                where: { email, id: { not: req.params.id } }
+            });
+            if (existingUser) {
+                return res.status(400).json({ message: 'Email already in use by another account.' });
+            }
+            updateData.email = email;
+        }
+
+        if (password) {
+            const salt = await bcrypt.genSalt(10);
+            updateData.password = await bcrypt.hash(password, salt);
+        }
+
+        const user = await prisma.user.update({
+            where: { id: req.params.id },
+            data: updateData,
+            select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+                role: true,
+                createdAt: true
+            }
+        });
+
+        res.json(user);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
 // @desc    Delete user
 // @route   DELETE /api/users/:id
 // @access  Private (Admin only)

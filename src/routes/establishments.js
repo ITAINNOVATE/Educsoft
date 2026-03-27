@@ -26,24 +26,24 @@ router.get('/', protect, authorize('SUPER_ADMIN'), async (req, res) => {
 // @route   POST /api/establishments
 // @access  Private (SUPER_ADMIN only)
 router.post('/', protect, authorize('SUPER_ADMIN'), async (req, res) => {
-    const { name, code, address, phone, email } = req.body;
+    const { name, code, address, phone, email, type, typeOther } = req.body;
 
     try {
-        const exists = await prisma.establishment.findUnique({ where: { code } });
-        if (exists) {
-            return res.status(400).json({ message: 'Code établissement déjà utilisé' });
+        const existing = await prisma.establishment.findUnique({ where: { code } });
+        if (existing) {
+            return res.status(400).json({ message: 'Ce code établissement est déjà utilisé.' });
         }
 
         const establishment = await prisma.establishment.create({
-            data: { name, code, address, phone, email }
+            data: { name, code, address, phone, email, type, typeOther }
         });
 
         res.status(201).json(establishment);
     } catch (error) {
         console.error("Establishment Creation Error:", error);
-        res.status(500).json({ 
-            message: 'Erreur lors de la création de l établissement', 
-            error: error.message 
+        res.status(500).json({
+            message: 'Erreur lors de la création de l établissement',
+            error: error.message
         });
     }
 });
@@ -53,10 +53,20 @@ router.post('/', protect, authorize('SUPER_ADMIN'), async (req, res) => {
 // @access  Private (SUPER_ADMIN only)
 router.patch('/:id', protect, authorize('SUPER_ADMIN'), async (req, res) => {
     try {
-        const { isActive } = req.body;
+        const { isActive, name, address, phone, email, type, typeOther } = req.body;
+
+        const updateData = {};
+        if (typeof isActive !== 'undefined') updateData.isActive = isActive;
+        if (name) updateData.name = name;
+        if (address) updateData.address = address;
+        if (phone) updateData.phone = phone;
+        if (email) updateData.email = email;
+        if (type) updateData.type = type;
+        if (typeof typeOther !== 'undefined') updateData.typeOther = typeOther;
+
         const establishment = await prisma.establishment.update({
             where: { id: req.params.id },
-            data: { isActive }
+            data: updateData
         });
         res.json(establishment);
     } catch (error) {

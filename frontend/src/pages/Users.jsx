@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import config from '../config';
-import { UserPlus, Trash2, Shield, Mail, UserCheck } from 'lucide-react';
+import { UserPlus, Trash2, Shield, Mail, UserCheck, Pencil, X } from 'lucide-react';
 
 const Users = () => {
     const [users, setUsers] = useState([]);
@@ -11,6 +11,7 @@ const Users = () => {
         firstName: '', lastName: '', email: '', password: '', role: 'SECRETARY'
     });
 
+    const [editingId, setEditingId] = useState(null);
     const { user } = useAuth();
     const API_URL = `${config.API_URL}/users`;
 
@@ -34,19 +35,41 @@ const Users = () => {
         }
     };
 
-    const handleCreate = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axios.post(API_URL, formData, {
-                headers: { Authorization: `Bearer ${user.token}` }
-            });
+            if (editingId) {
+                // Update
+                await axios.put(`${API_URL}/${editingId}`, formData, {
+                    headers: { Authorization: `Bearer ${user.token}` }
+                });
+                alert('Utilisateur mis à jour avec succès !');
+            } else {
+                // Create
+                await axios.post(API_URL, formData, {
+                    headers: { Authorization: `Bearer ${user.token}` }
+                });
+                alert('Utilisateur créé avec succès !');
+            }
             setShowForm(false);
+            setEditingId(null);
             setFormData({ firstName: '', lastName: '', email: '', password: '', role: 'SECRETARY' });
             fetchUsers();
-            alert('Utilisateur créé avec succès !');
         } catch (error) {
-            alert(error.response?.data?.message || 'Erreur lors de la création');
+            alert(error.response?.data?.message || 'Erreur lors de l’opération');
         }
+    };
+
+    const handleEdit = (u) => {
+        setEditingId(u.id);
+        setFormData({
+            firstName: u.firstName,
+            lastName: u.lastName,
+            email: u.email,
+            password: '', // Password optional for edit
+            role: u.role
+        });
+        setShowForm(true);
     };
 
     const handleDelete = async (id) => {
@@ -68,16 +91,24 @@ const Users = () => {
                     <h1 style={{ fontSize: '2rem', color: 'var(--primary-dark)' }}>Gestion des Utilisateurs</h1>
                     <p style={{ color: 'var(--text-muted)' }}>Gérez les comptes d'accès au système (Staff).</p>
                 </div>
-                <button className="btn btn-primary" onClick={() => setShowForm(!showForm)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <UserPlus size={20} />
+                <button className="btn btn-primary" onClick={() => { 
+                    if (showForm) {
+                        setEditingId(null);
+                        setFormData({ firstName: '', lastName: '', email: '', password: '', role: 'SECRETARY' });
+                    }
+                    setShowForm(!showForm);
+                }} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    {showForm ? <X size={20} /> : <UserPlus size={20} />}
                     {showForm ? 'Annuler' : 'Nouvel Utilisateur'}
                 </button>
             </header>
 
             {showForm && (
                 <section className="card" style={{ marginBottom: '2rem', border: '1px solid var(--primary-light)' }}>
-                    <h2 style={{ marginBottom: '1.5rem', color: 'var(--primary)', fontSize: '1.25rem' }}>Nouveau Compte Staff</h2>
-                    <form onSubmit={handleCreate}>
+                    <h2 style={{ marginBottom: '1.5rem', color: 'var(--primary)', fontSize: '1.25rem' }}>
+                        {editingId ? 'Modifier le Compte' : 'Nouveau Compte Staff'}
+                    </h2>
+                    <form onSubmit={handleSubmit}>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                             <div className="form-group">
                                 <label className="form-label">Prénom</label>
@@ -92,8 +123,8 @@ const Users = () => {
                                 <input type="email" className="form-input" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} required />
                             </div>
                             <div className="form-group">
-                                <label className="form-label">Mot de Passe Initial</label>
-                                <input type="password" className="form-input" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} required />
+                                <label className="form-label">{editingId ? 'Changer Mot de Passe (Optionnel)' : 'Mot de Passe Initial'}</label>
+                                <input type="password" className="form-input" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} required={!editingId} placeholder={editingId ? 'Laisser vide pour garder l’ancien' : ''} />
                             </div>
                             <div className="form-group" style={{ gridColumn: 'span 2' }}>
                                 <label className="form-label">Rôle / Permission</label>
@@ -142,7 +173,10 @@ const Users = () => {
                                     </span>
                                 </td>
                                 <td style={{ padding: '1rem', fontSize: '0.875rem' }}>{new Date(u.createdAt).toLocaleDateString()}</td>
-                                <td style={{ padding: '1rem', textAlign: 'right' }}>
+                                <td style={{ padding: '1rem', textAlign: 'right', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                                    <button onClick={() => handleEdit(u)} style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', padding: '0.5rem' }} title="Modifier">
+                                        <Pencil size={18} />
+                                    </button>
                                     {u.id !== user.id && (
                                         <button onClick={() => handleDelete(u.id)} style={{ background: 'none', border: 'none', color: 'var(--error)', cursor: 'pointer', padding: '0.5rem' }} title="Supprimer">
                                             <Trash2 size={18} />

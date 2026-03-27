@@ -9,7 +9,15 @@ const SuperAdmin = () => {
     const [establishments, setEstablishments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
-    const [newEst, setNewEst] = useState({ name: '', code: '', email: '', phone: '', address: '' });
+    const [newEst, setNewEst] = useState({ name: '', code: '', email: '', phone: '', address: '', type: '', typeOther: '' });
+    const establishmentTypes = [
+        "Maternelle",
+        "Maternelle-Primaire-Secondaire",
+        "Primaire & Secondaire",
+        "Technique & Professionnel",
+        "Universitaire",
+        "Autre"
+    ];
     const API_BASE = `${config.API_URL}/establishments`;
 
     const handleManage = async (id) => {
@@ -76,7 +84,7 @@ const SuperAdmin = () => {
             });
             alert('Établissement créé avec succès !');
             setShowModal(false);
-            setNewEst({ name: '', code: '', email: '', phone: '', address: '' });
+            setNewEst({ name: '', code: '', email: '', phone: '', address: '', type: '', typeOther: '' });
             fetchEstablishments();
         } catch (error) {
             const msg = error.response?.data?.message || 'Erreur lors de la création';
@@ -113,7 +121,14 @@ const SuperAdmin = () => {
                             </div>
                             <div>
                                 <h3 style={{ margin: 0, fontSize: '1.1rem' }}>{est.name}</h3>
-                                <code style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 'bold' }}>CODE: {est.code}</code>
+                                <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', marginTop: '0.2rem' }}>
+                                    <code style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 'bold' }}>{est.code}</code>
+                                    {est.type && (
+                                        <span style={{ fontSize: '0.7rem', padding: '0.1rem 0.5rem', backgroundColor: '#f0f0f0', borderRadius: '4px', textTransform: 'uppercase', color: '#666' }}>
+                                            {est.type === 'Autre' ? est.typeOther : est.type}
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                         </div>
                         <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
@@ -209,6 +224,33 @@ const SuperAdmin = () => {
                                 <label className="form-label">Adresse</label>
                                 <input type="text" className="form-input" value={newEst.address} onChange={e => setNewEst({...newEst, address: e.target.value})} />
                             </div>
+
+                            <div className="form-group">
+                                <label className="form-label">Type d'établissement</label>
+                                <select 
+                                    className="form-input" 
+                                    required 
+                                    value={newEst.type} 
+                                    onChange={e => setNewEst({...newEst, type: e.target.value, typeOther: e.target.value === 'Autre' ? newEst.typeOther : ''})}
+                                >
+                                    <option value="">-- Sélectionner le type --</option>
+                                    {establishmentTypes.map(t => <option key={t} value={t}>{t}</option>)}
+                                </select>
+                            </div>
+
+                            {newEst.type === 'Autre' && (
+                                <div className="form-group">
+                                    <label className="form-label">Précisez le type</label>
+                                    <input 
+                                        type="text" 
+                                        className="form-input" 
+                                        required 
+                                        value={newEst.typeOther} 
+                                        onChange={e => setNewEst({...newEst, typeOther: e.target.value})} 
+                                        placeholder="Ex: Centre de formation technique"
+                                    />
+                                </div>
+                            )}
                             <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
                                 <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setShowModal(false)}>Annuler</button>
                                 <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Créer l'école</button>
