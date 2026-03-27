@@ -9,7 +9,17 @@ const fs = require('fs');
 const router = express.Router();
 
 // Configure Multer for document uploads
-const upload = multer({ storage });
+const documentStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const dir = 'uploads/documents';
+        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+        cb(null, dir);
+    },
+    filename: (req, file, cb) => {
+        cb(null, `doc-${Date.now()}-${file.originalname}`);
+    }
+});
+const upload = multer({ storage: documentStorage });
 
 // Configure Multer for student photos
 const photoStorage = multer.diskStorage({
