@@ -207,11 +207,11 @@ const Dashboard = () => {
                     <section className="card">
                         <h3 style={{ fontSize: '1rem', marginBottom: '1.25rem', fontWeight: '700' }}>Actions Rapides</h3>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                            {(user.role === 'ADMIN' || user.role === 'ACCOUNTANT') && (
+                            {(user.role === 'ADMIN' || user.role === 'ACCOUNTANT' || user.role === 'SUPER_ADMIN') && (
                                 <ActionButton icon={<Download size={18} />} label="Rapport Comptable" />
                             )}
                             <ActionButton icon={<Users size={18} />} label="Liste des Éleves" onClick={() => navigate('/students')} />
-                            {(user.role === 'ADMIN' || user.role === 'ACCOUNTANT') && (
+                            {(user.role === 'ADMIN' || user.role === 'ACCOUNTANT' || user.role === 'SUPER_ADMIN') && (
                                 <ActionButton icon={<CreditCard size={18} />} label="Nouveau Paiement" primary onClick={() => navigate('/payments')} />
                             )}
                         </div>

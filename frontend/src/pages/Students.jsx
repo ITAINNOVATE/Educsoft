@@ -287,8 +287,8 @@ const Students = () => {
                 <div style={{ display: 'flex', gap: '1rem' }}>
                     {view === 'LIST' ? (
                         <>
-                            {/* Only show register button for ADMIN and SECRETARY */}
-                            {user && (user.role === 'ADMIN' || user.role === 'SECRETARY') && (
+                            {/* Only show register button for ADMIN, SECRETARY, and SUPER_ADMIN */}
+                            {user && (user.role === 'ADMIN' || user.role === 'SECRETARY' || user.role === 'SUPER_ADMIN') && (
                                 <button className="btn btn-primary" onClick={() => setView('REGISTER')} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                     <UserPlus size={20} /> Inscrire un Élève
                                 </button>
@@ -644,7 +644,7 @@ const Students = () => {
                                     }}>
                                         {/* Header */}
                                         <div style={{ backgroundColor: '#1a237e', color: 'white', padding: '10px', textAlign: 'center' }}>
-                                            <div style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>INSTITUT DE TECHNOLOGIE APPLIQUÉE</div>
+                                            <div style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>{user?.establishmentName?.toUpperCase() || 'ÉTABLISSEMENT'}</div>
                                             <div style={{ fontSize: '0.6rem' }}>Année Scolaire: {selectedStudent.enrollments[0]?.schoolYear?.name || '---'}</div>
                                         </div>
 
@@ -775,7 +775,7 @@ const Students = () => {
 
                                                     setUploading(true);
                                                     try {
-                                                        await axios.post(`${API_BASE}/students/${selectedStudent.id}/upload`, formData, {
+                                                        await axios.post(`${API_BASE}/students/${selectedStudent.id}/documents`, formData, {
                                                             headers: {
                                                                 'Content-Type': 'multipart/form-data',
                                                                 Authorization: `Bearer ${user.token}`

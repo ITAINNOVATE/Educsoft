@@ -1,16 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import { Building2, Plus, CheckCircle, XCircle, ShieldCheck } from 'lucide-react';
+import { Building2, Plus, CheckCircle, XCircle, ShieldCheck, Trash2, Pause, Play, Eye } from 'lucide-react';
 import config from '../config';
 
 const SuperAdmin = () => {
-    const { user } = useAuth();
+    const { user, switchEstablishment } = useAuth();
     const [establishments, setEstablishments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [newEst, setNewEst] = useState({ name: '', code: '', email: '', phone: '', address: '' });
     const API_BASE = `${config.API_URL}/establishments`;
+
+    const handleManage = async (id) => {
+        const res = await switchEstablishment(id);
+        if (res.success) {
+            alert('Vous gérez maintenant cet établissement.');
+            window.location.reload(); // Reload to refresh sidebar and context
+        } else {
+            alert(res.message);
+        }
+    };
 
     useEffect(() => {
         fetchEstablishments();
@@ -26,6 +36,35 @@ const SuperAdmin = () => {
             console.error('Error fetching establishments:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleToggleStatus = async (id, currentStatus) => {
+        try {
+            await axios.patch(`${API_BASE}/${id}`, { isActive: !currentStatus }, {
+                headers: { Authorization: `Bearer ${user.token}` }
+            });
+            fetchEstablishments();
+        } catch (error) {
+            alert(error.response?.data?.message || 'Erreur lors de la mise à jour de l\'état');
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (!window.confirm('Êtes-vous sûr de vouloir supprimer cet établissement ? Cette action est irréversible et ne fonctionnera que si l\'établissement est vide de données (élèves/agents).')) {
+            return;
+        }
+
+        try {
+            await axios.delete(`${API_BASE}/${id}`, {
+                headers: { Authorization: `Bearer ${user.token}` }
+            });
+            alert('Établissement supprimé avec succès');
+            fetchEstablishments();
+        } catch (error) {
+            const msg = error.response?.data?.message || 'Erreur lors de la suppression';
+            const detail = error.response?.data?.details ? `\n\n${error.response?.data?.details}` : '';
+            alert(msg + detail);
         }
     };
 
@@ -83,13 +122,61 @@ const SuperAdmin = () => {
                             <span>📍 {est.address || '-'}</span>
                         </div>
                         <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: est.isActive ? '#2e7d32' : '#c62828', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                                {est.isActive ? <CheckCircle size={14} /> : <XCircle size={14} />}
-                                {est.isActive ? 'ACTIF' : 'INACTIF'}
-                            </span>
-                            <span style={{ fontSize: '0.75rem', color: '#999' }}>
-                                {est._count.students} Élèves • {est._count.users} Agents
-                            </span>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: est.isActive ? '#2e7d32' : '#c62828', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                    {est.isActive ? <CheckCircle size={14} /> : <XCircle size={14} />}
+                                    {est.isActive ? 'ACTIF' : 'SUSPENDU'}
+                                </span>
+                                <span style={{ fontSize: '0.75rem', color: '#999' }}>
+                                    {est._count?.students || 0} Élèves • {est._count?.users || 0} Agents
+                                </span>
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <button
+                                    onClick={() => handleManage(est.id)}
+                                    title="Gérer"
+                                    style={{
+                                        border: 'none',
+                                        background: 'var(--primary-light)',
+                                        color: 'var(--primary)',
+                                        padding: '0.5rem',
+                                        borderRadius: '8px',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center'
+                                    }}
+                                >
+                                    <Eye size={18} />
+                                </button>
+                                <button
+                                    onClick={() => handleToggleStatus(est.id, est.isActive)}
+                                    title={est.isActive ? 'Suspendre' : 'Activer'}
+                                    style={{
+                                        border: 'none',
+                                        background: est.isActive ? '#fff3e0' : '#e8f5e9',
+                                        color: est.isActive ? '#ef6c00' : '#2e7d32',
+                                        padding: '0.5rem',
+                                        borderRadius: '8px',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    {est.isActive ? <Pause size={18} /> : <Play size={18} />}
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(est.id)}
+                                    title="Supprimer"
+                                    style={{
+                                        border: 'none',
+                                        background: '#ffebee',
+                                        color: '#c62828',
+                                        padding: '0.5rem',
+                                        borderRadius: '8px',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <Trash2 size={18} />
+                                </button>
+                            </div>
                         </div>
                     </div>
                 ))}

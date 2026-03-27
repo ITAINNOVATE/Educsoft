@@ -105,9 +105,9 @@ const Layout = () => {
             <SidebarLink to="/configuration" label="Configuration" />
           )}
 
-          {/* Students - Admin, Secretary, and Accountant (read-only) */}
-          {user && (user.role === 'ADMIN' || user.role === 'SECRETARY' || user.role === 'ACCOUNTANT') && (
-            <SidebarLink to="/students" label="Élèves" />
+          {/* Students - Admin, Secretary, Accountant (read-only), and Super Admin */}
+          {user && (user.role === 'ADMIN' || user.role === 'SECRETARY' || user.role === 'ACCOUNTANT' || user.role === 'SUPER_ADMIN') && (
+            <SidebarLink to="/students" label="Gestion des Élèves" />
           )}
 
           {/* Payments - Admin and Accountant */}

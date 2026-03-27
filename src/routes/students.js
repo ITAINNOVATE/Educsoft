@@ -205,7 +205,10 @@ router.put('/:id', protect, authorize('ADMIN', 'SECRETARY', 'DIRECTOR'), auditLo
         const result = await prisma.$transaction(async (tx) => {
             // Update Student
             const student = await tx.student.update({
-                where: { id: req.params.id },
+                where: { 
+                    id: req.params.id,
+                    establishmentId: req.user.establishmentId
+                },
                 data: {
                     ...studentData,
                     dob: studentData.dob ? new Date(studentData.dob) : undefined
@@ -275,7 +278,8 @@ router.post('/:id/documents', protect, upload.single('document'), async (req, re
                 name: name || req.file.originalname,
                 type: type || 'OTHER',
                 url: `/uploads/documents/${req.file.filename}`,
-                studentId: req.params.id
+                studentId: req.params.id,
+                establishmentId: req.user.establishmentId
             }
         });
         res.status(201).json(document);
@@ -293,7 +297,10 @@ router.post('/:id/photo', protect, uploadPhoto.single('photo'), async (req, res)
         const photoUrl = `/uploads/photos/${req.file.filename}`;
         
         const student = await prisma.student.update({
-            where: { id: req.params.id },
+            where: { 
+                id: req.params.id,
+                establishmentId: req.user.establishmentId
+            },
             data: { photoUrl }
         });
 
@@ -347,7 +354,10 @@ const { generateStudentCardPDF } = require('../utils/studentCard');
 router.get('/:id/pdf', protect, async (req, res) => {
     try {
         const student = await prisma.student.findUnique({
-            where: { id: req.params.id },
+            where: { 
+                id: req.params.id,
+                establishmentId: req.user.establishmentId
+            },
             include: {
                 enrollments: { include: { class: { include: { fees: true } }, schoolYear: true } },
                 parents: { include: { parent: true } },
@@ -382,7 +392,10 @@ router.get('/:id/pdf', protect, async (req, res) => {
 router.get('/:id/card', protect, async (req, res) => {
     try {
         const student = await prisma.student.findUnique({
-            where: { id: req.params.id },
+            where: { 
+                id: req.params.id,
+                establishmentId: req.user.establishmentId
+            },
             include: {
                 enrollments: { include: { class: true, schoolYear: true } }
             }
