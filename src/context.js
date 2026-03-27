@@ -1,21 +1,22 @@
-const { PrismaClient } = require('@prisma/client');
-
 let prismaInstance = null;
 
 function getPrisma() {
     if (prismaInstance) return prismaInstance;
     
     try {
+        // RADICAL ISOLATION: Require only when needed
+        const { PrismaClient } = require('@prisma/client');
         prismaInstance = new PrismaClient({
             log: ['error', 'warn'],
         });
         return prismaInstance;
     } catch (error) {
-        console.error("PRISMA_INIT_CRASH:", error);
+        console.error("PRISMA_DYNAMIC_IMPORT_CRASH:", error);
+        // Fallback mock to prevent total crash
         return {
-            $queryRaw: () => { throw new Error("Prisma failed to initialize: " + error.message); },
-            user: { findUnique: () => { throw new Error("Prisma failed to initialize"); } },
-            establishment: { findUnique: () => { throw new Error("Prisma failed to initialize"); } }
+            $queryRaw: () => { throw new Error("Prisma dynamic import failed: " + error.message); },
+            user: { findFirst: () => null, findUnique: () => null },
+            establishment: { findUnique: () => null }
         };
     }
 }
