@@ -9,7 +9,7 @@ const SuperAdmin = () => {
     const [establishments, setEstablishments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
-    const [newEst, setNewEst] = useState({ name: '', code: '', email: '', phone: '', address: '', type: '', typeOther: '' });
+    const [newEst, setNewEst] = useState({ name: '', code: '', email: '', phone: '', address: '', type: '', typeOther: '', directorName: '' });
     const establishmentTypes = [
         "Maternelle",
         "Maternelle-Primaire-Secondaire",
@@ -84,7 +84,7 @@ const SuperAdmin = () => {
             });
             alert('Établissement créé avec succès !');
             setShowModal(false);
-            setNewEst({ name: '', code: '', email: '', phone: '', address: '', type: '', typeOther: '' });
+            setNewEst({ name: '', code: '', email: '', phone: '', address: '', type: '', typeOther: '', directorName: '' });
             fetchEstablishments();
         } catch (error) {
             const msg = error.response?.data?.message || 'Erreur lors de la création';
@@ -205,6 +205,10 @@ const SuperAdmin = () => {
                             <div className="form-group">
                                 <label className="form-label">Nom de l'établissement</label>
                                 <input type="text" className="form-input" required value={newEst.name} onChange={e => setNewEst({...newEst, name: e.target.value})} placeholder="Ex: École Primaire Les Palmiers" />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Nom du Directeur</label>
+                                <input type="text" className="form-input" value={newEst.directorName} onChange={e => setNewEst({...newEst, directorName: e.target.value})} placeholder="Ex: M. Koffi DJIBO" />
                             </div>
                             <div className="form-group">
                                 <label className="form-label">Code d'accès (Unique)</label>

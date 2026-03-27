@@ -21,7 +21,8 @@ const generateStudentCardPDF = (student, res) => {
 
     // --- HEADER ---
     doc.rect(2, 2, width - 4, 30).fill('#1a237e');
-    doc.fontSize(9).fillColor('#ffffff').text('INSTITUT DE TECHNOLOGIE APPLIQUÉE', 5, 8, { align: 'center', width: width - 10 });
+    const establishmentName = student.establishment?.name || 'INSTITUT DE TECHNOLOGIE APPLIQUÉE';
+    doc.fontSize(9).fillColor('#ffffff').text(establishmentName.toUpperCase(), 5, 8, { align: 'center', width: width - 10 });
     
     const schoolYear = student.enrollments[0]?.schoolYear?.name || '2025-2026';
     doc.fontSize(7).text(`Année Scolaire: ${schoolYear}`, 5, 20, { align: 'center', width: width - 10 });
@@ -83,7 +84,8 @@ const generateStudentCardPDF = (student, res) => {
 
     // --- FOOTER / SIGNATURE ---
     const signatureY = height - 42;
-    doc.fontSize(6).fillColor('#000').text('Le Directeur', width - 85, signatureY, { align: 'center', width: 70 });
+    const director = student.establishment?.directorName ? `Le Directeur: ${student.establishment.directorName}` : 'Le Directeur';
+    doc.fontSize(6).fillColor('#000').text(director, width - 85, signatureY, { align: 'center', width: 70 });
     doc.fontSize(5).fillColor('#999').text('(Signature & Cachet)', width - 85, signatureY + 18, { align: 'center', width: 70, italic: true });
 
     // Decorative bar at bottom

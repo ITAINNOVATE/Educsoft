@@ -23,6 +23,7 @@ model Establishment {
   isActive      Boolean   @default(true)
   type          String?   // Maternelle, Primaire, etc.
   typeOther     String?   // Specific description if 'Autre' is selected
+  directorName  String?   // Full name of the school Director
   
   users             User[]
   students          Student[]

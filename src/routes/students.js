@@ -397,7 +397,8 @@ router.get('/:id/card', protect, async (req, res) => {
                 establishmentId: req.user.establishmentId
             },
             include: {
-                enrollments: { include: { class: true, schoolYear: true } }
+                enrollments: { include: { class: true, schoolYear: true } },
+                establishment: true
             }
         });
 
