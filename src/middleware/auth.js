@@ -14,7 +14,8 @@ const protect = async (req, res, next) => {
         try {
             // Ensure token is trimmed and clean
             const cleanToken = token.trim();
-            const decoded = jwt.verify(cleanToken, process.env.JWT_SECRET);
+            const JWT_SECRET = process.env.JWT_SECRET || 'EduSoft_Internal_Fallback_Secret_2026';
+            const decoded = jwt.verify(cleanToken, JWT_SECRET);
 
             req.user = await prisma.user.findUnique({
                 where: { id: decoded.id },
