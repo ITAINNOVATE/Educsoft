@@ -24,14 +24,16 @@ const accountingRoutes = require('./routes/accounting');
 const teacherPaymentRoutes = require('./routes/teacherPayments');
 const userRoutes = require('./routes/users');
 const establishmentRoutes = require('./routes/establishments');
+const debugRoutes = require('./routes/debug');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/config', configRoutes);
+app.use('/api/establishments', establishmentRoutes);
+app.use('/api/debug-data', debugRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/accounting', accountingRoutes);
 app.use('/api/teacher-payments', teacherPaymentRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/establishments', establishmentRoutes);
 
 module.exports = app;
