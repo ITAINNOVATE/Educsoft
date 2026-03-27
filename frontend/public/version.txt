@@ -1,0 +1,3 @@
+EduSoft v1.1.8 - FLAT - ISOLATED
+Deployment Timestamp: 2026-03-26T21:10:00Z
+Status: INFRA_RESTRUCTURED
