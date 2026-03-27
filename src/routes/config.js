@@ -24,7 +24,7 @@ router.get('/school-years', protect, async (req, res) => {
 // @desc    Create a new school year
 // @route   POST /api/config/school-years
 // @access  Private/Admin
-router.post('/school-years', protect, authorize('ADMIN', 'DIRECTOR'), async (req, res) => {
+router.post('/school-years', protect, authorize('ADMIN', 'DIRECTOR', 'SUPER_ADMIN'), async (req, res) => {
     const { name, startDate, endDate, current } = req.body;
     console.log('--- POST /api/config/school-years ---');
     console.log('Payload:', { name, startDate, endDate, current });
@@ -88,7 +88,7 @@ router.get('/classes', protect, async (req, res) => {
 // @desc    Create a new class
 // @route   POST /api/config/classes
 // @access  Private/Admin
-router.post('/classes', protect, authorize('ADMIN', 'DIRECTOR'), async (req, res) => {
+router.post('/classes', protect, authorize('ADMIN', 'DIRECTOR', 'SUPER_ADMIN'), async (req, res) => {
     const { name, level, schoolYearId } = req.body;
 
     try {

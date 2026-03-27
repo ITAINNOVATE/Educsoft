@@ -7,7 +7,7 @@ const router = express.Router();
 // @desc    Get all teacher payments
 // @route   GET /api/teacher-payments
 // @access  Private (Admin & Accountant)
-router.get('/', protect, authorize(['ADMIN', 'ACCOUNTANT']), async (req, res) => {
+router.get('/', protect, authorize(['ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN']), async (req, res) => {
     try {
         const where = { establishmentId: req.user.establishmentId };
         if (teacherId) where.teacherId = teacherId;
@@ -33,7 +33,7 @@ router.get('/', protect, authorize(['ADMIN', 'ACCOUNTANT']), async (req, res) =>
 // @desc    Create a new payment
 // @route   POST /api/teacher-payments
 // @access  Private (Admin & Accountant)
-router.post('/', protect, authorize(['ADMIN', 'ACCOUNTANT']), async (req, res) => {
+router.post('/', protect, authorize(['ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN']), async (req, res) => {
     try {
         const { teacherId, amount, period, type, notes, reference } = req.body;
 
@@ -58,7 +58,7 @@ router.post('/', protect, authorize(['ADMIN', 'ACCOUNTANT']), async (req, res) =
 // @desc    Get payment stats
 // @route   GET /api/teacher-payments/stats
 // @access  Private (Admin & Accountant)
-router.get('/stats', protect, authorize(['ADMIN', 'ACCOUNTANT']), async (req, res) => {
+router.get('/stats', protect, authorize(['ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN']), async (req, res) => {
     try {
         const currentYear = new Date().getFullYear();
 

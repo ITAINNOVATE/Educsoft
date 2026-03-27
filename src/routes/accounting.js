@@ -6,8 +6,14 @@ const router = express.Router();
 
 // @desc    Get overall financial statistics
 // @route   GET /api/accounting/stats
-router.get('/stats', protect, authorize('ADMIN', 'ACCOUNTANT', 'DIRECTOR'), async (req, res) => {
+router.get('/stats', protect, authorize('ADMIN', 'ACCOUNTANT', 'DIRECTOR', 'SUPER_ADMIN'), async (req, res) => {
     try {
+        if (!req.user.establishmentId) {
+            return res.status(400).json({ 
+                message: 'Aucun établissement sélectionné',
+                requiresSelection: true 
+            });
+        }
         const { startDate, endDate } = req.query;
 
         const now = new Date();
@@ -92,8 +98,11 @@ const { calculateStudentFinancials } = require('../utils/finance');
 
 // @desc    Get debt report (Students with unpaid fees)
 // @route   GET /api/accounting/debts
-router.get('/debts', protect, authorize('ADMIN', 'ACCOUNTANT'), async (req, res) => {
+router.get('/debts', protect, authorize('ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'), async (req, res) => {
     try {
+        if (!req.user.establishmentId) {
+            return res.json([]); // Return empty for debts if no context
+        }
         const students = await prisma.student.findMany({
             where: { 
                 status: 'ACTIF',

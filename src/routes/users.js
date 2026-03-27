@@ -9,7 +9,7 @@ const router = express.Router();
 // @desc    Get all users
 // @route   GET /api/users
 // @access  Private (Admin only)
-router.get('/', protect, authorize('ADMIN'), async (req, res) => {
+router.get('/', protect, authorize('ADMIN', 'SUPER_ADMIN'), async (req, res) => {
     try {
         const where = req.user.role === 'SUPER_ADMIN' ? {} : { establishmentId: req.user.establishmentId };
         const users = await prisma.user.findMany({
@@ -35,7 +35,7 @@ router.get('/', protect, authorize('ADMIN'), async (req, res) => {
 // @desc    Create a new user
 // @route   POST /api/users
 // @access  Private (Admin only)
-router.post('/', protect, authorize('ADMIN'), auditLog('CREATE_USER'), async (req, res) => {
+router.post('/', protect, authorize('ADMIN', 'SUPER_ADMIN'), auditLog('CREATE_USER'), async (req, res) => {
     const { firstName, lastName, email, password, role } = req.body;
 
     try {
@@ -75,7 +75,7 @@ router.post('/', protect, authorize('ADMIN'), auditLog('CREATE_USER'), async (re
 // @desc    Delete user
 // @route   DELETE /api/users/:id
 // @access  Private (Admin only)
-router.delete('/:id', protect, authorize('ADMIN'), auditLog('DELETE_USER'), async (req, res) => {
+router.delete('/:id', protect, authorize('ADMIN', 'SUPER_ADMIN'), auditLog('DELETE_USER'), async (req, res) => {
     try {
         // Prevent deleting oneself
         if (req.user.id === req.params.id) {

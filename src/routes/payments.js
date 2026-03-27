@@ -9,7 +9,7 @@ const router = express.Router();
 
 // @desc    Configure fees for a class
 // @route   POST /api/payments/fees
-router.post('/fees', protect, authorize('ADMIN', 'ACCOUNTANT'), auditLog('CREATE_FEE'), async (req, res) => {
+router.post('/fees', protect, authorize('ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'), auditLog('CREATE_FEE'), async (req, res) => {
     const { name, amount, category, type, classId } = req.body;
     try {
         const fee = await prisma.fee.create({
@@ -42,7 +42,7 @@ router.get('/fees/:classId', protect, async (req, res) => {
 
 // @desc    Update a fee
 // @route   PUT /api/payments/fees/:id
-router.put('/fees/:id', protect, authorize('ADMIN'), auditLog('UPDATE_FEE'), async (req, res) => {
+router.put('/fees/:id', protect, authorize('ADMIN', 'SUPER_ADMIN'), auditLog('UPDATE_FEE'), async (req, res) => {
     const { name, amount, category, type } = req.body;
     try {
         const fee = await prisma.fee.update({
@@ -62,7 +62,7 @@ router.put('/fees/:id', protect, authorize('ADMIN'), auditLog('UPDATE_FEE'), asy
 
 // @desc    Delete a fee
 // @route   DELETE /api/payments/fees/:id
-router.delete('/fees/:id', protect, authorize('ADMIN'), auditLog('DELETE_FEE'), async (req, res) => {
+router.delete('/fees/:id', protect, authorize('ADMIN', 'SUPER_ADMIN'), auditLog('DELETE_FEE'), async (req, res) => {
     try {
         await prisma.fee.delete({
             where: { id: req.params.id }
@@ -77,7 +77,7 @@ router.delete('/fees/:id', protect, authorize('ADMIN'), auditLog('DELETE_FEE'), 
 
 // @desc    Process a student payment
 // @route   POST /api/payments
-router.post('/', protect, authorize('ADMIN', 'ACCOUNTANT', 'SECRETARY'), auditLog('PROCESS_PAYMENT'), async (req, res) => {
+router.post('/', protect, authorize('ADMIN', 'ACCOUNTANT', 'SECRETARY', 'SUPER_ADMIN'), auditLog('PROCESS_PAYMENT'), async (req, res) => {
     const { studentId, amount, method, notes, feeId, feeName } = req.body;
 
     try {

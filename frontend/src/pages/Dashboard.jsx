@@ -17,6 +17,7 @@ const Dashboard = () => {
     const [stats, setStats] = useState(null);
     const [debts, setDebts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const { user } = useAuth();
     const navigate = useNavigate();
 
@@ -24,6 +25,10 @@ const Dashboard = () => {
 
     useEffect(() => {
         if (user?.token) {
+            if (user.role === 'SUPER_ADMIN' && !user.establishmentId) {
+                setLoading(false);
+                return;
+            }
             fetchStats();
         }
     }, [user]);
@@ -54,18 +59,59 @@ const Dashboard = () => {
 
             setStats(statsData);
             setDebts(debtsRes.data);
+            setError(null);
         } catch (error) {
             console.error('Error fetching dashboard stats:', error);
+            setError(error.response?.data?.message || 'Erreur lors du chargement des données');
         } finally {
             setLoading(false);
         }
     };
 
-    if (loading || !stats) {
+    if (loading) {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', padding: '2rem' }}>
                 <div style={{ textAlign: 'center' }}>
-                    <p style={{ color: 'var(--text-muted)' }}>Chargement du tableau de bord...</p>
+                    <div className="spinner"></div>
+                    <p style={{ color: 'var(--text-muted)', marginTop: '1rem' }}>Chargement du tableau de bord...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (user.role === 'SUPER_ADMIN' && !user.establishmentId) {
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh', padding: '2rem' }}>
+                <div className="card" style={{ maxWidth: '500px', textAlign: 'center', padding: '3rem' }}>
+                    <div style={{ backgroundColor: '#e3f2fd', width: '80px', height: '80px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', color: '#1976d2' }}>
+                        <TrendingUp size={40} />
+                    </div>
+                    <h2 style={{ marginBottom: '1rem' }}>Bienvenue, Super Admin</h2>
+                    <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>
+                        Pour consulter les statistiques, veuillez d'abord sélectionner un établissement dans le module d'administration.
+                    </p>
+                    <button className="btn btn-primary" onClick={() => navigate('/system')} style={{ width: '100%' }}>
+                        Accéder à la Gestion des Établissements
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    if (error || !stats) {
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh', padding: '2rem' }}>
+                <div className="card" style={{ maxWidth: '500px', textAlign: 'center', padding: '3rem' }}>
+                    <div style={{ backgroundColor: '#ffebee', width: '80px', height: '80px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', color: '#c62828' }}>
+                        <AlertTriangle size={40} />
+                    </div>
+                    <h2 style={{ marginBottom: '1rem' }}>Erreur de chargement</h2>
+                    <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>
+                        {error || 'Impossible de charger les statistiques du tableau de bord.'}
+                    </p>
+                    <button className="btn btn-primary" onClick={() => fetchStats()} style={{ width: '100%' }}>
+                        Réessayer
+                    </button>
                 </div>
             </div>
         );
