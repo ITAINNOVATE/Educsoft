@@ -41,9 +41,6 @@ class ErrorBoundary extends React.Component {
           >
             Rafraîchir la page
           </button>
-          <pre style={{ marginTop: '2rem', textAlign: 'left', fontSize: '0.75rem', padding: '1rem', backgroundColor: '#fff', borderRadius: '4px', maxWidth: '90vw', overflow: 'auto' }}>
-            {this.state.error?.name}: {this.state.error?.message}
-          </pre>
         </div>
       );
     }
