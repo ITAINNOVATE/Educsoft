@@ -237,7 +237,10 @@ function App() {
             </Route>
           </Route>
 
-          <Route path="/" element={<Navigate to="/dashboard" />} />
+          <Route path="/superadmin" element={<Navigate to="/system" replace />} />
+          <Route path="/establishments" element={<Navigate to="/system" replace />} />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </Router>
     </AuthProvider>
