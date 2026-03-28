@@ -78,17 +78,22 @@ router.get('/stats', protect, authorize('ADMIN', 'ACCOUNTANT', 'DIRECTOR', 'SUPE
         // ... (Graph data logic would go here, omitting for brevity/complexity in this step)
 
         res.json({
-            revenueDay: dayPayments._sum.amount || 0,
-            revenueMonth: monthPayments._sum.amount || 0,
-            revenueTotal: displayTotal,
-            absoluteTotal: totalPayments._sum.amount || 0, // Sending absolute total just in case
+            revenueDay: Number(dayPayments?._sum?.amount) || 0,
+            revenueMonth: Number(monthPayments?._sum?.amount) || 0,
+            revenueTotal: Number(displayTotal) || 0,
+            absoluteTotal: Number(totalPayments?._sum?.amount) || 0,
             stats: {
-                students: studentCount,
-                classes: classCount
+                students: studentCount || 0,
+                classes: classCount || 0
             }
         });
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error("Accounting Stats Global Error:", error);
+        res.status(500).json({ 
+            message: 'Erreur lors du calcul des statistiques', 
+            error: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
     }
 });
 

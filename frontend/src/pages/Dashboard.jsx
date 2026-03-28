@@ -105,20 +105,27 @@ const Dashboard = () => {
                     <div style={{ backgroundColor: '#ffebee', width: '80px', height: '80px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', color: '#c62828' }}>
                         <AlertTriangle size={40} />
                     </div>
-                    <h2 style={{ marginBottom: '1rem' }}>Erreur de chargement</h2>
+                    <h2 style={{ marginBottom: '1rem' }}>Attention</h2>
                     <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>
                         {error || 'Impossible de charger les statistiques du tableau de bord.'}
                     </p>
-                    <button className="btn btn-primary" onClick={() => fetchStats()} style={{ width: '100%' }}>
-                        Réessayer
-                    </button>
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                        <button className="btn btn-outline" onClick={() => fetchStats()} style={{ flex: 1 }}>
+                            Réessayer
+                        </button>
+                        {user.role === 'SUPER_ADMIN' && (
+                            <button className="btn btn-primary" onClick={() => navigate('/system')} style={{ flex: 1 }}>
+                                Changer d'école
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
         );
     }
 
-    const totalRevenue = stats.revenueTotal || 0;
-    const totalDebt = debts.reduce((acc, curr) => acc + curr.balance, 0);
+    const totalRevenue = stats?.revenueTotal || 0;
+    const totalDebt = Array.isArray(debts) ? debts.reduce((acc, curr) => acc + (Number(curr.balance) || 0), 0) : 0;
     const collectionRate = (totalRevenue + totalDebt) > 0 ? Math.round((totalRevenue / (totalRevenue + totalDebt)) * 100) : 0;
 
     return (
@@ -223,14 +230,20 @@ const Dashboard = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {debts.slice(0, 4).map(debt => (
+                                    {Array.isArray(debts) && debts.length > 0 ? debts.slice(0, 4).map(debt => (
                                         <tr key={debt.id} style={{ borderBottom: '1px solid #f9f9f9' }}>
                                             <td style={{ padding: '0.75rem', fontWeight: '600', fontSize: '0.9rem' }}>{debt.name}</td>
                                             <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>{debt.className}</td>
-                                            <td style={{ padding: '0.75rem', color: 'var(--error)', fontWeight: '700' }}>{debt.balance.toLocaleString()}</td>
+                                            <td style={{ padding: '0.75rem', color: 'var(--error)', fontWeight: '700' }}>{(Number(debt.balance) || 0).toLocaleString()}</td>
                                             <td style={{ padding: '0.75rem' }}><ArrowUpRight size={16} color="var(--primary)" /></td>
                                         </tr>
-                                    ))}
+                                    )) : (
+                                        <tr>
+                                            <td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+                                                Aucun impayé trouvé
+                                            </td>
+                                        </tr>
+                                    )}
                                 </tbody>
                             </table>
                         </div>
