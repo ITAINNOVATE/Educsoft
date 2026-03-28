@@ -92,7 +92,8 @@ router.get('/stats', protect, authorize('ADMIN', 'ACCOUNTANT', 'DIRECTOR', 'SUPE
         res.status(500).json({ 
             message: 'Erreur lors du calcul des statistiques', 
             error: error.message,
-            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+            stack: error.stack,
+            context: { establishmentId: req.user?.establishmentId, role: req.user?.role }
         });
     }
 });

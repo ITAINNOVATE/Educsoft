@@ -1,19 +1,57 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, Link, NavLink, Outlet } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
 import Configuration from './pages/Configuration';
 import Students from './pages/Students';
 import Payments from './pages/Payments';
 import Dashboard from './pages/Dashboard';
-
 import Users from './pages/Users';
 import Accounting from './pages/Accounting';
 import SuperAdmin from './pages/SuperAdmin';
-
-import { useState, useEffect } from 'react';
 import axios from 'axios';
 import config from './config';
 import './index.css';
+import { AlertTriangle } from 'lucide-react';
+
+// Error Boundary for UI Resilience
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error("UI Crash caught by Boundary:", error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: '2rem', textAlign: 'center', height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#fdf2f2' }}>
+          <AlertTriangle size={64} color="#c62828" style={{ marginBottom: '1.5rem' }} />
+          <h1 style={{ color: '#c62828', marginBottom: '1rem' }}>Une erreur d'affichage est survenue</h1>
+          <p style={{ color: '#7f1d1d', maxWidth: '500px', marginBottom: '2rem' }}>
+            L'interface a rencontré un problème inattendu. Veuillez rafraîchir la page ou contacter l'administration si le problème persiste.
+          </p>
+          <button 
+            onClick={() => window.location.reload()} 
+            style={{ padding: '0.75rem 1.5rem', backgroundColor: '#c62828', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            Rafraîchir la page
+          </button>
+          {process.env.NODE_ENV !== 'production' && (
+            <pre style={{ marginTop: '2rem', textAlign: 'left', fontSize: '0.75rem', padding: '1rem', backgroundColor: '#fff', borderRadius: '4px', maxWidth: '90vw', overflow: 'auto' }}>
+              {this.state.error?.toString()}
+            </pre>
+          )}
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 const ProtectedRoute = ({ children, roleRequired }) => {
   const { user, loading } = useAuth();
@@ -31,8 +69,6 @@ const ProtectedRoute = ({ children, roleRequired }) => {
   return children ? children : <Outlet />;
 };
 
-
-// Sidebar Layout for Dashboard-ish pages
 const Layout = () => {
   const { user, logout, switchEstablishment } = useAuth();
   const navigate = useNavigate();
@@ -66,7 +102,6 @@ const Layout = () => {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
-      {/* Sidebar - Simple version for now */}
       <aside style={{ width: '260px', backgroundColor: 'var(--primary-dark)', color: 'white', padding: '2rem 1rem', display: 'flex', flexDirection: 'column' }}>
         <h2 style={{ fontSize: '1.25rem', marginBottom: '0.5rem', textAlign: 'center' }}>EDUSOFT</h2>
         
@@ -76,17 +111,7 @@ const Layout = () => {
             <select
               value={user.establishmentId}
               onChange={(e) => handleSwitch(e.target.value)}
-              style={{ 
-                width: '100%', 
-                padding: '0.6rem', 
-                borderRadius: '6px', 
-                background: 'rgba(255,255,255,0.15)', 
-                color: 'white', 
-                border: '1px solid rgba(255,255,255,0.1)', 
-                fontSize: '0.8rem', 
-                outline: 'none',
-                cursor: 'pointer'
-              }}
+              style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', background: 'rgba(255,255,255,0.15)', color: 'white', border: '1px solid rgba(255,255,255,0.1)', fontSize: '0.8rem', outline: 'none', cursor: 'pointer' }}
             >
               {establishments.map(est => (
                 <option key={est.id} value={est.id} style={{ color: 'black' }}>{est.name}</option>
@@ -100,75 +125,36 @@ const Layout = () => {
         )}
 
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
-          {/* Dashboard - Visible to all */}
           <SidebarLink to="/dashboard" label="Tableau de Bord" />
-
-          {/* Configuration - Admin only */}
           {user && (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') && (
             <SidebarLink to="/configuration" label="Configuration" />
           )}
-
-          {/* Students - Admin, Secretary, Accountant (read-only), and Super Admin */}
           {user && (user.role === 'ADMIN' || user.role === 'SECRETARY' || user.role === 'ACCOUNTANT' || user.role === 'SUPER_ADMIN') && (
             <SidebarLink to="/students" label="Gestion des Élèves" />
           )}
-
-          {/* Payments - Admin and Accountant */}
           {user && (user.role === 'ADMIN' || user.role === 'ACCOUNTANT' || user.role === 'SUPER_ADMIN') && (
             <SidebarLink to="/payments" label="Paiements" />
           )}
-
-          {/* Accounting - Admin and Accountant */}
           {user && (user.role === 'ADMIN' || user.role === 'ACCOUNTANT' || user.role === 'SUPER_ADMIN') && (
             <SidebarLink to="/accounting" label="Comptabilité" />
           )}
-
-
-
-          {/* Users - Admin only */}
           {(user && (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN')) && (
             <SidebarLink to="/users" label="Utilisateurs" />
           )}
-
-          {/* System Admin - Super Admin only */}
           {user && user.role === 'SUPER_ADMIN' && (
             <SidebarLink to="/system" label="🏠 Établissements" />
           )}
-
           <button onClick={logout} style={{ marginTop: '1.5rem', padding: '0.75rem', borderRadius: '8px', border: 'none', backgroundColor: '#c62828', color: 'white', fontWeight: 'bold', cursor: 'pointer' }}>Déconnexion</button>
-
-          <div style={{ marginTop: 'auto', paddingTop: '2rem' }}>
-            <label style={{ fontSize: '0.75rem', opacity: 0.7, marginBottom: '0.5rem', display: 'block' }}>Année Scolaire</label>
-            <select
-              value={schoolYear}
-              onChange={(e) => setSchoolYear(e.target.value)}
-              style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', fontSize: '0.875rem', outline: 'none' }}
-            >
-              <option value="2025-2026">2025-2026</option>
-              <option value="2024-2025">2024-2025</option>
-            </select>
-          </div>
         </nav>
       </aside>
       <main style={{ flex: 1, overflowY: 'auto', backgroundColor: 'var(--bg-main)', position: 'relative' }}>
         {user?.role === 'SUPER_ADMIN' && user?.establishmentId && (
-          <div style={{ 
-            backgroundColor: '#fffbeb', 
-            borderBottom: '1px solid #fef3c7', 
-            padding: '0.5rem 2rem', 
-            color: '#b45309', 
-            fontSize: '0.75rem', 
-            fontWeight: 'bold',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}>
+          <div style={{ backgroundColor: '#fffbeb', borderBottom: '1px solid #fef3c7', padding: '0.5rem 2rem', color: '#b45309', fontSize: '0.75rem', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span>MODE GESTION : {user.establishmentName || 'Établissement sélectionné'}</span>
             <Link to="/system" style={{ color: '#b45309', textDecoration: 'underline' }}>Changer</Link>
           </div>
         )}
         <Outlet />
-
       </main>
     </div>
   );
@@ -188,8 +174,6 @@ const SidebarLink = ({ to, label }) => (
       fontWeight: isActive ? '600' : 'normal',
       display: 'block'
     })}
-    onMouseEnter={e => { if (!e.target.classList.contains('active')) e.target.style.background = 'rgba(255,255,255,0.05)' }}
-    onMouseLeave={e => { if (!e.target.classList.contains('active')) e.target.style.background = 'transparent' }}
   >
     {label}
   </NavLink>
@@ -197,53 +181,40 @@ const SidebarLink = ({ to, label }) => (
 
 function App() {
   return (
-    <AuthProvider>
+    <ErrorBoundary>
       <Router>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-
-          <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            {/* Payments - Admin and Accountant */}
-            <Route element={<ProtectedRoute roleRequired={['ADMIN', 'ACCOUNTANT']} />}>
-              <Route path="/payments" element={<Payments />} />
+        <AuthProvider>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route element={<ProtectedRoute roleRequired={['ADMIN', 'ACCOUNTANT']} />}>
+                <Route path="/payments" element={<Payments />} />
+              </Route>
+              <Route element={<ProtectedRoute roleRequired="ADMIN" />}>
+                <Route path="/configuration" element={<Configuration />} />
+              </Route>
+              <Route element={<ProtectedRoute roleRequired={['ADMIN', 'SECRETARY', 'ACCOUNTANT']} />}>
+                <Route path="/students" element={<Students />} />
+              </Route>
+              <Route element={<ProtectedRoute roleRequired="ADMIN" />}>
+                <Route path="/users" element={<Users />} />
+              </Route>
+              <Route element={<ProtectedRoute roleRequired={['ADMIN', 'ACCOUNTANT']} />}>
+                <Route path="/accounting" element={<Accounting />} />
+              </Route>
+              <Route element={<ProtectedRoute roleRequired="SUPER_ADMIN" />}>
+                <Route path="/system" element={<SuperAdmin />} />
+              </Route>
             </Route>
-
-            {/* Configuration - Admin only */}
-            <Route element={<ProtectedRoute roleRequired="ADMIN" />}>
-              <Route path="/configuration" element={<Configuration />} />
-            </Route>
-
-            {/* Students - Admin, Secretary (full access), Accountant (read-only) */}
-            <Route element={<ProtectedRoute roleRequired={['ADMIN', 'SECRETARY', 'ACCOUNTANT']} />}>
-              <Route path="/students" element={<Students />} />
-            </Route>
-
-
-
-            {/* Users - Admin only */}
-            <Route element={<ProtectedRoute roleRequired="ADMIN" />}>
-              <Route path="/users" element={<Users />} />
-            </Route>
-
-            {/* Accounting - Admin and Accountant */}
-            <Route element={<ProtectedRoute roleRequired={['ADMIN', 'ACCOUNTANT']} />}>
-              <Route path="/accounting" element={<Accounting />} />
-            </Route>
-
-            {/* Super Admin - System Management */}
-            <Route element={<ProtectedRoute roleRequired="SUPER_ADMIN" />}>
-              <Route path="/system" element={<SuperAdmin />} />
-            </Route>
-          </Route>
-
-          <Route path="/superadmin" element={<Navigate to="/system" replace />} />
-          <Route path="/establishments" element={<Navigate to="/system" replace />} />
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
-        </Routes>
+            <Route path="/superadmin" element={<Navigate to="/system" replace />} />
+            <Route path="/establishments" element={<Navigate to="/system" replace />} />
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          </Routes>
+        </AuthProvider>
       </Router>
-    </AuthProvider>
+    </ErrorBoundary>
   );
 }
 

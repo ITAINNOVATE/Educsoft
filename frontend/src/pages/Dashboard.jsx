@@ -156,64 +156,10 @@ const Dashboard = () => {
                     <section className="card">
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                             <h2 style={{ fontSize: '1.25rem', fontWeight: '700' }}>Analyses des Revenus</h2>
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <span style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem', background: '#eee', borderRadius: '4px' }}>7 derniers jours</span>
-                            </div>
+                            <span style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem', background: '#eee', borderRadius: '4px' }}>Données en cours</span>
                         </div>
-
-                        {/* Dynamic SVG Revenue Chart */}
-                        <div style={{ width: '100%', height: '220px', position: 'relative', marginTop: '1rem' }}>
-                            {stats?.chartData && stats.chartData.length > 0 ? (
-                                <svg width="100%" height="100%" viewBox="0 0 800 200" preserveAspectRatio="none">
-                                    {/* Grid Lines */}
-                                    <line x1="0" y1="150" x2="800" y2="150" stroke="#eee" strokeWidth="1" />
-                                    <line x1="0" y1="100" x2="800" y2="100" stroke="#eee" strokeWidth="1" />
-                                    <line x1="0" y1="50" x2="800" y2="50" stroke="#eee" strokeWidth="1" />
-
-                                    {/* Area Path */}
-                                    <path
-                                        d={`M 0 200 ${stats.chartData.map((d, i) => {
-                                            const x = (i / (stats.chartData.length - 1)) * 800;
-                                            const y = 200 - (d.amount / (Math.max(...stats.chartData.map(d => d.amount)) || 1)) * 180;
-                                            return `L ${x} ${y}`;
-                                        }).join(' ')} L 800 200 Z`}
-                                        fill="rgba(46, 125, 50, 0.1)"
-                                    />
-
-                                    {/* Line Path */}
-                                    <path
-                                        d={`M 0 ${200 - (stats.chartData[0].amount / (Math.max(...stats.chartData.map(d => d.amount)) || 1)) * 180} ${stats.chartData.map((d, i) => {
-                                            const x = (i / (stats.chartData.length - 1)) * 800;
-                                            const y = 200 - (d.amount / (Math.max(...stats.chartData.map(d => d.amount)) || 1)) * 180;
-                                            return `L ${x} ${y}`;
-                                        }).join(' ')}`}
-                                        fill="none"
-                                        stroke="var(--primary)"
-                                        strokeWidth="3"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    />
-
-                                    {/* Data Points */}
-                                    {stats.chartData.map((d, i) => {
-                                        const x = (i / (stats.chartData.length - 1)) * 800;
-                                        const y = 200 - (d.amount / (Math.max(...stats.chartData.map(d => d.amount)) || 1)) * 180;
-                                        return (
-                                            <circle key={i} cx={x} cy={y} r="4" fill="white" stroke="var(--primary)" strokeWidth="2" />
-                                        );
-                                    })}
-                                </svg>
-                            ) : (
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#999', fontSize: '0.9rem' }}>
-                                    Pas assez de données pour afficher le graphique
-                                </div>
-                            )}
-
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem', color: 'var(--text-muted)', fontSize: '0.75rem' }}>
-                                {stats?.chartData?.map((d, i) => (
-                                    <span key={i}>{d.label}</span>
-                                ))}
-                            </div>
+                        <div style={{ padding: '2rem', textAlign: 'center', backgroundColor: '#f8f9fa', borderRadius: '8px', color: 'var(--text-muted)' }}>
+                            Graphique temporairement indisponible (en cours de maintenance)
                         </div>
                     </section>
 
