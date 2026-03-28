@@ -38,6 +38,11 @@ router.get('/', protect, authorize('ADMIN', 'SUPER_ADMIN'), async (req, res) => 
 router.post('/', protect, authorize('ADMIN', 'SUPER_ADMIN'), auditLog('CREATE_USER'), async (req, res) => {
     const { firstName, lastName, email, password, role } = req.body;
 
+    // Security: Only SUPER_ADMIN can create an ADMIN role
+    if (role === 'ADMIN' && req.user.role !== 'SUPER_ADMIN') {
+        return res.status(403).json({ message: 'Seul un Super Admin peut créer un compte Administrateur.' });
+    }
+
     try {
         const existingUser = await prisma.user.findUnique({ where: { email } });
         if (existingUser) {
@@ -82,7 +87,14 @@ router.put('/:id', protect, authorize('ADMIN', 'SUPER_ADMIN'), auditLog('UPDATE_
         const updateData = {};
         if (firstName) updateData.firstName = firstName;
         if (lastName) updateData.lastName = lastName;
-        if (role) updateData.role = role;
+        
+        if (role) {
+            // Security: Only SUPER_ADMIN can promote to ADMIN role
+            if (role === 'ADMIN' && req.user.role !== 'SUPER_ADMIN') {
+                return res.status(403).json({ message: 'Seul un Super Admin peut promouvoir un utilisateur au rang d’Administrateur.' });
+            }
+            updateData.role = role;
+        }
         
         if (email) {
             const existingUser = await prisma.user.findFirst({
