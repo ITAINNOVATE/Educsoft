@@ -121,31 +121,46 @@ router.get('/debts', protect, authorize('ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'), a
         });
 
         const report = students.map(s => {
-            const fees = s.enrollments[0]?.class.fees || [];
+            const enrollment = s.enrollments?.[0];
+            if (!enrollment || !enrollment.class) {
+                return null; // Skip students without a valid class enrollment
+            }
+
+            const fees = enrollment.class.fees || [];
             const payments = s.payments || [];
 
-            const financials = calculateStudentFinancials(fees, payments);
-            const { global, OBLIGATORY, OPTIONAL, OCCASIONAL } = financials;
+            try {
+                const financials = calculateStudentFinancials(fees, payments);
+                const { global, OBLIGATORY, OPTIONAL, OCCASIONAL } = financials;
 
-            return {
-                id: s.id,
-                name: `${s.firstName} ${s.lastName}`,
-                regNumber: s.regNumber,
-                className: s.enrollments[0]?.class.name,
-                totalFees: global.totalDue,
-                paid: global.totalPaid,
-                balance: global.remaining,
-                breakdown: {
-                    obligatory: OBLIGATORY.remaining,
-                    optional: OPTIONAL.remaining,
-                    occasional: OCCASIONAL.remaining
-                }
-            };
-        }).filter(r => r.balance > 0);
+                return {
+                    id: s.id,
+                    name: `${s.firstName} ${s.lastName}`,
+                    regNumber: s.regNumber,
+                    className: enrollment.class.name,
+                    totalFees: global.totalDue,
+                    paid: global.totalPaid,
+                    balance: global.remaining,
+                    breakdown: {
+                        obligatory: OBLIGATORY?.remaining || 0,
+                        optional: OPTIONAL?.remaining || 0,
+                        occasional: OCCASIONAL?.remaining || 0
+                    }
+                };
+            } catch (err) {
+                console.error(`Error calculating financials for student ${s.id}:`, err);
+                return null;
+            }
+        }).filter(r => r !== null && r.balance > 0);
 
         res.json(report);
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error("Accounting Debts Global Error:", error);
+        res.status(500).json({ 
+            message: 'Erreur lors du calcul des impayés', 
+            error: error.message,
+            stack: error.stack
+        });
     }
 });
 
