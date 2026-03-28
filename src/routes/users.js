@@ -38,9 +38,9 @@ router.get('/', protect, authorize('ADMIN', 'SUPER_ADMIN'), async (req, res) => 
 router.post('/', protect, authorize('ADMIN', 'SUPER_ADMIN'), auditLog('CREATE_USER'), async (req, res) => {
     const { firstName, lastName, email, password, role } = req.body;
 
-    // Security: Only SUPER_ADMIN can create an ADMIN role
+    // Security: Only Super Admin can create an ADMIN role
     if (role === 'ADMIN' && req.user.role !== 'SUPER_ADMIN') {
-        return res.status(403).json({ message: 'Seul un Super Admin peut créer un compte Administrateur.' });
+        return res.status(403).json({ message: 'Seul un Super Admin peut désigner un Administrateur.' });
     }
 
     try {
@@ -89,9 +89,9 @@ router.put('/:id', protect, authorize('ADMIN', 'SUPER_ADMIN'), auditLog('UPDATE_
         if (lastName) updateData.lastName = lastName;
         
         if (role) {
-            // Security: Only SUPER_ADMIN can promote to ADMIN role
+            // Security: Only Super Admin can promote someone to ADMIN
             if (role === 'ADMIN' && req.user.role !== 'SUPER_ADMIN') {
-                return res.status(403).json({ message: 'Seul un Super Admin peut promouvoir un utilisateur au rang d’Administrateur.' });
+                return res.status(403).json({ message: 'Modification refusée. Seul un Super Admin peut accorder le rôle Administrateur.' });
             }
             updateData.role = role;
         }

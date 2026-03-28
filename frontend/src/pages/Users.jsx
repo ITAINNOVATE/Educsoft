@@ -129,7 +129,9 @@ const Users = () => {
                             <div className="form-group" style={{ gridColumn: 'span 2' }}>
                                 <label className="form-label">Rôle / Permission</label>
                                 <select className="form-input" value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })}>
-                                    {user.role === 'SUPER_ADMIN' && <option value="ADMIN">Administrateur (Accès Total)</option>}
+                                    {user.role === 'SUPER_ADMIN' && (
+                                        <option value="ADMIN">Administrateur (Accès Total)</option>
+                                    )}
                                     <option value="ACCOUNTANT">Comptable (Finances & Dashboard)</option>
                                     <option value="SECRETARY">Secrétaire (Gestion Élèves)</option>
                                 </select>
