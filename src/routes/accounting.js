@@ -31,48 +31,74 @@ router.get('/stats', protect, authorize('ADMIN', 'ACCOUNTANT', 'DIRECTOR', 'SUPE
             };
         }
 
-        const [dayPayments, monthPayments, totalPayments, filteredPayments, studentCount, classCount] = await Promise.all([
-            prisma.payment.aggregate({
+        // Individual queries for better diagnostics
+        let dayPayments = { _sum: { amount: 0 } };
+        let monthPayments = { _sum: { amount: 0 } };
+        let totalPayments = { _sum: { amount: 0 } };
+        let filteredPayments = { _sum: { amount: 0 } };
+        let studentCount = 0;
+        let classCount = 0;
+
+        try {
+            dayPayments = await prisma.payment.aggregate({
                 _sum: { amount: true },
                 where: { 
                     paymentDate: { gte: startOfDay },
                     establishmentId: req.user.establishmentId
                 }
-            }),
-            prisma.payment.aggregate({
+            });
+        } catch (e) { console.error("Error fetching dayPayments:", e.message); }
+
+        try {
+            monthPayments = await prisma.payment.aggregate({
                 _sum: { amount: true },
                 where: { 
                     paymentDate: { gte: startOfMonth },
                     establishmentId: req.user.establishmentId
                 }
-            }),
-            prisma.payment.aggregate({
+            });
+        } catch (e) { console.error("Error fetching monthPayments:", e.message); }
+
+        try {
+            totalPayments = await prisma.payment.aggregate({
                 _sum: { amount: true },
                 where: { establishmentId: req.user.establishmentId } 
-            }),
-            prisma.payment.aggregate({
-                _sum: { amount: true },
-                where: { 
-                    ...dateFilter,
-                    establishmentId: req.user.establishmentId
-                }
-            }),
-            prisma.student.count({ 
+            });
+        } catch (e) { console.error("Error fetching totalPayments:", e.message); }
+
+        if (startDate && endDate) {
+            try {
+                filteredPayments = await prisma.payment.aggregate({
+                    _sum: { amount: true },
+                    where: { 
+                        ...dateFilter,
+                        establishmentId: req.user.establishmentId
+                    }
+                });
+            } catch (e) { console.error("Error fetching filteredPayments:", e.message); }
+        }
+
+        try {
+            studentCount = await prisma.student.count({ 
                 where: { 
                     status: 'ACTIF',
                     establishmentId: req.user.establishmentId
                 } 
-            }),
-            prisma.class.count({
+            });
+        } catch (e) { console.error("Error fetching studentCount:", e.message); }
+
+        try {
+            classCount = await prisma.class.count({
                 where: { establishmentId: req.user.establishmentId }
-            })
-        ]);
+            });
+        } catch (e) { console.error("Error fetching classCount:", e.message); }
 
         // If date filter is applied, 'revenueTotal' returns the filtered amount
         // Otherwise it returns the absolute total
         const displayTotal = (startDate && endDate)
-            ? (filteredPayments._sum.amount || 0)
-            : (totalPayments._sum.amount || 0);
+            ? (filteredPayments?._sum?.amount || 0)
+            : (totalPayments?._sum?.amount || 0);
+
 
         // Fetch graph data (daily revenue for the last 7 days OR selected range)
         // ... (Graph data logic would go here, omitting for brevity/complexity in this step)
