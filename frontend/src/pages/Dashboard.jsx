@@ -24,57 +24,62 @@ const Dashboard = () => {
     const API_BASE = `${config.API_URL}/accounting`;
 
     useEffect(() => {
-        if (user?.token) {
-            if (user.role === 'SUPER_ADMIN' && !user.establishmentId) {
-                setLoading(false);
-                return;
+        let isMounted = true;
+        let timeoutId;
+
+        const load = async () => {
+            if (user?.token) {
+                if (user.role === 'SUPER_ADMIN' && !user.establishmentId) {
+                    if (isMounted) setLoading(false);
+                    return;
+                }
+                
+                // Safety timeout to prevent infinite loading if API hangs
+                timeoutId = setTimeout(() => {
+                    if (isMounted && loading) {
+                        console.warn("Dashboard timeout reached. Forcing loading false.");
+                        setLoading(false);
+                    }
+                }, 8000);
+
+                await fetchStats();
+                if (isMounted) setLoading(false);
             }
-            fetchStats();
-        }
-    }, [user]);
+        };
+
+        load();
+
+        return () => {
+            isMounted = false;
+            if (timeoutId) clearTimeout(timeoutId);
+        };
+    }, [user, user?.establishmentId, user?.token]);
 
     const fetchStats = async () => {
+        const authHeader = { headers: { Authorization: `Bearer ${user.token}` } };
+        
         try {
-            setLoading(true);
-            const authHeader = { headers: { Authorization: `Bearer ${user.token}` } };
             const [statsRes, debtsRes] = await Promise.all([
                 axios.get(`${API_BASE}/stats`, authHeader),
                 axios.get(`${API_BASE}/debts`, authHeader)
             ]);
 
-            // Transform stats for chart if needed, or expect backend to send chartData
-            const statsData = statsRes.data;
-            if (!statsData.chartData) {
-                // Mock chart data if not provided by backend yet
-                statsData.chartData = [
-                    { label: 'Lun', amount: 150000 },
-                    { label: 'Mar', amount: 230000 },
-                    { label: 'Mer', amount: 180000 },
-                    { label: 'Jeu', amount: 320000 },
-                    { label: 'Ven', amount: 290000 },
-                    { label: 'Sam', amount: 120000 },
-                    { label: 'Dim', amount: 0 }
-                ];
-            }
-
-            setStats(statsData);
-            setDebts(debtsRes.data);
+            setStats(statsRes.data || { stats: {} });
+            setDebts(Array.isArray(debtsRes.data) ? debtsRes.data : []);
             setError(null);
         } catch (error) {
             console.error('Error fetching dashboard stats:', error);
-            setError(error.response?.data?.message || 'Erreur lors du chargement des données');
-        } finally {
-            setLoading(false);
+            setError('Certaines données n\'ont pas pu être chargées');
+            // Don't crash, just show what we have (null/0)
         }
     };
 
     if (loading) {
         return (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', padding: '2rem' }}>
-                <div style={{ textAlign: 'center' }}>
-                    <div className="spinner"></div>
-                    <p style={{ color: 'var(--text-muted)', marginTop: '1rem' }}>Chargement du tableau de bord...</p>
-                </div>
+            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', gap: '1rem' }}>
+                <div className="spinner" style={{ width: '40px', height: '40px', border: '4px solid #f3f3f3', borderTop: '4px solid var(--primary)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Chargement du tableau de bord...</p>
+                <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
             </div>
         );
     }
