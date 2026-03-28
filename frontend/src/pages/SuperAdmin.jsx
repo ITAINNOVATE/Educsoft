@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { Building2, Plus, CheckCircle, XCircle, ShieldCheck, Trash2, Pause, Play, Eye } from 'lucide-react';
 import config from '../config';
 
 const SuperAdmin = () => {
     const { user, switchEstablishment } = useAuth();
+    const navigate = useNavigate();
     const [establishments, setEstablishments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
@@ -23,8 +24,7 @@ const SuperAdmin = () => {
     const handleManage = async (id) => {
         const res = await switchEstablishment(id);
         if (res.success) {
-            alert('Vous gérez maintenant cet établissement.');
-            window.location.reload(); // Reload to refresh sidebar and context
+            navigate('/dashboard');
         } else {
             alert(res.message);
         }

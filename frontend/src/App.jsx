@@ -35,6 +35,7 @@ const ProtectedRoute = ({ children, roleRequired }) => {
 // Sidebar Layout for Dashboard-ish pages
 const Layout = () => {
   const { user, logout, switchEstablishment } = useAuth();
+  const navigate = useNavigate();
   const [schoolYear, setSchoolYear] = useState('2025-2026');
   const [establishments, setEstablishments] = useState([]);
 
@@ -56,7 +57,9 @@ const Layout = () => {
 
   const handleSwitch = async (id) => {
     const result = await switchEstablishment(id);
-    if (!result.success) {
+    if (result.success) {
+      navigate('/dashboard');
+    } else {
       alert(result.message);
     }
   };
@@ -148,6 +151,22 @@ const Layout = () => {
         </nav>
       </aside>
       <main style={{ flex: 1, overflowY: 'auto', backgroundColor: 'var(--bg-main)', position: 'relative' }}>
+        {user?.role === 'SUPER_ADMIN' && user?.establishmentId && (
+          <div style={{ 
+            backgroundColor: '#fffbeb', 
+            borderBottom: '1px solid #fef3c7', 
+            padding: '0.5rem 2rem', 
+            color: '#b45309', 
+            fontSize: '0.75rem', 
+            fontWeight: 'bold',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <span>MODE GESTION : {user.establishmentName || 'Établissement sélectionné'}</span>
+            <Link to="/system" style={{ color: '#b45309', textDecoration: 'underline' }}>Changer</Link>
+          </div>
+        )}
         <Outlet />
 
       </main>
