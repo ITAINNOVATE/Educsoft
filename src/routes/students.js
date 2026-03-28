@@ -316,7 +316,10 @@ router.put('/:id/documents/:docId', protect, authorize('ADMIN', 'SECRETARY', 'SU
     try {
         const { status, expiryDate, name } = req.body;
         const document = await prisma.document.update({
-            where: { id: req.params.docId },
+            where: { 
+                id: req.params.docId,
+                student: { establishmentId: req.user.establishmentId }
+            },
             data: {
                 status,
                 name,
@@ -333,6 +336,12 @@ router.put('/:id/documents/:docId', protect, authorize('ADMIN', 'SECRETARY', 'SU
 // @route   POST /api/students/:id/history
 router.post('/:id/history', protect, authorize('ADMIN', 'SECRETARY', 'SUPER_ADMIN'), async (req, res) => {
     try {
+        // Verify student belongs to establishment
+        const student = await prisma.student.findUnique({
+            where: { id: req.params.id, establishmentId: req.user.establishmentId }
+        });
+        if (!student) return res.status(404).json({ message: 'Student not found in this establishment.' });
+
         const history = await prisma.schoolHistory.create({
             data: {
                 ...req.body,

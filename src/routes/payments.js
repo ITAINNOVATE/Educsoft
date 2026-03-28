@@ -12,6 +12,12 @@ const router = express.Router();
 router.post('/fees', protect, authorize('ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'), auditLog('CREATE_FEE'), async (req, res) => {
     const { name, amount, category, type, classId } = req.body;
     try {
+        // Verify class belongs to establishment
+        const targetClass = await prisma.class.findFirst({
+            where: { id: classId, establishmentId: req.user.establishmentId }
+        });
+        if (!targetClass) return res.status(404).json({ message: 'Classe non trouvée dans cet établissement.' });
+
         const fee = await prisma.fee.create({
             data: {
                 name,
@@ -32,7 +38,10 @@ router.post('/fees', protect, authorize('ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'), a
 router.get('/fees/:classId', protect, async (req, res) => {
     try {
         const fees = await prisma.fee.findMany({
-            where: { classId: req.params.classId }
+            where: { 
+                classId: req.params.classId,
+                class: { establishmentId: req.user.establishmentId }
+            }
         });
         res.json(fees);
     } catch (error) {
@@ -46,7 +55,10 @@ router.put('/fees/:id', protect, authorize('ADMIN', 'SUPER_ADMIN'), auditLog('UP
     const { name, amount, category, type } = req.body;
     try {
         const fee = await prisma.fee.update({
-            where: { id: req.params.id },
+            where: { 
+                id: req.params.id,
+                class: { establishmentId: req.user.establishmentId }
+            },
             data: {
                 name,
                 amount: parseFloat(amount),
@@ -65,7 +77,10 @@ router.put('/fees/:id', protect, authorize('ADMIN', 'SUPER_ADMIN'), auditLog('UP
 router.delete('/fees/:id', protect, authorize('ADMIN', 'SUPER_ADMIN'), auditLog('DELETE_FEE'), async (req, res) => {
     try {
         await prisma.fee.delete({
-            where: { id: req.params.id }
+            where: { 
+                id: req.params.id,
+                class: { establishmentId: req.user.establishmentId }
+            }
         });
         res.json({ message: 'Fee deleted successfully' });
     } catch (error) {

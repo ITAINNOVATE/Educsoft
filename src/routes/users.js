@@ -99,8 +99,10 @@ router.put('/:id', protect, authorize('ADMIN', 'SUPER_ADMIN'), auditLog('UPDATE_
             updateData.password = await bcrypt.hash(password, salt);
         }
 
+        const where = req.user.role === 'SUPER_ADMIN' ? { id: req.params.id } : { id: req.params.id, establishmentId: req.user.establishmentId };
+        
         const user = await prisma.user.update({
-            where: { id: req.params.id },
+            where,
             data: updateData,
             select: {
                 id: true,
@@ -124,11 +126,9 @@ router.put('/:id', protect, authorize('ADMIN', 'SUPER_ADMIN'), auditLog('UPDATE_
 router.delete('/:id', protect, authorize('ADMIN', 'SUPER_ADMIN'), auditLog('DELETE_USER'), async (req, res) => {
     try {
         // Prevent deleting oneself
-        if (req.user.id === req.params.id) {
-            return res.status(400).json({ message: "You cannot delete your own account." });
-        }
-
-        await prisma.user.delete({ where: { id: req.params.id } });
+        const where = req.user.role === 'SUPER_ADMIN' ? { id: req.params.id } : { id: req.params.id, establishmentId: req.user.establishmentId };
+        
+        await prisma.user.delete({ where });
         res.json({ message: 'User removed' });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
