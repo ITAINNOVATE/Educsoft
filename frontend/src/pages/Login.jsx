@@ -25,6 +25,7 @@ import {
     Eye,
     EyeOff
 } from 'lucide-react';
+import logo from '../assets/logo.png';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -85,10 +86,9 @@ const Login = () => {
             {/* SECTION 1: HERO & LOGIN */}
             <section className="hero-pattern" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1.5rem 1rem' }}>
                 <div style={{ textAlign: 'center', maxWidth: '800px', marginBottom: '1.5rem' }}>
-                    <div className="fade-in" style={{ display: 'inline-flex', padding: '1rem', backgroundColor: 'white', borderRadius: '20px', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', marginBottom: '1rem' }}>
-                        <ShieldCheck size={48} color="var(--primary)" />
+                    <div className="fade-in" style={{ display: 'inline-flex', marginBottom: '1.5rem' }}>
+                        <img src={logo} alt="EDUSOFT" style={{ height: '120px', width: 'auto' }} />
                     </div>
-                    <h1 style={{ fontSize: 'clamp(2rem, 6vw, 3.5rem)', fontWeight: '900', color: 'var(--primary-dark)', marginBottom: '0.25rem', letterSpacing: '-0.05em' }}>EDUSOFT</h1>
                     <h2 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--primary)', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.2em' }}>Intelligence Scolaire</h2>
                     <p style={{ fontSize: '1rem', color: '#64748b', lineHeight: '1.6', marginBottom: '1rem', maxWidth: '600px', margin: '0 auto' }}>
                         Propulsé par <strong>ITA INNOVATE</strong>. Gérez votre établissement avec une efficacité sans précédent : inscriptions, finances, pédagogie et communication.

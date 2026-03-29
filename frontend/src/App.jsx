@@ -13,7 +13,8 @@ import Grades from './pages/Grades';
 import axios from 'axios';
 import config from './config';
 import './index.css';
-import { AlertTriangle, Menu, X, School } from 'lucide-react';
+import logo from './assets/logo.png';
+import { AlertTriangle, Menu, X } from 'lucide-react';
 
 // Error Boundary for UI Resilience
 class ErrorBoundary extends React.Component {
@@ -103,7 +104,7 @@ const Layout = () => {
     <div className="app-container">
       {/* Mobile Header */}
       <header className="mobile-header">
-        <h2 style={{ fontSize: '1rem', margin: 0 }}>EDUSOFT</h2>
+        <img src={logo} alt="EDUSOFT" style={{ height: '32px', width: 'auto' }} />
         <button onClick={toggleSidebar} style={{ background: 'none', border: 'none', color: 'white' }}>
           {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -116,9 +117,9 @@ const Layout = () => {
       />
 
       <aside className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
-        <h2 style={{ fontSize: '1.25rem', marginBottom: '0.5rem', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-          <School size={24} /> EDUSOFT
-        </h2>
+        <div style={{ padding: '2rem 0', textAlign: 'center' }}>
+          <img src={logo} alt="EDUSOFT" style={{ height: '70px', width: 'auto', display: 'block', margin: '0 auto' }} />
+        </div>
         
         {user?.role === 'SUPER_ADMIN' ? (
           <div style={{ marginBottom: '2rem' }}>

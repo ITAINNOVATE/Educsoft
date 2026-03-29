@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import config from '../config';
+import logo from '../assets/logo.png';
 import {
     CreditCard, Search, FileText,
     CheckCircle, User, BookOpen, AlertCircle,
@@ -762,13 +763,8 @@ const Payments = () => {
                                         <img src={user.establishmentInfo.logoUrl} alt="Logo" style={{ maxHeight: '100px', maxWidth: '200px', objectFit: 'contain' }} />
                                     </div>
                                 ) : (
-                                    <div style={{ 
-                                        width: '120px', height: '120px', border: '2px dashed #ddd', 
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                                        borderRadius: '8px', color: '#999', fontSize: '0.8rem',
-                                        marginBottom: '1rem', background: '#fcfcfc'
-                                    }}>
-                                        LOGO ÉCOLE
+                                    <div style={{ marginBottom: '1.5rem' }}>
+                                        <img src={logo} alt="EDUSOFT" style={{ maxHeight: '100px', maxWidth: '200px', objectFit: 'contain' }} />
                                     </div>
                                 )}
                                 <h2 style={{ margin: 0, color: 'var(--primary-dark)', fontSize: '1.5rem', textTransform: 'uppercase' }}>

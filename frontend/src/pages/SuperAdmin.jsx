@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Building2, Plus, CheckCircle, XCircle, ShieldCheck, Trash2, Pause, Play, Eye, Mail, Phone, MapPin } from 'lucide-react';
+import { Building2, Plus, CheckCircle, XCircle, Trash2, Pause, Play, Eye, Mail, Phone, MapPin } from 'lucide-react';
 import config from '../config';
+import logo from '../assets/logo.png';
 
 const SuperAdmin = () => {
     const { user, switchEstablishment } = useAuth();
@@ -104,7 +105,7 @@ const SuperAdmin = () => {
             <header className="stack-on-mobile" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2.5rem', gap: '1rem' }}>
                 <div>
                     <h1 style={{ fontSize: '2.2rem', color: 'var(--primary-dark)', display: 'flex', alignItems: 'center', gap: '1rem', fontWeight: '800', margin: 0 }}>
-                        <ShieldCheck size={40} /> Système ITA
+                        <img src={logo} alt="ITA" style={{ height: '50px', width: 'auto' }} /> Système ITA
                     </h1>
                     <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>Administration globale des établissements affiliés.</p>
                 </div>
