@@ -83,22 +83,22 @@ const Login = () => {
             `}</style>
 
             {/* SECTION 1: HERO & LOGIN */}
-            <section className="hero-pattern" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '3rem 1rem' }}>
-                <div style={{ textAlign: 'center', maxWidth: '800px', marginBottom: '4rem' }}>
-                    <div className="fade-in" style={{ display: 'inline-flex', padding: '1.25rem', backgroundColor: 'white', borderRadius: '24px', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', marginBottom: '2rem' }}>
-                        <ShieldCheck size={56} color="var(--primary)" />
+            <section className="hero-pattern" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1.5rem 1rem' }}>
+                <div style={{ textAlign: 'center', maxWidth: '800px', marginBottom: '1.5rem' }}>
+                    <div className="fade-in" style={{ display: 'inline-flex', padding: '1rem', backgroundColor: 'white', borderRadius: '20px', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', marginBottom: '1rem' }}>
+                        <ShieldCheck size={48} color="var(--primary)" />
                     </div>
-                    <h1 style={{ fontSize: 'clamp(2.5rem, 8vw, 4rem)', fontWeight: '900', color: 'var(--primary-dark)', marginBottom: '0.5rem', letterSpacing: '-0.05em' }}>EDUSOFT</h1>
-                    <h2 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--primary)', marginBottom: '1.5rem', textTransform: 'uppercase', letterSpacing: '0.2em' }}>Intelligence Scolaire</h2>
-                    <p style={{ fontSize: '1.1rem', color: '#64748b', lineHeight: '1.7', marginBottom: '3rem', maxWidth: '600px', margin: '0 auto' }}>
+                    <h1 style={{ fontSize: 'clamp(2rem, 6vw, 3.5rem)', fontWeight: '900', color: 'var(--primary-dark)', marginBottom: '0.25rem', letterSpacing: '-0.05em' }}>EDUSOFT</h1>
+                    <h2 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--primary)', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.2em' }}>Intelligence Scolaire</h2>
+                    <p style={{ fontSize: '1rem', color: '#64748b', lineHeight: '1.6', marginBottom: '1rem', maxWidth: '600px', margin: '0 auto' }}>
                         Propulsé par <strong>ITA INNOVATE</strong>. Gérez votre établissement avec une efficacité sans précédent : inscriptions, finances, pédagogie et communication.
                     </p>
                 </div>
 
                 {/* LOGIN CARD */}
-                <div className="card fade-in" style={{ width: '100%', maxWidth: '450px', borderRadius: '32px', padding: '3rem 2.5rem', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.1)', background: 'white', border: '1px solid #f1f5f9' }}>
+                <div className="card fade-in" style={{ width: '100%', maxWidth: '450px', borderRadius: '32px', padding: '2rem 2.5rem', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.1)', background: 'white', border: '1px solid #f1f5f9' }}>
                     <h3 style={{ fontSize: '1.75rem', fontWeight: '800', marginBottom: '0.5rem', textAlign: 'center', color: 'var(--primary-dark)' }}>Connexion</h3>
-                    <p style={{ fontSize: '0.95rem', color: '#94a3b8', textAlign: 'center', marginBottom: '2.5rem', fontWeight: '500' }}>Accédez à votre espace sécurisé.</p>
+                    <p style={{ fontSize: '0.95rem', color: '#94a3b8', textAlign: 'center', marginBottom: '1.5rem', fontWeight: '500' }}>Accédez à votre espace sécurisé.</p>
 
                     {error && (
                         <div className="shake" style={{ backgroundColor: '#fef2f2', color: '#991b1b', padding: '1rem', borderRadius: '16px', marginBottom: '2rem', display: 'flex', gap: '0.75rem', fontSize: '0.85rem', border: '1px solid #fee2e2', fontWeight: '600' }}>
