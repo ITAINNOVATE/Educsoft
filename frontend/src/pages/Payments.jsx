@@ -401,7 +401,7 @@ const Payments = () => {
                                         {selectedStudent?.groupedFees?.OBLIGATORY?.length > 0 && (
                                             <optgroup label="🟢 OBLIGATOIRES ANNUELS">
                                                 {selectedStudent.groupedFees.OBLIGATORY.map(f => (
-                                                    <option key={f.id} value={f.id}>{f.name} ({f.amount.toLocaleString()} FCFA)</option>
+                                                    <option key={f.id} value={f.id}>{f.name} ({(f.amount || 0).toLocaleString()} FCFA)</option>
                                                 ))}
                                             </optgroup>
                                         )}
@@ -409,7 +409,7 @@ const Payments = () => {
                                         {selectedStudent?.groupedFees?.OPTIONAL?.length > 0 && (
                                             <optgroup label="🟡 FRAIS OPTIONNELS">
                                                 {selectedStudent.groupedFees.OPTIONAL.map(f => (
-                                                    <option key={f.id} value={f.id}>{f.name} ({f.amount.toLocaleString()} FCFA)</option>
+                                                    <option key={f.id} value={f.id}>{f.name} ({(f.amount || 0).toLocaleString()} FCFA)</option>
                                                 ))}
                                             </optgroup>
                                         )}
@@ -417,7 +417,7 @@ const Payments = () => {
                                         {selectedStudent?.groupedFees?.OCCASIONAL?.length > 0 && (
                                             <optgroup label="🟠 FRAIS OCCASIONNELS">
                                                 {selectedStudent.groupedFees.OCCASIONAL.map(f => (
-                                                    <option key={f.id} value={f.id}>{f.name} ({f.amount.toLocaleString()} FCFA)</option>
+                                                    <option key={f.id} value={f.id}>{f.name} ({(f.amount || 0).toLocaleString()} FCFA)</option>
                                                 ))}
                                             </optgroup>
                                         )}

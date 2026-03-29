@@ -386,7 +386,7 @@ const Configuration = () => {
                             }}
                         >
                             <option value="">-- Choisir une année --</option>
-                            {schoolYears.map(y => <option key={y.id} value={y.id}>{y.name}</option>)}
+                            {(Array.isArray(schoolYears) ? schoolYears : []).map(y => <option key={y.id} value={y.id}>{y.name}</option>)}
                         </select>
                     </div>
 

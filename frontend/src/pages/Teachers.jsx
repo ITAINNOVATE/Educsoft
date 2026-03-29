@@ -41,8 +41,9 @@ const Teachers = () => {
 
     const fetchTeachers = async () => {
         try {
-            // Re-using the /users endpoint but filtering for TEACHER locally or if API supports it
-            // Assuming /users returns all users for admin
+            const res = await axios.get(`${API_BASE}/users`, {
+                headers: { Authorization: `Bearer ${user.token}` }
+            });
             const rawData = Array.isArray(res.data) ? res.data : [];
             const teacherList = rawData.filter(u => u.role === 'TEACHER');
             setTeachers(teacherList);
@@ -199,13 +200,13 @@ const Teachers = () => {
 
                     {/* Stats Cards Responsive */}
                     <div className="grid-resp-3" style={{ gap: '1.5rem', marginBottom: '2rem' }}>
-                        {(Array.isArray(stats) ? stats : []).map(s => (
-                            <div key={s.type} className="card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', borderLeft: '4px solid var(--primary)' }}>
+                        {(Array.isArray(stats) ? stats : []).map((s, idx) => (
+                            <div key={idx} className="card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', borderLeft: '4px solid var(--primary)' }}>
                                 <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                                     {s.type === 'SALARY' ? 'Salaires' : s.type === 'HOURLY' ? 'Heures Supp.' : s.type === 'ADVANCE' ? 'Avances' : 'Primes'}
                                 </div>
                                 <div style={{ fontSize: '1.75rem', fontWeight: '900', color: 'var(--primary-dark)' }}>
-                                    {(s._sum.amount || 0).toLocaleString()} <span style={{ fontSize: '0.9rem', opacity: 0.6 }}>FCFA</span>
+                                    {(s._sum?.amount || 0).toLocaleString()} <span style={{ fontSize: '0.9rem', opacity: 0.6 }}>FCFA</span>
                                 </div>
                             </div>
                         ))}

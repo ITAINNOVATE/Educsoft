@@ -54,6 +54,7 @@ model User {
   auditLogs       AuditLog[]
   teacherPayments TeacherPayment[]
 
+  createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
   @@index([establishmentId])

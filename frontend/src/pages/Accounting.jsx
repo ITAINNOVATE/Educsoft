@@ -237,9 +237,9 @@ const Accounting = () => {
 
     const handleViewInvoice = (p) => {
         // Calculate balance for the invoice
-        const enrollment = p.student.enrollments[0];
+        const enrollment = p.student?.enrollments?.[0];
         const fees = enrollment?.class?.fees || [];
-        const payments = p.student.payments || [];
+        const payments = p.student?.payments || [];
         
         // Use the same balance calculation logic
         const totalPaid = payments.reduce((acc, curr) => acc + curr.amount, 0);
