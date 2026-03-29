@@ -273,34 +273,164 @@ const Students = () => {
         }
     };
 
+    const handleExportExcel = async () => {
+        try {
+            const params = new URLSearchParams({
+                classId: filterClass,
+                status: filterStatus,
+                search: searchTerm
+            });
+            
+            const response = await axios.get(`${API_BASE}/students/export?${params.toString()}`, {
+                headers: { Authorization: `Bearer ${user.token}` },
+                responseType: 'blob'
+            });
+
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `Liste_Eleves_${new Date().toISOString().split('T')[0]}.xlsx`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (error) {
+            console.error('Error exporting Excel:', error);
+            alert('Erreur lors de l\'exportation Excel.');
+        }
+    };
+
     return (
-        <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
-            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+        <div style={{ padding: '1rem', maxWidth: '1200px', margin: '0 auto' }}>
+            <header className="stack-on-mobile" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', gap: '1.5rem', background: 'white', padding: '1.5rem', borderRadius: '20px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
                 <div>
-                    <h1 style={{ fontSize: '2rem', color: 'var(--primary-dark)' }}>
+                    <h1 style={{ fontSize: '2rem', color: 'var(--primary-dark)', margin: 0, fontWeight: '800' }}>
                         {view === 'DETAILS' ? 'Dossier Élève' : 'Gestion des Élèves'}
                     </h1>
-                    <p style={{ color: 'var(--text-muted)' }}>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginTop: '0.25rem' }}>
                         {view === 'DETAILS' ? `${selectedStudent?.firstName} ${selectedStudent?.lastName} • ${selectedStudent?.regNumber}` : 'Base de données centrale des élèves et tuteurs.'}
                     </p>
                 </div>
-                <div style={{ display: 'flex', gap: '1rem' }}>
+                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                     {view === 'LIST' ? (
                         <>
-                            {/* Only show register button for ADMIN, SECRETARY, and SUPER_ADMIN */}
+                            <button 
+                                className="btn" 
+                                onClick={handleExportExcel}
+                                style={{ 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    gap: '0.5rem', 
+                                    backgroundColor: '#2e7d32', 
+                                    color: 'white',
+                                    padding: '0.75rem 1.25rem',
+                                    borderRadius: '12px',
+                                    fontSize: '0.9rem',
+                                    fontWeight: '700'
+                                }}
+                            >
+                                <Download size={18} /> <span className="hide-mobile">Exporter Excel</span><span className="show-mobile">Export</span>
+                            </button>
                             {user && (user.role === 'ADMIN' || user.role === 'SECRETARY' || user.role === 'SUPER_ADMIN') && (
-                                <button className="btn btn-primary" onClick={() => setView('REGISTER')} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <UserPlus size={20} /> Inscrire un Élève
+                                <button 
+                                    className="btn btn-primary" 
+                                    onClick={() => setView('REGISTER')} 
+                                    style={{ 
+                                        display: 'flex', 
+                                        alignItems: 'center', 
+                                        gap: '0.5rem',
+                                        padding: '0.75rem 1.25rem',
+                                        borderRadius: '12px',
+                                        fontSize: '0.9rem',
+                                        fontWeight: '700'
+                                    }}
+                                >
+                                    <UserPlus size={20} /> <span className="hide-mobile">Inscrire un Élève</span><span className="show-mobile">Inscrire</span>
                                 </button>
                             )}
                         </>
                     ) : (
-                        <button className="btn" onClick={() => setView('LIST')} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <button className="btn" onClick={() => setView('LIST')} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1.5rem', borderRadius: '12px', fontWeight: '700' }}>
                             <ArrowLeft size={20} /> Retour à la liste
                         </button>
                     )}
                 </div>
             </header>
+
+            {view === 'LIST' && (
+                <>
+                    <div className="card" style={{ marginBottom: '2rem', padding: '1rem' }}>
+                        <div className="stack-on-mobile" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                            <div style={{ position: 'relative', flex: 2, width: '100%' }}>
+                                <Search style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#999' }} size={18} />
+                                <input 
+                                    type="text" 
+                                    placeholder="Rechercher par nom, matricule..." 
+                                    className="form-input" 
+                                    style={{ paddingLeft: '40px' }}
+                                    value={searchTerm}
+                                    onChange={e => setSearchTerm(e.target.value)}
+                                />
+                            </div>
+                            <div style={{ display: 'flex', gap: '1rem', flex: 1, width: '100%' }}>
+                                <select className="form-input" value={filterClass} onChange={e => setFilterClass(e.target.value)}>
+                                    <option value="">Toutes les classes</option>
+                                    {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                </select>
+                                <select className="form-input" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
+                                    <option value="ACTIF">ACTIF</option>
+                                    <option value="SUSPENDU">SUSPENDU</option>
+                                    <option value="ARCHIVE">ARCHIVE</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="card" style={{ padding: '0' }}>
+                        <div className="table-container">
+                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                <thead>
+                                    <tr style={{ textAlign: 'left', borderBottom: '2px solid #eee', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                                        <th style={{ padding: '1rem' }}>Matricule</th>
+                                        <th style={{ padding: '1rem' }}>Élève</th>
+                                        <th style={{ padding: '1rem' }}>Classe</th>
+                                        <th style={{ padding: '1rem' }}>Sexe</th>
+                                        <th style={{ padding: '1rem' }}>Statut</th>
+                                        <th style={{ padding: '1rem' }}>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredStudents.map(student => (
+                                        <tr key={student.id} style={{ borderBottom: '1px solid #f5f5f5', transition: 'background 0.2s' }}>
+                                            <td style={{ padding: '1rem', fontWeight: 'bold', color: 'var(--primary)', whiteSpace: 'nowrap' }}>{student.regNumber}</td>
+                                            <td style={{ padding: '1rem' }}>
+                                                <div style={{ fontWeight: '600' }}>{student.lastName}</div>
+                                                <div style={{ fontSize: '0.8rem', color: '#666' }}>{student.firstName}</div>
+                                            </td>
+                                            <td style={{ padding: '1rem', whiteSpace: 'nowrap' }}>{student.enrollments[0]?.class?.name || '---'}</td>
+                                            <td style={{ padding: '1rem' }}>{student.gender}</td>
+                                            <td style={{ padding: '1rem' }}>
+                                                <span style={{ 
+                                                    padding: '4px 8px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 'bold',
+                                                    backgroundColor: student.status === 'ACTIF' ? '#e8f5e9' : '#ffebee',
+                                                    color: student.status === 'ACTIF' ? '#2e7d32' : '#c62828'
+                                                }}>{student.status}</span>
+                                            </td>
+                                            <td style={{ padding: '1rem' }}>
+                                                <button className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => openDetails(student)}>
+                                                    Détails
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {filteredStudents.length === 0 && (
+                                        <tr><td colSpan="6" style={{ textAlign: 'center', padding: '3rem', color: '#999' }}>Aucun élève trouvé.</td></tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </>
+            )}
 
             {view === 'REGISTER' && (
                 <div className="card" style={{ border: '1px solid var(--primary-light)' }}>
@@ -414,7 +544,12 @@ const Students = () => {
             )}
 
             {view === 'DETAILS' && selectedStudent && (
-                <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '2rem' }}>
+                <div id="student-details-grid" style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '2rem' }}>
+                    <style>{`
+                        @media (max-width: 900px) {
+                            #student-details-grid { grid-template-columns: 1fr !important; }
+                        }
+                    `}</style>
                     <aside>
                         <div className="card" style={{ textAlign: 'center', position: 'sticky', top: '2rem' }}>
                             <div style={{ position: 'relative', width: '120px', height: '120px', margin: '0 auto 1.5rem' }}>
@@ -458,15 +593,22 @@ const Students = () => {
                         </div>
                     </aside>
 
-                    <main className="card" style={{ padding: '0' }}>
-                        <nav style={{ display: 'flex', borderBottom: '1px solid #eee', backgroundColor: '#fafafa' }}>
+                    <main className="card" style={{ padding: '0', overflow: 'hidden' }}>
+                        <nav style={{ display: 'flex', borderBottom: '1px solid #eee', backgroundColor: '#fafafa', overflowX: 'auto', whiteSpace: 'nowrap' }} className="table-container">
                             {['BIO', 'CARTE', 'PARENTS', 'HISTORY', 'DOCUMENTS', 'FINANCE'].map(tab => (
                                 <button
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
-                                    style={{ padding: '1.25rem 1.5rem', border: 'none', background: 'none', cursor: 'pointer', borderBottom: activeTab === tab ? '3px solid var(--primary)' : '3px solid transparent', color: activeTab === tab ? 'var(--primary)' : 'var(--text-muted)', fontWeight: activeTab === tab ? 'bold' : 'normal', transition: 'all 0.2s' }}
+                                    style={{ 
+                                        padding: '1.25rem 1.5rem', border: 'none', background: 'none', cursor: 'pointer', 
+                                        borderBottom: activeTab === tab ? '3px solid var(--primary)' : '3px solid transparent', 
+                                        color: activeTab === tab ? 'var(--primary)' : 'var(--text-muted)', 
+                                        fontWeight: activeTab === tab ? 'bold' : 'normal', transition: 'all 0.2s',
+                                        flexShrink: 0
+                                    }}
                                 >
                                     {tab === 'BIO' && 'Identité'}
+                                    {tab === 'CARTE' && 'Carte ID'}
                                     {tab === 'PARENTS' && 'Famille'}
                                     {tab === 'HISTORY' && 'Historique'}
                                     {tab === 'DOCUMENTS' && 'Documents'}

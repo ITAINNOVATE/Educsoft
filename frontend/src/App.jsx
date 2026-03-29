@@ -13,7 +13,7 @@ import Grades from './pages/Grades';
 import axios from 'axios';
 import config from './config';
 import './index.css';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Menu, X, School } from 'lucide-react';
 
 // Error Boundary for UI Resilience
 class ErrorBoundary extends React.Component {
@@ -68,8 +68,8 @@ const ProtectedRoute = ({ children, roleRequired }) => {
 const Layout = () => {
   const { user, logout, switchEstablishment } = useAuth();
   const navigate = useNavigate();
-  const [schoolYear, setSchoolYear] = useState('2025-2026');
   const [establishments, setEstablishments] = useState([]);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (user?.role === 'SUPER_ADMIN') {
@@ -96,10 +96,29 @@ const Layout = () => {
     }
   };
 
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const closeSidebar = () => setIsSidebarOpen(false);
+
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <aside style={{ width: '260px', backgroundColor: 'var(--primary-dark)', color: 'white', padding: '2rem 1rem', display: 'flex', flexDirection: 'column' }}>
-        <h2 style={{ fontSize: '1.25rem', marginBottom: '0.5rem', textAlign: 'center' }}>EDUSOFT</h2>
+    <div className="app-container">
+      {/* Mobile Header */}
+      <header className="mobile-header">
+        <h2 style={{ fontSize: '1rem', margin: 0 }}>EDUSOFT</h2>
+        <button onClick={toggleSidebar} style={{ background: 'none', border: 'none', color: 'white' }}>
+          {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </header>
+
+      {/* Overlay for Mobile */}
+      <div 
+        className={`sidebar-overlay ${isSidebarOpen ? 'visible' : ''}`} 
+        onClick={closeSidebar} 
+      />
+
+      <aside className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
+        <h2 style={{ fontSize: '1.25rem', marginBottom: '0.5rem', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+          <School size={24} /> EDUSOFT
+        </h2>
         
         {user?.role === 'SUPER_ADMIN' ? (
           <div style={{ marginBottom: '2rem' }}>
@@ -121,47 +140,51 @@ const Layout = () => {
         )}
 
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
-          <SidebarLink to="/dashboard" label="Tableau de Bord" />
+          <SidebarLink to="/dashboard" label="Tableau de Bord" onClick={closeSidebar} />
           {user && (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') && (
-            <SidebarLink to="/configuration" label="Configuration" />
+            <SidebarLink to="/configuration" label="Configuration" onClick={closeSidebar} />
           )}
           {user && (user.role === 'ADMIN' || user.role === 'SECRETARY' || user.role === 'ACCOUNTANT' || user.role === 'SUPER_ADMIN') && (
-            <SidebarLink to="/students" label="Gestion des Élèves" />
+            <SidebarLink to="/students" label="Gestion des Élèves" onClick={closeSidebar} />
           )}
           {user && (user.role === 'ADMIN' || user.role === 'ACCOUNTANT' || user.role === 'SUPER_ADMIN') && (
-            <SidebarLink to="/payments" label="Paiements" />
+            <SidebarLink to="/payments" label="Paiements" onClick={closeSidebar} />
           )}
           {user && (user.role === 'ADMIN' || user.role === 'SECRETARY' || user.role === 'DIRECTOR' || user.role === 'TEACHER' || user.role === 'SUPER_ADMIN') && (
-            <SidebarLink to="/grades" label="Notes & Bulletins" />
+            <SidebarLink to="/grades" label="Notes & Bulletins" onClick={closeSidebar} />
           )}
           {user && (user.role === 'ADMIN' || user.role === 'ACCOUNTANT' || user.role === 'SUPER_ADMIN') && (
-            <SidebarLink to="/accounting" label="Comptabilité" />
+            <SidebarLink to="/accounting" label="Comptabilité" onClick={closeSidebar} />
           )}
           {(user && (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN')) && (
-            <SidebarLink to="/users" label="Utilisateurs" />
+            <SidebarLink to="/users" label="Utilisateurs" onClick={closeSidebar} />
           )}
           {user && user.role === 'SUPER_ADMIN' && (
-            <SidebarLink to="/system" label="🏠 Établissements" />
+            <SidebarLink to="/system" label="🏠 Établissements" onClick={closeSidebar} />
           )}
-          <button onClick={logout} style={{ marginTop: '1.5rem', padding: '0.75rem', borderRadius: '8px', border: 'none', backgroundColor: '#c62828', color: 'white', fontWeight: 'bold', cursor: 'pointer' }}>Déconnexion</button>
+          <button onClick={logout} style={{ marginTop: 'auto', padding: '0.75rem', borderRadius: '8px', border: 'none', backgroundColor: '#c62828', color: 'white', fontWeight: 'bold', cursor: 'pointer' }}>Déconnexion</button>
         </nav>
       </aside>
-      <main style={{ flex: 1, overflowY: 'auto', backgroundColor: 'var(--bg-main)', position: 'relative' }}>
+
+      <main className="main-content">
         {user?.role === 'SUPER_ADMIN' && user?.establishmentId && (
-          <div style={{ backgroundColor: '#fffbeb', borderBottom: '1px solid #fef3c7', padding: '0.5rem 2rem', color: '#b45309', fontSize: '0.75rem', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ backgroundColor: '#fffbeb', borderBottom: '1px solid #fef3c7', padding: '0.5rem 1rem', color: '#b45309', fontSize: '0.75rem', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span>MODE GESTION : {user.establishmentName || 'Établissement sélectionné'}</span>
             <Link to="/system" style={{ color: '#b45309', textDecoration: 'underline' }}>Changer</Link>
           </div>
         )}
-        <Outlet />
+        <div style={{ padding: '1rem' }} className="responsive-container">
+          <Outlet />
+        </div>
       </main>
     </div>
   );
 };
 
-const SidebarLink = ({ to, label }) => (
+const SidebarLink = ({ to, label, onClick }) => (
   <NavLink
     to={to}
+    onClick={onClick}
     style={({ isActive }) => ({
       padding: '0.75rem 1rem',
       borderRadius: '8px',

@@ -62,93 +62,92 @@ const Login = () => {
     ];
 
     return (
-        <div style={{ backgroundColor: '#e0f7fa', color: '#37474f' }}>
+        <div style={{ backgroundColor: '#f8fafc', color: '#1e293b' }}>
             <style>{`
                 @keyframes patternMove {
                     0% { background-position: 0 0; }
                     100% { background-position: 100px 100px; }
                 }
                 .hero-pattern {
-                    background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 86c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm66-3c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm-46-45c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm26 18c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z' fill='%2300acc1' fill-opacity='0.08' fill-rule='evenodd'/%3E%3C/svg%3E");
+                    background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 86c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm66-3c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm-46-45c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm26 18c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z' fill='%230ea5e9' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
                     animation: patternMove 60s linear infinite;
                 }
                 .feature-card:hover {
-                    transform: translateY(-5px);
-                    box-shadow: 0 12px 20px rgba(0,0,0,0.1);
+                    transform: translateY(-8px);
+                    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
                 }
                 .form-input-focus:focus {
-                    border-color: #00796b !important;
-                    box-shadow: 0 0 0 3px rgba(0, 121, 107, 0.1) !important;
+                    border-color: var(--primary) !important;
+                    box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.1) !important;
                 }
             `}</style>
 
             {/* SECTION 1: HERO & LOGIN */}
-            <section className="hero-pattern" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '4rem 2rem' }}>
-                <div style={{ textAlign: 'center', maxWidth: '800px', marginBottom: '3rem' }}>
-                    <div style={{ display: 'inline-flex', padding: '1rem', backgroundColor: 'white', borderRadius: '20px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', marginBottom: '1.5rem' }}>
-                        <ShieldCheck size={48} color="#00796b" />
+            <section className="hero-pattern" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '3rem 1rem' }}>
+                <div style={{ textAlign: 'center', maxWidth: '800px', marginBottom: '4rem' }}>
+                    <div className="fade-in" style={{ display: 'inline-flex', padding: '1.25rem', backgroundColor: 'white', borderRadius: '24px', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', marginBottom: '2rem' }}>
+                        <ShieldCheck size={56} color="var(--primary)" />
                     </div>
-                    <h1 style={{ fontSize: '2.5rem', fontWeight: '900', color: '#004d40', marginBottom: '0.5rem', letterSpacing: '-1px' }}>EDUSOFT</h1>
-                    <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#00796b', marginBottom: '1.5rem', textTransform: 'uppercase', letterSpacing: '2px' }}>Gestion Scolaire Intégrée</h2>
-                    <p style={{ fontSize: '1.1rem', color: '#455a64', lineHeight: '1.6', marginBottom: '3rem' }}>
-                        EDUSOFT est une solution numérique complète développée par <strong>ITA INNOVATE</strong>, permettant de centraliser et d'optimiser la gestion de votre école : de l'inscription à la comptabilité, en passant par les bulletins et le suivi pédagogique.
+                    <h1 style={{ fontSize: 'clamp(2.5rem, 8vw, 4rem)', fontWeight: '900', color: 'var(--primary-dark)', marginBottom: '0.5rem', letterSpacing: '-0.05em' }}>EDUSOFT</h1>
+                    <h2 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--primary)', marginBottom: '1.5rem', textTransform: 'uppercase', letterSpacing: '0.2em' }}>Intelligence Scolaire</h2>
+                    <p style={{ fontSize: '1.1rem', color: '#64748b', lineHeight: '1.7', marginBottom: '3rem', maxWidth: '600px', margin: '0 auto' }}>
+                        Propulsé par <strong>ITA INNOVATE</strong>. Gérez votre établissement avec une efficacité sans précédent : inscriptions, finances, pédagogie et communication.
                     </p>
                 </div>
 
                 {/* LOGIN CARD */}
-                <div style={{ width: '100%', maxWidth: '440px', backgroundColor: 'white', borderRadius: '24px', padding: '2.5rem', boxShadow: '0 20px 40px rgba(0,0,0,0.08)', position: 'relative' }}>
-                    <h3 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '0.5rem', textAlign: 'center' }}>Connexion</h3>
-                    <p style={{ fontSize: '0.875rem', color: '#78909c', textAlign: 'center', marginBottom: '2rem' }}>Entrez le code de votre établissement et vos identifiants.</p>
+                <div className="card fade-in" style={{ width: '100%', maxWidth: '450px', borderRadius: '32px', padding: '3rem 2.5rem', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.1)', background: 'white', border: '1px solid #f1f5f9' }}>
+                    <h3 style={{ fontSize: '1.75rem', fontWeight: '800', marginBottom: '0.5rem', textAlign: 'center', color: 'var(--primary-dark)' }}>Connexion</h3>
+                    <p style={{ fontSize: '0.95rem', color: '#94a3b8', textAlign: 'center', marginBottom: '2.5rem', fontWeight: '500' }}>Accédez à votre espace sécurisé.</p>
 
                     {error && (
-                        <div style={{ backgroundColor: '#ffebee', color: '#c62828', padding: '1rem', borderRadius: '12px', marginBottom: '1.5rem', display: 'flex', gap: '0.75rem', fontSize: '0.875rem' }}>
+                        <div className="shake" style={{ backgroundColor: '#fef2f2', color: '#991b1b', padding: '1rem', borderRadius: '16px', marginBottom: '2rem', display: 'flex', gap: '0.75rem', fontSize: '0.85rem', border: '1px solid #fee2e2', fontWeight: '600' }}>
                             <AlertCircle size={20} />
                             {error}
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                         <div style={{ textAlign: 'left' }}>
-                            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: '#546e7a' }}>Code Établissement *</label>
+                            <label className="form-label" style={{ marginBottom: '0.6rem' }}>Code Établissement</label>
                             <input
                                 type="text"
-                                className="form-input-focus"
+                                className="form-input form-input-focus"
                                 placeholder="EX: ITA2025"
                                 value={establishmentCode}
                                 onChange={(e) => setEstablishmentCode(e.target.value)}
-                                style={{ width: '100%', padding: '0.8rem 1rem', borderRadius: '10px', border: '1px solid #cfd8dc', outline: 'none', transition: 'all 0.2s' }}
+                                style={{ height: '52px', fontSize: '1rem', fontWeight: '700', letterSpacing: '1px' }}
                                 required
                             />
                         </div>
                         <div style={{ textAlign: 'left' }}>
-                            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: '#546e7a' }}>Email professionnel *</label>
+                            <label className="form-label" style={{ marginBottom: '0.6rem' }}>Email professionnel</label>
                             <input
                                 type="text"
-                                className="form-input-focus"
+                                className="form-input form-input-focus"
                                 placeholder="votre@email.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                style={{ width: '100%', padding: '0.8rem 1rem', borderRadius: '10px', border: '1px solid #cfd8dc', outline: 'none', transition: 'all 0.2s' }}
+                                style={{ height: '52px', fontSize: '1rem' }}
                                 required
                             />
                         </div>
-                        <div style={{ textAlign: 'left', position: 'relative' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                                <label style={{ fontSize: '0.85rem', fontWeight: '700', color: '#546e7a' }}>Mot de passe *</label>
-                                <span style={{ fontSize: '0.75rem', color: '#00796b', fontWeight: '600', cursor: 'pointer' }}>Oublié ?</span>
+                        <div style={{ textAlign: 'left' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
+                                <label className="form-label" style={{ margin: 0 }}>Mot de passe</label>
                             </div>
                             <div style={{ position: 'relative' }}>
                                 <input
                                     type={showPassword ? "text" : "password"}
-                                    className="form-input-focus"
+                                    className="form-input form-input-focus"
                                     placeholder="••••••••"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    style={{ width: '100%', padding: '0.8rem 1rem', paddingRight: '3rem', borderRadius: '10px', border: '1px solid #cfd8dc', outline: 'none', transition: 'all 0.2s' }}
+                                    style={{ height: '52px', paddingRight: '3.5rem', fontSize: '1rem' }}
                                     required
                                 />
-                                <div onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', color: '#90a4ae' }}>
-                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                <div onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '1.25rem', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', color: '#94a3b8' }}>
+                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                                 </div>
                             </div>
                         </div>
@@ -156,30 +155,19 @@ const Login = () => {
                         <button
                             type="submit"
                             disabled={isLoading}
+                            className="btn btn-primary"
                             style={{ 
                                 marginTop: '1rem',
-                                padding: '1rem',
-                                borderRadius: '12px',
-                                border: 'none',
-                                background: 'linear-gradient(90deg, #00796b 0%, #00acc1 100%)',
-                                color: 'white',
-                                fontWeight: '700',
-                                fontSize: '1rem',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '0.75rem',
-                                transition: 'transform 0.2s, opacity 0.2s',
-                                boxShadow: '0 4px 12px rgba(0, 121, 107, 0.3)'
+                                height: '56px',
+                                borderRadius: '18px',
+                                fontSize: '1.1rem',
+                                fontWeight: '800',
+                                boxShadow: '0 10px 15px -3px rgba(var(--primary-rgb), 0.3)'
                             }}
-                            onMouseEnter={(e) => e.target.style.opacity = '0.9'}
-                            onMouseLeave={(e) => e.target.style.opacity = '1'}
                         >
                             {isLoading ? 'Identification...' : (
                                 <>
-                                    <Send size={20} />
-                                    Se connecter
+                                    Se connecter <ChevronRight size={20} />
                                 </>
                             )}
                         </button>
@@ -188,21 +176,21 @@ const Login = () => {
             </section>
 
             {/* SECTION 2: FEATURES */}
-            <section style={{ backgroundColor: '#f5f7f8', padding: '6rem 2rem' }}>
+            <section style={{ backgroundColor: '#ffffff', padding: '6rem 1.5rem', borderTop: '1px solid #f1f5f9' }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
-                    <h2 style={{ fontSize: '2.5rem', fontWeight: '900', color: '#004d40', marginBottom: '1.5rem' }}>Fonctionnalités Principales</h2>
-                    <div style={{ width: '60px', height: '5px', background: 'linear-gradient(90deg, #0288d1 0%, #26a69a 100%)', margin: '0 auto 4rem', borderRadius: '5px' }}></div>
+                    <h2 style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--primary-dark)', marginBottom: '1.5rem', letterSpacing: '-0.02em' }}>Une Solution à 360°</h2>
+                    <div style={{ width: '80px', height: '6px', background: 'var(--primary)', margin: '0 auto 4rem', borderRadius: '10px' }}></div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem' }}>
+                    <div className="grid-resp-3" style={{ gap: '2rem' }}>
                         {features.map((f, i) => (
-                            <div key={i} className="feature-card" style={{ backgroundColor: 'white', padding: '2.5rem', borderRadius: '24px', textAlign: 'left', transition: 'all 0.3s ease', cursor: 'default' }}>
-                                <div style={{ width: '60px', height: '60px', backgroundColor: f.color, color: f.iconColor, borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem' }}>
+                            <div key={i} className="feature-card" style={{ backgroundColor: '#f8fafc', padding: '3rem 2rem', borderRadius: '32px', textAlign: 'left', transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)', cursor: 'default', border: '1px solid #f1f5f9' }}>
+                                <div style={{ width: '64px', height: '64px', backgroundColor: 'white', color: f.iconColor, borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '2rem', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
                                     {f.icon}
                                 </div>
-                                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1rem', color: '#263238' }}>{f.title}</h3>
-                                <p style={{ color: '#607d8b', fontSize: '0.95rem', lineHeight: '1.6', marginBottom: '1.5rem' }}>{f.desc}</p>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#00796b', fontWeight: '700', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px', cursor: 'pointer' }}>
-                                    En savoir plus <ChevronRight size={16} />
+                                <h3 style={{ fontSize: '1.3rem', fontWeight: '800', marginBottom: '1rem', color: 'var(--primary-dark)' }}>{f.title}</h3>
+                                <p style={{ color: '#64748b', fontSize: '1rem', lineHeight: '1.7', marginBottom: '2rem' }}>{f.desc}</p>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', fontWeight: '800', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                                    Découvrir <ChevronRight size={18} />
                                 </div>
                             </div>
                         ))}
@@ -211,97 +199,70 @@ const Login = () => {
             </section>
 
             {/* SECTION 3: CONTACT */}
-            <section className="hero-pattern" style={{ padding: '6rem 2rem' }}>
-                <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '4rem', alignItems: 'center' }}>
+            <section className="hero-pattern" style={{ padding: '6rem 1.5rem', backgroundColor: '#fdfdfd' }}>
+                <div className="stack-on-mobile" style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', gap: '5rem', alignItems: 'center' }}>
                     
                     {/* INFO COLUMN */}
-                    <div style={{ textAlign: 'left' }}>
-                        <h2 style={{ fontSize: '2.5rem', fontWeight: '900', color: '#004d40', marginBottom: '1.5rem' }}>Contactez-nous</h2>
-                        <p style={{ color: '#546e7a', fontSize: '1.1rem', lineHeight: '1.6', marginBottom: '3rem' }}>
-                            Avez-vous des questions ou des suggestions ? Nous serions ravis d'avoir de vos nouvelles. 
-                            Votre feedback nous aide à améliorer continuellement <strong>EDUSOFT</strong>.
+                    <div style={{ flex: 1, textAlign: 'left' }}>
+                        <h2 style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--primary-dark)', marginBottom: '1.5rem' }}>Besoin d'aide ?</h2>
+                        <p style={{ color: '#64748b', fontSize: '1.1rem', lineHeight: '1.7', marginBottom: '3.5rem' }}>
+                            Notre équipe technique est à votre disposition pour vous accompagner dans la prise en main d'<strong>EDUSOFT</strong>.
                         </p>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                                <div style={{ width: '50px', height: '50px', backgroundColor: 'white', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' }}>
-                                    <Mail color="#00acc1" />
+                                <div style={{ width: '56px', height: '56px', backgroundColor: 'white', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', color: 'var(--primary)' }}>
+                                    <Mail size={24} />
                                 </div>
                                 <div>
-                                    <div style={{ fontSize: '0.7rem', color: '#90a4ae', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Email</div>
-                                    <div style={{ fontSize: '1.1rem', color: '#37474f', fontWeight: '600' }}>groupita25@gmail.com</div>
+                                    <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Email Support</div>
+                                    <div style={{ fontSize: '1.1rem', color: 'var(--primary-dark)', fontWeight: '700' }}>groupita25@gmail.com</div>
                                 </div>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                                <div style={{ width: '50px', height: '50px', backgroundColor: 'white', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' }}>
-                                    <Phone color="#00acc1" />
+                                <div style={{ width: '56px', height: '56px', backgroundColor: 'white', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', color: 'var(--primary)' }}>
+                                    <Phone size={24} />
                                 </div>
                                 <div>
-                                    <div style={{ fontSize: '0.7rem', color: '#90a4ae', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Téléphone</div>
-                                    <div style={{ fontSize: '1.1rem', color: '#37474f', fontWeight: '600' }}>(00229) 0152818100</div>
-                                </div>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                                <div style={{ width: '50px', height: '50px', backgroundColor: 'white', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' }}>
-                                    <MapPin color="#00acc1" />
-                                </div>
-                                <div>
-                                    <div style={{ fontSize: '0.7rem', color: '#90a4ae', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Adresse</div>
-                                    <div style={{ fontSize: '1.1rem', color: '#37474f', fontWeight: '600' }}>Parakou, Bénin</div>
+                                    <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Assistance Directe</div>
+                                    <div style={{ fontSize: '1.1rem', color: 'var(--primary-dark)', fontWeight: '700' }}>(+229) 01 52 81 81 00</div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     {/* FORM COLUMN */}
-                    <div style={{ backgroundColor: 'white', padding: '3rem', borderRadius: '32px', boxShadow: '0 20px 40px rgba(0,0,0,0.06)' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                    <div className="card" style={{ flex: 1.2, padding: '3.5rem 3rem', borderRadius: '40px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.05)', background: 'white' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
                             <div style={{ textAlign: 'left' }}>
-                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: '#546e7a' }}>Nom *</label>
+                                <label className="form-label">Nom Complet</label>
                                 <input
                                     type="text"
-                                    className="form-input-focus"
-                                    placeholder="Votre nom complet"
-                                    style={{ width: '100%', padding: '0.8rem 1rem', borderRadius: '10px', border: '1px solid #cfd8dc', outline: 'none' }}
+                                    className="form-input form-input-focus"
+                                    placeholder="Ex: Jean Dupont"
+                                    style={{ height: '52px' }}
                                 />
                             </div>
                             <div style={{ textAlign: 'left' }}>
-                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: '#546e7a' }}>Email *</label>
+                                <label className="form-label">Votre Email</label>
                                 <input
                                     type="email"
-                                    className="form-input-focus"
+                                    className="form-input form-input-focus"
                                     placeholder="votre@email.com"
-                                    style={{ width: '100%', padding: '0.8rem 1rem', borderRadius: '10px', border: '1px solid #cfd8dc', outline: 'none' }}
+                                    style={{ height: '52px' }}
                                 />
                             </div>
                             <div style={{ textAlign: 'left' }}>
-                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', color: '#546e7a' }}>Message *</label>
+                                <label className="form-label">Message</label>
                                 <textarea
-                                    className="form-input-focus"
+                                    className="form-input form-input-focus"
                                     rows="4"
                                     placeholder="Comment pouvons-nous vous aider ?"
-                                    style={{ width: '100%', padding: '0.8rem 1rem', borderRadius: '10px', border: '1px solid #cfd8dc', outline: 'none', resize: 'none' }}
+                                    style={{ padding: '1rem', resize: 'none' }}
                                 ></textarea>
                             </div>
-                            <button
-                                style={{ 
-                                    padding: '1rem',
-                                    borderRadius: '12px',
-                                    border: 'none',
-                                    background: 'linear-gradient(90deg, #0072ff 0%, #00c6ff 100%)',
-                                    color: 'white',
-                                    fontWeight: '700',
-                                    fontSize: '1rem',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '0.75rem',
-                                    boxShadow: '0 10px 20px rgba(0, 114, 255, 0.2)'
-                                }}
-                            >
-                                <Send size={20} />
-                                Envoyer le message
+                            <button className="btn btn-primary" style={{ height: '56px', borderRadius: '18px', fontWeight: '800' }}>
+                                <Send size={20} style={{ marginRight: '0.75rem' }} /> Envoyer
                             </button>
                         </div>
                     </div>
@@ -309,9 +270,14 @@ const Login = () => {
             </section>
 
             {/* FOOTER */}
-            <footer style={{ backgroundColor: '#004d40', color: 'rgba(255,255,255,0.6)', padding: '2rem', textAlign: 'center', fontSize: '0.8rem' }}>
-                <div style={{ marginBottom: '0.5rem' }}>© 2026 EDUSOFT - Produit d'ITA INNOVATE</div>
-                <div>Plateforme de Gestion Scolaire Intégrée Multi-Établissements • v1.5.0</div>
+            <footer style={{ backgroundColor: 'var(--primary-dark)', color: 'rgba(255,255,255,0.5)', padding: '3rem 1.5rem', textAlign: 'center', fontSize: '0.9rem' }}>
+                <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                    <div style={{ color: 'white', fontWeight: '800', marginBottom: '0.5rem', fontSize: '1.1rem' }}>EDUSOFT</div>
+                    <div style={{ marginBottom: '1.5rem' }}>© 2026 ITA INNOVATE - Tous droits réservés</div>
+                    <div style={{ fontSize: '0.75rem', maxWidth: '400px', margin: '0 auto', lineHeight: '1.6' }}>
+                        Solution de Gestion Scolaire Intégrée v1.5.0. Conçu pour l'excellence académique et la transparence administrative.
+                    </div>
+                </div>
             </footer>
         </div>
     );

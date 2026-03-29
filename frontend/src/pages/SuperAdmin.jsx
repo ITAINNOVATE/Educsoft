@@ -100,97 +100,76 @@ const SuperAdmin = () => {
     if (loading) return <div className="p-8">Chargement du système...</div>;
 
     return (
-        <div style={{ padding: '2rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+        <div style={{ padding: '1rem', maxWidth: '1200px', margin: '0 auto' }}>
+            <header className="stack-on-mobile" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2.5rem', gap: '1rem' }}>
                 <div>
-                    <h1 style={{ fontSize: '1.75rem', color: 'var(--primary-dark)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <ShieldCheck size={32} /> Administration Système
+                    <h1 style={{ fontSize: '2.2rem', color: 'var(--primary-dark)', display: 'flex', alignItems: 'center', gap: '1rem', fontWeight: '800', margin: 0 }}>
+                        <ShieldCheck size={40} /> Système ITA
                     </h1>
-                    <p style={{ color: 'var(--text-muted)' }}>Gestion globale des établissements connectés</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>Administration globale des établissements affiliés.</p>
                 </div>
-                <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-                    <Plus size={20} /> Nouvel Établissement
+                <button className="btn btn-primary" style={{ height: '48px', padding: '0 1.5rem', fontWeight: '700', width: '100%', maxWidth: '250px' }} onClick={() => setShowModal(true)}>
+                    <Plus size={20} style={{ marginRight: '0.5rem' }} /> Nouvel Établissement
                 </button>
-            </div>
+            </header>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+            <div className="grid-resp-2" style={{ gap: '1.5rem' }}>
                 {establishments.map(est => (
-                    <div key={est.id} className="card" style={{ borderTop: '4px solid var(--primary)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                            <div style={{ backgroundColor: '#e0f2f1', padding: '0.75rem', borderRadius: '12px', color: 'var(--primary)' }}>
-                                <Building2 size={24} />
+                    <div key={est.id} className="card fade-in" style={{ borderTop: '5px solid var(--primary)', borderRadius: '20px', padding: '1.75rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', marginBottom: '1.5rem' }}>
+                            <div style={{ backgroundColor: 'var(--primary-light)', padding: '0.8rem', borderRadius: '14px', color: 'var(--primary)' }}>
+                                <Building2 size={28} />
                             </div>
-                            <div>
-                                <h3 style={{ margin: 0, fontSize: '1.1rem' }}>{est.name}</h3>
-                                <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', marginTop: '0.2rem' }}>
-                                    <code style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 'bold' }}>{est.code}</code>
+                            <div style={{ flex: 1 }}>
+                                <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '800', color: 'var(--primary-dark)' }}>{est.name}</h3>
+                                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.3rem', flexWrap: 'wrap' }}>
+                                    <code style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: '800', backgroundColor: '#f1f5f9', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>{est.code}</code>
                                     {est.type && (
-                                        <span style={{ fontSize: '0.7rem', padding: '0.1rem 0.5rem', backgroundColor: '#f0f0f0', borderRadius: '4px', textTransform: 'uppercase', color: '#666' }}>
+                                        <span style={{ fontSize: '0.65rem', padding: '0.2rem 0.5rem', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', textTransform: 'uppercase', color: '#64748b', fontWeight: '700' }}>
                                             {est.type === 'Autre' ? est.typeOther : est.type}
                                         </span>
                                     )}
                                 </div>
                             </div>
                         </div>
-                        <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                            <span>📧 {est.email || '-'}</span>
-                            <span>📞 {est.phone || '-'}</span>
-                            <span>📍 {est.address || '-'}</span>
+                        
+                        <div style={{ fontSize: '0.9rem', color: '#64748b', display: 'flex', flexDirection: 'column', gap: '0.6rem', background: '#f8fafc', padding: '1rem', borderRadius: '12px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}><Mail size={14} /> {est.email || '-'}</div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}><Phone size={14} /> {est.phone || '-'}</div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}><MapPin size={14} /> {est.address || '-'}</div>
                         </div>
-                        <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: est.isActive ? '#2e7d32' : '#c62828', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+
+                        <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                                <span style={{ fontSize: '0.7rem', fontWeight: '900', color: est.isActive ? '#166534' : '#991b1b', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                     {est.isActive ? <CheckCircle size={14} /> : <XCircle size={14} />}
                                     {est.isActive ? 'ACTIF' : 'SUSPENDU'}
                                 </span>
-                                <span style={{ fontSize: '0.75rem', color: '#999' }}>
-                                    {est._count?.students || 0} Élèves • {est._count?.users || 0} Agents
+                                <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: '600' }}>
+                                    {est._count?.students || 0} Élèves • {est._count?.users || 0} Staff
                                 </span>
                             </div>
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <div style={{ display: 'flex', gap: '0.6rem' }}>
                                 <button
                                     onClick={() => handleManage(est.id)}
-                                    title="Gérer"
-                                    style={{
-                                        border: 'none',
-                                        background: 'var(--primary-light)',
-                                        color: 'var(--primary)',
-                                        padding: '0.5rem',
-                                        borderRadius: '8px',
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        alignItems: 'center'
-                                    }}
+                                    title="Gérer l'établissement"
+                                    style={{ border: 'none', background: 'var(--primary-light)', color: 'var(--primary)', padding: '0.6rem', borderRadius: '10px', cursor: 'pointer' }}
                                 >
-                                    <Eye size={18} />
+                                    <Eye size={20} />
                                 </button>
                                 <button
                                     onClick={() => handleToggleStatus(est.id, est.isActive)}
                                     title={est.isActive ? 'Suspendre' : 'Activer'}
-                                    style={{
-                                        border: 'none',
-                                        background: est.isActive ? '#fff3e0' : '#e8f5e9',
-                                        color: est.isActive ? '#ef6c00' : '#2e7d32',
-                                        padding: '0.5rem',
-                                        borderRadius: '8px',
-                                        cursor: 'pointer'
-                                    }}
+                                    style={{ border: 'none', background: est.isActive ? '#fff7ed' : '#f0fdf4', color: est.isActive ? '#9a3412' : '#166534', padding: '0.6rem', borderRadius: '10px', cursor: 'pointer' }}
                                 >
-                                    {est.isActive ? <Pause size={18} /> : <Play size={18} />}
+                                    {est.isActive ? <Pause size={20} /> : <Play size={20} />}
                                 </button>
                                 <button
                                     onClick={() => handleDelete(est.id)}
-                                    title="Supprimer"
-                                    style={{
-                                        border: 'none',
-                                        background: '#ffebee',
-                                        color: '#c62828',
-                                        padding: '0.5rem',
-                                        borderRadius: '8px',
-                                        cursor: 'pointer'
-                                    }}
+                                    title="Supprimer définitivement"
+                                    style={{ border: 'none', background: '#fff5f5', color: '#991b1b', padding: '0.6rem', borderRadius: '10px', cursor: 'pointer' }}
                                 >
-                                    <Trash2 size={18} />
+                                    <Trash2 size={20} />
                                 </button>
                             </div>
                         </div>
@@ -198,47 +177,52 @@ const SuperAdmin = () => {
                 ))}
             </div>
 
+            {/* MODAL: Creation - Scrollable on mobile */}
             {showModal && (
-                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', zIndex: 1000, overflowY: 'auto', padding: '2rem 1rem' }}>
-                    <div className="card" style={{ width: '100%', maxWidth: '500px', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
-                        <h2 style={{ marginBottom: '1.5rem' }}>Créer un Établissement</h2>
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000, padding: '1rem' }}>
+                    <div className="card fade-in" style={{ width: '100%', maxWidth: '550px', maxHeight: '90vh', overflowY: 'auto', borderRadius: '24px', padding: '2rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                            <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '800', color: 'var(--primary-dark)' }}>Nouvel Établissement</h2>
+                            <button onClick={() => setShowModal(false)} style={{ background: '#f1f5f9', border: 'none', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer' }}>×</button>
+                        </div>
                         <form onSubmit={handleCreate}>
                             <div className="form-group">
-                                <label className="form-label">Nom de l'établissement</label>
-                                <input type="text" className="form-input" required value={newEst.name} onChange={e => setNewEst({...newEst, name: e.target.value})} placeholder="Ex: École Primaire Les Palmiers" />
+                                <label className="form-label">Nom officiel</label>
+                                <input type="text" className="form-input" style={{ height: '48px' }} required value={newEst.name} onChange={e => setNewEst({...newEst, name: e.target.value})} placeholder="Ex: Groupe Scolaire ITA" />
                             </div>
                             <div className="form-group">
                                 <label className="form-label">Nom du Directeur</label>
-                                <input type="text" className="form-input" value={newEst.directorName} onChange={e => setNewEst({...newEst, directorName: e.target.value})} placeholder="Ex: M. Koffi DJIBO" />
+                                <input type="text" className="form-input" style={{ height: '48px' }} value={newEst.directorName} onChange={e => setNewEst({...newEst, directorName: e.target.value})} />
                             </div>
                             <div className="form-group">
-                                <label className="form-label">Code d'accès (Unique)</label>
-                                <input type="text" className="form-input" required value={newEst.code} onChange={e => setNewEst({...newEst, code: e.target.value.toUpperCase()})} placeholder="Ex: PALMIERS2026" />
+                                <label className="form-label">Code d'accès unique</label>
+                                <input type="text" className="form-input" style={{ height: '48px', fontWeight: '800', letterSpacing: '1px' }} required value={est.code} onChange={e => setNewEst({...newEst, code: e.target.value.toUpperCase()})} placeholder="EX: ITA2026" />
                             </div>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                            <div className="grid-resp-2" style={{ gap: '1rem' }}>
                                 <div className="form-group">
-                                    <label className="form-label">Email</label>
-                                    <input type="email" className="form-input" value={newEst.email} onChange={e => setNewEst({...newEst, email: e.target.value})} />
+                                    <label className="form-label">Email contact</label>
+                                    <input type="email" className="form-input" style={{ height: '48px' }} value={newEst.email} onChange={e => setNewEst({...newEst, email: e.target.value})} />
                                 </div>
                                 <div className="form-group">
                                     <label className="form-label">Téléphone</label>
-                                    <input type="text" className="form-input" value={newEst.phone} onChange={e => setNewEst({...newEst, phone: e.target.value})} />
+                                    <input type="text" className="form-input" style={{ height: '48px' }} value={newEst.phone} onChange={e => setNewEst({...newEst, phone: e.target.value})} />
                                 </div>
                             </div>
                             <div className="form-group">
-                                <label className="form-label">Adresse</label>
-                                <input type="text" className="form-input" value={newEst.address} onChange={e => setNewEst({...newEst, address: e.target.value})} />
+                                <label className="form-label">Adresse physique</label>
+                                <input type="text" className="form-input" style={{ height: '48px' }} value={newEst.address} onChange={e => setNewEst({...newEst, address: e.target.value})} />
                             </div>
 
                             <div className="form-group">
                                 <label className="form-label">Type d'établissement</label>
                                 <select 
                                     className="form-input" 
+                                    style={{ height: '48px', fontWeight: '700' }}
                                     required 
                                     value={newEst.type} 
                                     onChange={e => setNewEst({...newEst, type: e.target.value, typeOther: e.target.value === 'Autre' ? newEst.typeOther : ''})}
                                 >
-                                    <option value="">-- Sélectionner le type --</option>
+                                    <option value="">-- Choisir le type --</option>
                                     {establishmentTypes.map(t => <option key={t} value={t}>{t}</option>)}
                                 </select>
                             </div>
@@ -246,19 +230,12 @@ const SuperAdmin = () => {
                             {newEst.type === 'Autre' && (
                                 <div className="form-group">
                                     <label className="form-label">Précisez le type</label>
-                                    <input 
-                                        type="text" 
-                                        className="form-input" 
-                                        required 
-                                        value={newEst.typeOther} 
-                                        onChange={e => setNewEst({...newEst, typeOther: e.target.value})} 
-                                        placeholder="Ex: Centre de formation technique"
-                                    />
+                                    <input type="text" className="form-input" style={{ height: '48px' }} required value={newEst.typeOther} onChange={e => setNewEst({...newEst, typeOther: e.target.value})} />
                                 </div>
                             )}
-                            <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                                <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setShowModal(false)}>Annuler</button>
-                                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Créer l'école</button>
+                            <div style={{ display: 'flex', gap: '1rem', marginTop: '2.5rem' }}>
+                                <button type="button" className="btn" style={{ flex: 1, height: '48px', background: '#f8fafc' }} onClick={() => setShowModal(false)}>Annuler</button>
+                                <button type="submit" className="btn btn-primary" style={{ flex: 1, height: '48px' }}>Enregistrer l'école</button>
                             </div>
                         </form>
                     </div>

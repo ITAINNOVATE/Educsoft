@@ -16,7 +16,8 @@ import {
     X,
     Calendar,
     BookOpen,
-    User
+    User,
+    FileSpreadsheet
 } from 'lucide-react';
 
 const Accounting = () => {
@@ -30,6 +31,9 @@ const Accounting = () => {
     const [journalData, setJournalData] = useState([]);
     const [showInvoice, setShowInvoice] = useState(false);
     const [selectedPayment, setSelectedPayment] = useState(null);
+    const [classes, setClasses] = useState([]);
+    const [filterClass, setFilterClass] = useState('');
+    const [isExporting, setIsExporting] = useState(false);
 
     const API_BASE = `${config.API_URL}/accounting`;
     const PAYMENTS_API = `${config.API_URL}/payments`;
@@ -38,21 +42,41 @@ const Accounting = () => {
         if (user?.token) {
             fetchData();
         }
-    }, [user, dateRange]); // Re-fetch when date range changes
+    }, [user, dateRange, filterClass]); // Re-fetch when date range or class changes
+
+    useEffect(() => {
+        if (user?.token) {
+            fetchClasses();
+        }
+    }, [user]);
+
+    const fetchClasses = async () => {
+        try {
+            const res = await axios.get(`${config.API_URL}/config/classes`, {
+                headers: { Authorization: `Bearer ${user.token}` }
+            });
+            setClasses(res.data);
+        } catch (error) {
+            console.error('Error fetching classes:', error);
+        }
+    };
 
     const fetchData = async () => {
         try {
             setLoading(true);
             const authHeader = { headers: { Authorization: `Bearer ${user.token}` } };
-            let query = '';
+            
+            let statsQuery = '';
             if (dateRange.start && dateRange.end) {
-                query = `?startDate=${dateRange.start}&endDate=${dateRange.end}`;
+                statsQuery = `?startDate=${dateRange.start}&endDate=${dateRange.end}`;
             }
 
+            let debtsQuery = filterClass ? `?classId=${filterClass}` : '';
+
             const [statsRes, debtsRes, journalRes] = await Promise.all([
-                axios.get(`${API_BASE}/stats${query}`, authHeader),
-                axios.get(`${API_BASE}/debts`, authHeader),
-                axios.get(`${PAYMENTS_API}${query}`, authHeader)
+                axios.get(`${API_BASE}/stats${statsQuery}`, authHeader),
+                axios.get(`${API_BASE}/debts${debtsQuery}`, authHeader),
+                axios.get(`${PAYMENTS_API}${statsQuery}`, authHeader)
             ]);
             setStats(statsRes.data);
             setDebts(debtsRes.data);
@@ -61,6 +85,33 @@ const Accounting = () => {
             console.error('Error fetching accounting data:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleExportExcel = async () => {
+        try {
+            setIsExporting(true);
+            const params = new URLSearchParams();
+            if (filterClass) params.append('classId', filterClass);
+            if (searchTerm) params.append('search', searchTerm);
+
+            const response = await axios.get(`${API_BASE}/debts/export?${params.toString()}`, {
+                headers: { Authorization: `Bearer ${user.token}` },
+                responseType: 'blob'
+            });
+
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `Impayes_${new Date().toISOString().split('T')[0]}.xlsx`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (error) {
+            console.error('Excel Export Error:', error);
+            alert('Erreur lors de l\'exportation Excel.');
+        } finally {
+            setIsExporting(false);
         }
     };
 
@@ -133,53 +184,89 @@ const Accounting = () => {
     if (loading) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><div className="spinner"></div></div>;
 
     return (
-        <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
-            <header style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
+        <div style={{ padding: '1rem', maxWidth: '1200px', margin: '0 auto' }}>
+            <header className="stack-on-mobile" style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1.5rem' }}>
                 <div>
-                    <h1 style={{ fontSize: '2rem', color: 'var(--primary-dark)', fontWeight: '800' }}>Comptabilité</h1>
-                    <p style={{ color: 'var(--text-muted)' }}>Suivi financier, recettes et gestion des arriérés.</p>
+                    <h1 style={{ fontSize: '2.2rem', color: 'var(--primary-dark)', fontWeight: '800', margin: 0 }}>Comptabilité</h1>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>Suivi financier, recettes et gestion des arriérés.</p>
                 </div>
 
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end' }}>
-                    <div style={{ display: 'flex', background: '#f1f5f9', padding: '0.25rem', borderRadius: '10px', marginRight: '1rem' }}>
+                <div className="stack-on-mobile" style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', width: 'auto' }}>
+                    <div style={{ display: 'flex', background: '#f1f5f9', padding: '0.25rem', borderRadius: '10px', width: '100%' }}>
                         <button 
                             onClick={() => setViewMode('DEBTS')}
                             style={{ 
-                                padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', cursor: 'pointer',
+                                flex: 1, padding: '0.5rem', borderRadius: '8px', border: 'none', cursor: 'pointer',
                                 background: viewMode === 'DEBTS' ? 'white' : 'transparent',
                                 color: viewMode === 'DEBTS' ? 'var(--primary-dark)' : '#64748b',
                                 fontWeight: '700', boxShadow: viewMode === 'DEBTS' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none',
-                                transition: 'all 0.2s'
+                                fontSize: '0.85rem'
                             }}
                         >
-                            <AlertTriangle size={16} style={{ verticalAlign: 'middle', marginRight: '6px' }} /> Impayés
+                            Impayés
                         </button>
                         <button 
                             onClick={() => setViewMode('JOURNAL')}
                             style={{ 
-                                padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', cursor: 'pointer',
+                                flex: 1, padding: '0.5rem', borderRadius: '8px', border: 'none', cursor: 'pointer',
                                 background: viewMode === 'JOURNAL' ? 'white' : 'transparent',
                                 color: viewMode === 'JOURNAL' ? 'var(--primary-dark)' : '#64748b',
                                 fontWeight: '700', boxShadow: viewMode === 'JOURNAL' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none',
-                                transition: 'all 0.2s'
+                                fontSize: '0.85rem'
                             }}
                         >
-                            <FileText size={16} style={{ verticalAlign: 'middle', marginRight: '6px' }} /> Journal de Caisse
+                            Journal
                         </button>
                     </div>
-                    <div className="form-group" style={{ marginBottom: 0 }}>
-                        <label style={{ fontSize: '0.75rem', fontWeight: '600', color: '#666', marginBottom: '0.25rem', display: 'block' }}>Du</label>
-                        <input type="date" className="form-input" style={{ padding: '0.5rem' }} value={dateRange.start} onChange={e => setDateRange({ ...dateRange, start: e.target.value })} />
-                    </div>
-                    <div className="form-group" style={{ marginBottom: 0 }}>
-                        <label style={{ fontSize: '0.75rem', fontWeight: '600', color: '#666', marginBottom: '0.25rem', display: 'block' }}>Au</label>
-                        <input type="date" className="form-input" style={{ padding: '0.5rem' }} value={dateRange.end} onChange={e => setDateRange({ ...dateRange, end: e.target.value })} />
-                    </div>
-                    <button onClick={handleExport} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', height: '38px' }}>
-                        <Download size={18} /> Exporter Rapport
+                    <button onClick={handleExport} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', height: '42px', width: '100%', justifyContent: 'center' }}>
+                        <Download size={18} /> Rapport
                     </button>
                 </div>
             </header>
+
+            {/* Date Filters Bar */}
+            <div className="card stack-on-mobile" style={{ marginBottom: '2rem', padding: '1rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', flex: 1, width: '100%' }}>
+                    <div style={{ flex: 1 }}>
+                        <label style={{ fontSize: '0.7rem', fontWeight: '700', color: '#666', marginBottom: '0.2rem', display: 'block', textTransform: 'uppercase' }}>Début</label>
+                        <input type="date" className="form-input" value={dateRange.start} onChange={e => setDateRange({ ...dateRange, start: e.target.value })} />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                        <label style={{ fontSize: '0.7rem', fontWeight: '700', color: '#666', marginBottom: '0.2rem', display: 'block', textTransform: 'uppercase' }}>Fin</label>
+                        <input type="date" className="form-input" value={dateRange.end} onChange={e => setDateRange({ ...dateRange, end: e.target.value })} />
+                    </div>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem', flex: 1, width: '100%' }}>
+                    <div style={{ flex: 1 }}>
+                        <label style={{ fontSize: '0.7rem', fontWeight: '700', color: '#666', marginBottom: '0.2rem', display: 'block', textTransform: 'uppercase' }}>Filtrer par Classe</label>
+                        <select 
+                            className="form-input" 
+                            value={filterClass} 
+                            onChange={(e) => setFilterClass(e.target.value)}
+                            style={{ height: '42px' }}
+                        >
+                            <option value="">Toutes les classes</option>
+                            {classes.map(c => (
+                                <option key={c.id} value={c.id}>{c.name}</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+                <div style={{ position: 'relative', flex: 1, width: '100%' }}>
+                    <label style={{ fontSize: '0.7rem', fontWeight: '700', color: '#666', marginBottom: '0.2rem', display: 'block', textTransform: 'uppercase' }}>Recherche Directe</label>
+                    <div style={{ position: 'relative' }}>
+                        <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                        <input
+                            type="text"
+                            placeholder="Nom, Matricule..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="form-input"
+                            style={{ paddingLeft: '2.5rem', height: '42px' }}
+                        />
+                    </div>
+                </div>
+            </div>
 
             {/* Stats Grid */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
@@ -210,35 +297,31 @@ const Accounting = () => {
             </div>
 
             {/* Main Content Table (Debts or Journal) */}
-            <section className="card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-                    <h2 style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <section className="card" style={{ padding: '0' }}>
+                <div style={{ padding: '1.5rem', borderBottom: '1px solid #eee' }}>
+                    <h2 style={{ fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
                         {viewMode === 'DEBTS' ? (
-                            <><AlertTriangle color="#c62828" size={20} /> Liste des Élèves Endettés</>
+                            <><AlertTriangle color="#c62828" size={18} /> Élèves en Arriérés</>
                         ) : (
-                            <><FileText color="var(--primary)" size={20} /> Journal Historique des Recettes</>
+                            <><FileText color="var(--primary)" size={18} /> Ledger de Caisse</>
                         )}
                     </h2>
-
-                    <div style={{ position: 'relative' }}>
-                        <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                        <input
-                            type="text"
-                            placeholder={viewMode === 'DEBTS' ? "Rechercher un élève..." : "Rechercher un reçu ou élève..."}
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            style={{
-                                padding: '0.6rem 1rem 0.6rem 2.5rem',
-                                borderRadius: '8px',
-                                border: '1px solid #ddd',
-                                width: '300px',
-                                outline: 'none'
+                    {viewMode === 'DEBTS' && (
+                        <button 
+                            onClick={handleExportExcel}
+                            disabled={isExporting}
+                            className="btn" 
+                            style={{ 
+                                background: '#2e7d32', color: 'white', display: 'flex', 
+                                alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', padding: '0.5rem 1rem' 
                             }}
-                        />
-                    </div>
+                        >
+                            {isExporting ? <div className="spinner-small"></div> : <><FileSpreadsheet size={16} /> Exporter Excel</>}
+                        </button>
+                    )}
                 </div>
 
-                <div style={{ overflowX: 'auto' }}>
+                <div className="table-container">
                     {viewMode === 'DEBTS' ? (
                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <thead>

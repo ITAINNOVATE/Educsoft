@@ -151,18 +151,28 @@ const { calculateStudentFinancials } = require('../utils/finance');
 
 // ... (other imports)
 
+const XLSX = require('xlsx');
+
 // @desc    Get debt report (Students with unpaid fees)
 // @route   GET /api/accounting/debts
 router.get('/debts', protect, authorize('ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'), async (req, res) => {
     try {
+        const { classId } = req.query;
         if (!req.user.establishmentId) {
-            return res.json([]); // Return empty for debts if no context
+            return res.json([]); 
         }
+
+        const where = { 
+            status: 'ACTIF',
+            establishmentId: req.user.establishmentId
+        };
+
+        if (classId) {
+            where.enrollments = { some: { classId: classId, schoolYear: { current: true } } };
+        }
+
         const students = await prisma.student.findMany({
-            where: { 
-                status: 'ACTIF',
-                establishmentId: req.user.establishmentId
-            }, // Note: Using 'ACTIF' instead of 'ACTIVE' based on schema default
+            where,
             include: {
                 enrollments: { include: { class: { include: { fees: true } } } },
                 payments: true
@@ -171,9 +181,7 @@ router.get('/debts', protect, authorize('ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'), a
 
         const report = students.map(s => {
             const enrollment = s.enrollments?.[0];
-            if (!enrollment || !enrollment.class) {
-                return null; // Skip students without a valid class enrollment
-            }
+            if (!enrollment || !enrollment.class) return null;
 
             const fees = enrollment.class.fees || [];
             const payments = s.payments || [];
@@ -181,6 +189,8 @@ router.get('/debts', protect, authorize('ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'), a
             try {
                 const financials = calculateStudentFinancials(fees, payments);
                 const { global, OBLIGATORY, OPTIONAL, OCCASIONAL } = financials;
+
+                if (global.remaining <= 0) return null; // Only debtors
 
                 return {
                     id: s.id,
@@ -197,19 +207,77 @@ router.get('/debts', protect, authorize('ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'), a
                     }
                 };
             } catch (err) {
-                console.error(`Error calculating financials for student ${s.id}:`, err);
                 return null;
             }
-        }).filter(r => r !== null && r.balance > 0);
+        }).filter(r => r !== null);
 
         res.json(report);
     } catch (error) {
         console.error("Accounting Debts Global Error:", error);
-        res.status(500).json({ 
-            message: 'Erreur lors du calcul des impayés', 
-            error: error.message,
-            stack: error.stack
+        res.status(500).json({ message: 'Erreur lors du calcul des impayés', error: error.message });
+    }
+});
+
+// @desc    Export debts to Excel
+// @route   GET /api/accounting/debts/export
+router.get('/debts/export', protect, authorize('ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'), async (req, res) => {
+    try {
+        const { classId, search } = req.query;
+        
+        const where = { 
+            status: 'ACTIF',
+            establishmentId: req.user.establishmentId
+        };
+
+        if (classId) {
+            where.enrollments = { some: { classId: classId, schoolYear: { current: true } } };
+        }
+
+        if (search) {
+            where.OR = [
+                { firstName: { contains: search, mode: 'insensitive' } },
+                { lastName: { contains: search, mode: 'insensitive' } },
+                { regNumber: { contains: search, mode: 'insensitive' } }
+            ];
+        }
+
+        const students = await prisma.student.findMany({
+            where,
+            include: {
+                enrollments: { include: { class: { include: { fees: true } } } },
+                payments: true
+            }
         });
+
+        const reportData = students.map(s => {
+            const enrollment = s.enrollments?.[0];
+            if (!enrollment || !enrollment.class) return null;
+            const financials = calculateStudentFinancials(enrollment.class.fees || [], s.payments || []);
+            if (financials.global.remaining <= 0) return null;
+
+            return {
+                'Matricule': s.regNumber,
+                'Nom': s.lastName.toUpperCase(),
+                'Prénoms': s.firstName,
+                'Classe': enrollment.class.name,
+                'Total Dû': financials.global.totalDue,
+                'Total Payé': financials.global.totalPaid,
+                'Reste à Payer': financials.global.remaining,
+                'Détail Obligatoire': financials.OBLIGATORY?.remaining || 0,
+                'Détail Optionnel': financials.OPTIONAL?.remaining || 0
+            };
+        }).filter(r => r !== null);
+
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.json_to_sheet(reportData);
+        XLSX.utils.book_append_sheet(wb, ws, 'Liste des Impayés');
+        
+        const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+        res.setHeader('Content-Disposition', `attachment; filename=Impayes_${new Date().toISOString().split('T')[0]}.xlsx`);
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.send(buffer);
+    } catch (error) {
+        res.status(500).json({ message: 'Export Excel Error', error: error.message });
     }
 });
 

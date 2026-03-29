@@ -163,6 +163,105 @@ router.get('/', protect, async (req, res) => {
     }
 });
 
+const XLSX = require('xlsx');
+
+// @desc    Export students to Excel
+// @route   GET /api/students/export
+// @access  Private
+router.get('/export', protect, async (req, res) => {
+    try {
+        const { classId, status, search } = req.query;
+        
+        let where = { establishmentId: req.user.establishmentId };
+        
+        if (classId) {
+            where.enrollments = { 
+                some: { 
+                    classId: classId, 
+                    schoolYear: { current: true } 
+                } 
+            };
+        }
+        
+        if (status) {
+            where.status = status;
+        }
+        
+        if (search) {
+            where.OR = [
+                { firstName: { contains: search, mode: 'insensitive' } },
+                { lastName: { contains: search, mode: 'insensitive' } },
+                { regNumber: { contains: search, mode: 'insensitive' } }
+            ];
+        }
+
+        const students = await prisma.student.findMany({
+            where,
+            include: {
+                enrollments: {
+                    where: { schoolYear: { current: true } },
+                    include: { class: true }
+                },
+                parents: {
+                    where: { isPrimary: true },
+                    include: { parent: true }
+                }
+            },
+            orderBy: [
+                { enrollments: { _count: 'desc' } }, // Sort by those who have enrollments first
+                { lastName: 'asc' }
+            ]
+        });
+
+        // Format data for Excel
+        const exportData = students.map(s => {
+            const enrollment = s.enrollments[0];
+            const primaryParent = s.parents.find(p => p.isPrimary)?.parent || s.parents[0]?.parent;
+
+            return {
+                'Matricule': s.regNumber,
+                'Nom': s.lastName.toUpperCase(),
+                'Prénoms': s.firstName,
+                'Sexe': s.gender === 'M' ? 'Masculin' : 'Féminin',
+                'Date de Naissance': new Date(s.dob).toLocaleDateString('fr-FR'),
+                'Lieu de Naissance': s.pob || '---',
+                'Classe': enrollment?.class?.name || '---',
+                'Niveau': enrollment?.class?.level || '---',
+                'Nationalité': s.nationality || '---',
+                'Statut': s.status,
+                'Parent': primaryParent ? `${primaryParent.lastName} ${primaryParent.firstName}` : '---',
+                'Téléphone Parent': primaryParent?.phonePrimary || '---',
+                'Adresse': s.address || '---'
+            };
+        });
+
+        // Create workbook and worksheet
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.json_to_sheet(exportData);
+        
+        // Auto-size columns (basic helper)
+        const colWidths = Object.keys(exportData[0] || {}).map(key => ({
+            wch: Math.max(key.length, ...exportData.map(row => String(row[key]).length)) + 2
+        }));
+        ws['!cols'] = colWidths;
+
+        XLSX.utils.book_append_sheet(wb, ws, 'Liste des Elèves');
+        
+        // Generate Buffer
+        const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+        
+        const filename = `Liste_Eleves_${new Date().toISOString().split('T')[0]}.xlsx`;
+        
+        res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.send(buffer);
+
+    } catch (error) {
+        console.error('Export Excel Error:', error);
+        res.status(500).json({ message: 'Erreur lors de l\'exportation Excel', error: error.message });
+    }
+});
+
 const { calculateStudentFinancials } = require('../utils/finance');
 
 // @desc    Get student by ID

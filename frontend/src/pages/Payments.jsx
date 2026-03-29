@@ -215,42 +215,47 @@ const Payments = () => {
     };
 
     return (
-        <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto', fontFamily: 'Inter, sans-serif' }}>
+        <div style={{ padding: '1rem', maxWidth: '1400px', margin: '0 auto', fontFamily: 'Inter, sans-serif' }}>
 
             {/* Header section */}
-            <header style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+            <header className="stack-on-mobile" style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1.5rem' }}>
                 <div>
-                    <h1 style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--primary-dark)', marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>
+                    <h1 style={{ fontSize: '2.2rem', fontWeight: '800', color: 'var(--primary-dark)', marginBottom: '0.5rem', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
                         Caisse & Paiements
                     </h1>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>
                         Enregistrement des frais scolaires et suivi des recettes.
                     </p>
                 </div>
 
-                <div style={{ display: 'flex', gap: '1rem' }}>
-                    <div className="card" style={{ padding: '1rem 1.5rem', background: 'white', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <div style={{ background: '#e0f2f1', padding: '0.75rem', borderRadius: '12px' }}>
-                            <TrendingUp color="var(--primary)" size={24} />
+                <div className="grid-resp-2" style={{ display: 'grid', gap: '1rem', flexShrink: 0 }}>
+                    <div className="card" style={{ padding: '0.75rem 1rem', background: 'white', display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: '180px' }}>
+                        <div style={{ background: '#e0f2f1', padding: '0.5rem', borderRadius: '10px' }}>
+                            <TrendingUp color="var(--primary)" size={18} />
                         </div>
                         <div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>Recettes Jour</div>
-                            <div style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--primary-dark)' }}>{dailyStats.totalRevenue?.toLocaleString()} <span style={{ fontSize: '0.8rem' }}>FCFA</span></div>
+                            <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>Recettes Jour</div>
+                            <div style={{ fontSize: '1rem', fontWeight: '800', color: 'var(--primary-dark)' }}>{dailyStats.totalRevenue?.toLocaleString()} <span style={{ fontSize: '0.7rem' }}>FCFA</span></div>
                         </div>
                     </div>
-                    <div className="card" style={{ padding: '1rem 1.5rem', background: 'white', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <div style={{ background: '#fff3e0', padding: '0.75rem', borderRadius: '12px' }}>
-                            <FileText color="#fb8c00" size={24} />
+                    <div className="card" style={{ padding: '0.75rem 1rem', background: 'white', display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: '150px' }}>
+                        <div style={{ background: '#fff3e0', padding: '0.5rem', borderRadius: '10px' }}>
+                            <FileText color="#fb8c00" size={18} />
                         </div>
                         <div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>Transactions</div>
-                            <div style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--primary-dark)' }}>{dailyStats.count}</div>
+                            <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>Transactions</div>
+                            <div style={{ fontSize: '1rem', fontWeight: '800', color: 'var(--primary-dark)' }}>{dailyStats.count}</div>
                         </div>
                     </div>
                 </div>
             </header>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '2rem' }}>
+            <div className="grid-resp-2" style={{ gridTemplateColumns: '1.5fr 1fr', gap: '2rem' }} id="payments-grid">
+                <style>{`
+                    @media (max-width: 1000px) {
+                        #payments-grid { grid-template-columns: 1fr !important; }
+                    }
+                `}</style>
 
                 {/* PAYMENT FORM COLUMN */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -338,7 +343,7 @@ const Payments = () => {
                                 <div style={{
                                     background: '#f0f4f8', padding: '1.5rem', borderRadius: '12px',
                                     marginBottom: '2rem', marginTop: '-1rem', border: '1px solid #d1d9e6',
-                                    display: 'grid', gridTemplateColumns: '2fr 1.5fr', gap: '1.5rem', alignItems: 'center'
+                                    display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', alignItems: 'center'
                                 }}>
                                     <div>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
@@ -353,7 +358,7 @@ const Payments = () => {
                                         </div>
                                     </div>
 
-                                    <div style={{ borderLeft: '1px solid #cbd5e1', paddingLeft: '1.5rem' }}>
+                                    <div className="hide-mobile" style={{ borderLeft: '1px solid #cbd5e1', paddingLeft: '1.5rem' }}>
                                         <div style={{ fontSize: '0.8rem', color: '#666', fontWeight: '600', textTransform: 'uppercase' }}>Situation Financière</div>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginTop: '0.4rem' }}>
                                             <span>Total Dû:</span>
@@ -368,7 +373,7 @@ const Payments = () => {
                             )}
 
                             {/* PAYMENT INPUTS */}
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+                            <div className="grid-resp-2" style={{ gap: '1.5rem', marginBottom: '1.5rem' }}>
                                 <div className="form-group">
                                     <label className="form-label">Type de Frais</label>
                                     <select
@@ -419,49 +424,37 @@ const Payments = () => {
 
                                         <option value="other">Autre / Règlement Manuel</option>
                                     </select>
-                                    {selectedFee?.category && (
-                                        <div style={{
-                                            fontSize: '0.75rem', marginTop: '0.4rem', fontWeight: '600', color:
-                                                selectedFee.category === 'ANNUAL_OBLIGATORY' ? '#2e7d32' :
-                                                    selectedFee.category === 'OPTIONAL' ? '#fb8c00' : '#ef5350'
-                                        }}>
-                                            {selectedFee.category === 'ANNUAL_OBLIGATORY' ? '✓ Frais obligatoire périodique' :
-                                                selectedFee.category === 'OPTIONAL' ? '⚠ Frais optionnel' : '⚡ Frais occasionnel / ponctuel'}
-                                        </div>
-                                    )}
                                 </div>
                                 <div className="form-group">
-                                    <label className="form-label">Montant à Encaisser (FCFA)</label>
-                                    <div style={{ position: 'relative' }}>
-                                        <input
-                                            type="number"
-                                            className="form-input"
-                                            style={{ paddingLeft: '1rem', fontWeight: '700', fontSize: '1.25rem', color: 'var(--primary)' }}
-                                            value={amount}
-                                            onChange={e => setAmount(e.target.value)}
-                                            required
-                                        />
-                                    </div>
+                                    <label className="form-label">Montant (FCFA)</label>
+                                    <input
+                                        type="number"
+                                        className="form-input"
+                                        style={{ fontWeight: '700', fontSize: '1.25rem', color: 'var(--primary)' }}
+                                        value={amount}
+                                        onChange={e => setAmount(e.target.value)}
+                                        required
+                                    />
                                 </div>
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
+                            <div className="grid-resp-2" style={{ gap: '1.5rem', marginBottom: '2rem' }}>
                                 <div className="form-group">
-                                    <label className="form-label">Notes / Observations</label>
+                                    <label className="form-label">Notes</label>
                                     <input
                                         type="text"
                                         className="form-input"
-                                        placeholder="Information complémentaire..."
+                                        placeholder="Observations..."
                                         value={notes}
                                         onChange={e => setNotes(e.target.value)}
                                     />
                                 </div>
                                 <div className="form-group">
-                                    <label className="form-label">Mode de Paiement</label>
+                                    <label className="form-label">Mode</label>
                                     <select className="form-input" value={method} onChange={e => setMethod(e.target.value)}>
                                         <option value="CASH">Espèces 💵</option>
                                         <option value="MOBILE_MONEY">Mobile Money 📱</option>
-                                        <option value="TRANSFER">Virement / Chèque 🏦</option>
+                                        <option value="TRANSFER">Virement 🏦</option>
                                     </select>
                                 </div>
                             </div>

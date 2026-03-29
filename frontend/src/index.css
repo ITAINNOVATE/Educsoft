@@ -149,3 +149,121 @@ input {
         padding: 10mm;
     }
 }
+
+/* --- Layout Responsiveness --- */
+.app-container {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+.sidebar {
+    width: 260px;
+    background-color: var(--primary-dark);
+    color: white;
+    padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease;
+    z-index: 1000;
+}
+
+.main-content {
+    flex: 1;
+    overflow-y: auto;
+    background-color: var(--bg-main);
+    position: relative;
+    width: 100%;
+}
+
+/* --- Responsive Utilities --- */
+.mobile-header {
+    display: none;
+    background: var(--primary-dark);
+    color: white;
+    padding: 1rem;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1001;
+}
+
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: var(--radius);
+    background: white;
+    box-shadow: var(--shadow);
+}
+
+.grid-resp-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.grid-resp-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.stack-on-mobile {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+}
+
+@media (max-width: 1024px) {
+    .grid-resp-3 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        height: 100vh;
+        left: 0;
+        top: 0;
+        transform: translateX(-100%);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+    }
+
+    .sidebar-overlay.visible {
+        display: block;
+    }
+
+    .mobile-header {
+        display: flex;
+    }
+
+    .grid-resp-2, .grid-resp-3 {
+        grid-template-columns: 1fr;
+    }
+
+    .stack-on-mobile {
+        flex-direction: column;
+    }
+
+    .card {
+        padding: 1.25rem;
+    }
+
+    h1 {
+        font-size: 1.75rem !important;
+    }
+}
