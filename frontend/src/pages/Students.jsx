@@ -1054,11 +1054,11 @@ const Students = () => {
                                                 <td style={{ padding: '1rem' }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                                                         <div style={{ width: '35px', height: '35px', borderRadius: '50%', backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 'bold' }}>
-                                                            {student.firstName[0]}{student.lastName[0]}
+                                                            {(student.firstName?.[0] || '?')}{(student.lastName?.[0] || '?')}
                                                         </div>
                                                         <div>
-                                                            <div style={{ fontWeight: '600' }}>{student.lastName} {student.firstName}</div>
-                                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{student.gender === 'M' ? 'Masculin' : 'Féminin'}</div>
+                                                            <div style={{ fontWeight: '600' }}>{student.lastName || '---'} {student.firstName || ''}</div>
+                                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{student.gender === 'M' ? 'Masculin' : (student.gender === 'F' ? 'Féminin' : '---')}</div>
                                                         </div>
                                                     </div>
                                                 </td>
@@ -1069,8 +1069,8 @@ const Students = () => {
                                                 <td style={{ padding: '1rem' }}>
                                                     {primaryParent ? (
                                                         <>
-                                                            <div style={{ fontSize: '0.9rem' }}>{primaryParent.lastName} {primaryParent.firstName}</div>
-                                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{primaryParent.phonePrimary}</div>
+                                                            <div style={{ fontSize: '0.9rem' }}>{primaryParent.lastName || '---'} {primaryParent.firstName || ''}</div>
+                                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{primaryParent.phonePrimary || '---'}</div>
                                                         </>
                                                     ) : '---'}
                                                 </td>

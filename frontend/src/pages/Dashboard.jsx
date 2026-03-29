@@ -202,9 +202,10 @@ const Dashboard = () => {
                             </div>
                         </div>
                         <div style={{ height: '240px', width: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', padding: '1rem 0', gap: '12px' }}>
-                            {stats?.chartData?.map((item, index) => {
-                                const maxAmount = Math.max(...stats.chartData.map(d => d.amount), 1);
-                                const height = (item.amount / maxAmount) * 100;
+                            {(stats?.chartData || []).map((item, index) => {
+                                const chartDataArray = Array.isArray(stats?.chartData) ? stats.chartData : [];
+                                const maxAmount = chartDataArray.length > 0 ? Math.max(...chartDataArray.map(d => d.amount || 0), 1) : 1;
+                                const height = ((item.amount || 0) / maxAmount) * 100;
                                 return (
                                     <div key={index} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', height: '100%' }}>
                                         <div style={{ flex: 1, width: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
@@ -215,7 +216,7 @@ const Dashboard = () => {
                                                 background: 'linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%)', 
                                                 borderRadius: '10px 10px 4px 4px',
                                                 transition: 'height 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                                                minHeight: item.amount > 0 ? '6px' : '0',
+                                                minHeight: (item.amount || 0) > 0 ? '6px' : '0',
                                                 position: 'relative',
                                                 boxShadow: '0 4px 12px rgba(var(--primary-rgb), 0.2)'
                                             }}>
@@ -230,12 +231,12 @@ const Dashboard = () => {
                                                         color: 'var(--primary-dark)',
                                                         whiteSpace: 'nowrap'
                                                     }}>
-                                                        {item.amount >= 1000 ? `${(item.amount / 1000).toFixed(1)}k` : item.amount}
+                                                        {(item.amount || 0) >= 1000 ? `${((item.amount || 0) / 1000).toFixed(1)}k` : (item.amount || 0)}
                                                     </div>
                                                 )}
                                             </div>
                                         </div>
-                                        <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{item.day}</span>
+                                        <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{item.day || '---'}</span>
                                     </div>
                                 );
                             })}
@@ -261,11 +262,11 @@ const Dashboard = () => {
                                     {Array.isArray(debts) && debts.length > 0 ? debts.slice(0, 5).map(debt => (
                                         <tr key={debt.id} style={{ borderBottom: '1px solid #f1f5f9', transition: 'background 0.2s' }}>
                                             <td style={{ padding: '1.25rem 1.5rem' }}>
-                                                <div style={{ fontWeight: '800', color: 'var(--primary-dark)', fontSize: '0.95rem' }}>{debt.name}</div>
-                                                <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>#{debt.id.substring(0, 8)}</div>
+                                                <div style={{ fontWeight: '800', color: 'var(--primary-dark)', fontSize: '0.95rem' }}>{debt.name || 'Inconnu'}</div>
+                                                <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>#{debt.id?.substring(0, 8) || 'N/A'}</div>
                                             </td>
                                             <td style={{ padding: '1.25rem 1.5rem' }}>
-                                                <span style={{ fontSize: '0.85rem', fontWeight: '700', color: '#64748b', background: '#f1f5f9', padding: '0.3rem 0.8rem', borderRadius: '8px' }}>{debt.className}</span>
+                                                <span style={{ fontSize: '0.85rem', fontWeight: '700', color: '#64748b', background: '#f1f5f9', padding: '0.3rem 0.8rem', borderRadius: '8px' }}>{debt.className || 'N/A'}</span>
                                             </td>
                                             <td style={{ padding: '1.25rem 1.5rem', textAlign: 'right' }}>
                                                 <div style={{ color: '#ef4444', fontWeight: '900', fontSize: '1rem' }}>{(Number(debt.balance) || 0).toLocaleString()} <small>FCFA</small></div>

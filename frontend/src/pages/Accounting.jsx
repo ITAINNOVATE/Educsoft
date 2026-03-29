@@ -418,32 +418,32 @@ const Accounting = () => {
                             </thead>
                             <tbody>
                                 {displayedDebts.map(debt => (
-                                    <tr key={debt.id} style={{ borderBottom: '1px solid #f9f9f9', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.backgroundColor = '#fcfcfc'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                                        <td style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.875rem' }}>{debt.regNumber}</td>
-                                        <td style={{ padding: '1rem', fontWeight: '500' }}>{debt.name}</td>
-                                        <td style={{ padding: '1rem' }}>{debt.className}</td>
-                                        <td style={{ padding: '1rem' }}>{debt.totalFees.toLocaleString()}</td>
-                                        <td style={{ padding: '1rem', color: '#2e7d32' }}>{debt.paid.toLocaleString()}</td>
-                                        <td style={{ padding: '1rem' }}>
-                                            <div style={{ color: 'var(--error)', fontWeight: 'bold' }}>{debt.balance.toLocaleString()}</div>
-                                            <div style={{ display: 'flex', gap: '4px', marginTop: '4px' }}>
-                                                {debt.breakdown.obligatory > 0 && (
-                                                    <span title="Obligatoire" style={{ padding: '2px 6px', background: '#ffebee', color: '#c62828', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 'bold' }}>
-                                                        OBL: {debt.breakdown.obligatory.toLocaleString()}
-                                                    </span>
-                                                )}
-                                                {debt.breakdown.optional > 0 && (
-                                                    <span title="Optionnel" style={{ padding: '2px 6px', background: '#fff3e0', color: '#ef6c00', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 'bold' }}>
-                                                        OPT: {debt.breakdown.optional.toLocaleString()}
-                                                    </span>
-                                                )}
-                                                {debt.breakdown.occasional > 0 && (
-                                                    <span title="Occasionnel" style={{ padding: '2px 6px', background: '#f5f5f5', color: '#616161', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 'bold' }}>
-                                                        OCC: {debt.breakdown.occasional.toLocaleString()}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </td>
+                                        <tr key={debt.id} style={{ borderBottom: '1px solid #f9f9f9', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.backgroundColor = '#fcfcfc'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                                            <td style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.875rem' }}>{debt.regNumber || '---'}</td>
+                                            <td style={{ padding: '1rem', fontWeight: '500' }}>{debt.name || 'Inconnu'}</td>
+                                            <td style={{ padding: '1rem' }}>{debt.className || '---'}</td>
+                                            <td style={{ padding: '1rem' }}>{(debt.totalFees || 0).toLocaleString()}</td>
+                                            <td style={{ padding: '1rem', color: '#2e7d32' }}>{(debt.paid || 0).toLocaleString()}</td>
+                                            <td style={{ padding: '1rem' }}>
+                                                <div style={{ color: 'var(--error)', fontWeight: 'bold' }}>{(debt.balance || 0).toLocaleString()}</div>
+                                                <div style={{ display: 'flex', gap: '4px', marginTop: '4px' }}>
+                                                    {(debt.breakdown?.obligatory > 0) && (
+                                                        <span title="Obligatoire" style={{ padding: '2px 6px', background: '#ffebee', color: '#c62828', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 'bold' }}>
+                                                            OBL: {(debt.breakdown.obligatory || 0).toLocaleString()}
+                                                        </span>
+                                                    )}
+                                                    {(debt.breakdown?.optional > 0) && (
+                                                        <span title="Optionnel" style={{ padding: '2px 6px', background: '#fff3e0', color: '#ef6c00', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 'bold' }}>
+                                                            OPT: {(debt.breakdown.optional || 0).toLocaleString()}
+                                                        </span>
+                                                    )}
+                                                    {(debt.breakdown?.occasional > 0) && (
+                                                        <span title="Occasionnel" style={{ padding: '2px 6px', background: '#f5f5f5', color: '#616161', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 'bold' }}>
+                                                            OCC: {(debt.breakdown.occasional || 0).toLocaleString()}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </td>
                                         <td style={{ padding: '1rem' }}>
                                             <button style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                                                 <FileText size={16} /> Relancer
@@ -469,17 +469,17 @@ const Accounting = () => {
                             <tbody>
                                 {displayedJournal.map(p => (
                                     <tr key={p.id} style={{ borderBottom: '1px solid #f9f9f9', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.backgroundColor = '#fcfcfc'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                                        <td style={{ padding: '1rem', fontSize: '0.85rem' }}>{new Date(p.paymentDate).toLocaleDateString('fr-FR')}</td>
-                                        <td style={{ padding: '1rem', fontWeight: '700', color: 'var(--primary-dark)' }}>{p.receiptNumber}</td>
+                                        <td style={{ padding: '1rem', fontSize: '0.85rem' }}>{p.paymentDate ? new Date(p.paymentDate).toLocaleDateString('fr-FR') : '---'}</td>
+                                        <td style={{ padding: '1rem', fontWeight: '700', color: 'var(--primary-dark)' }}>{p.receiptNumber || '---'}</td>
                                         <td style={{ padding: '1rem' }}>
-                                            <div style={{ fontWeight: '500' }}>{p.student.firstName} {p.student.lastName}</div>
-                                            <div style={{ fontSize: '0.75rem', color: '#666' }}>{p.student.regNumber}</div>
+                                            <div style={{ fontWeight: '500' }}>{p.student?.lastName || '---'} {p.student?.firstName || ''}</div>
+                                            <div style={{ fontSize: '0.75rem', color: '#666' }}>{p.student?.regNumber || '---'}</div>
                                         </td>
-                                        <td style={{ padding: '1rem', fontSize: '0.9rem' }}>{p.feeName}</td>
-                                        <td style={{ padding: '1rem', fontWeight: '800' }}>{p.amount.toLocaleString()}</td>
+                                        <td style={{ padding: '1rem', fontSize: '0.9rem' }}>{p.feeName || '---'}</td>
+                                        <td style={{ padding: '1rem', fontWeight: '800' }}>{(p.amount || 0).toLocaleString()}</td>
                                         <td style={{ padding: '1rem' }}>
                                             <span style={{ padding: '4px 8px', background: '#f0f4f8', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '600' }}>
-                                                {p.method}
+                                                {p.method || '---'}
                                             </span>
                                         </td>
                                         <td style={{ padding: '0.5rem 1rem' }}>
@@ -595,8 +595,8 @@ const Accounting = () => {
                                     border: '1px solid #e2e8f0', borderRadius: '12px', textAlign: 'center'
                                 }}>
                                     <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase' }}>Reçu de Paiement</div>
-                                    <div style={{ fontSize: '1.5rem', fontWeight: '900', color: 'var(--primary-dark)' }}>N° {selectedPayment.receiptNumber}</div>
-                                    <div style={{ fontSize: '0.9rem', color: '#64748b', marginTop: '0.25rem' }}>Fait le: {new Date(selectedPayment.paymentDate).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}</div>
+                                    <div style={{ fontSize: '1.5rem', fontWeight: '900', color: 'var(--primary-dark)' }}>N° {selectedPayment?.receiptNumber || '---'}</div>
+                                    <div style={{ fontSize: '0.9rem', color: '#64748b', marginTop: '0.25rem' }}>Fait le: {selectedPayment?.paymentDate ? new Date(selectedPayment.paymentDate).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }) : '---'}</div>
                                 </div>
                             </div>
                         </div>
@@ -605,9 +605,9 @@ const Accounting = () => {
                         <div style={{ marginBottom: '3rem', display: 'flex', gap: '2rem' }}>
                             <div style={{ flex: 1, padding: '1.5rem', background: '#fcfcfc', border: '1px solid #f1f5f9', borderRadius: '12px' }}>
                                 <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: '800', textTransform: 'uppercase', marginBottom: '0.75rem' }}>Informations de l'Élève</div>
-                                <div style={{ fontSize: '1.25rem', fontWeight: '800', marginBottom: '0.4rem' }}>{selectedPayment.studentName}</div>
+                                <div style={{ fontSize: '1.25rem', fontWeight: '800', marginBottom: '0.4rem' }}>{selectedPayment?.studentName || '---'}</div>
                                 <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.95rem', color: '#444' }}>
-                                    <span><strong>Matricule:</strong> {selectedPayment.studentReg}</span>
+                                    <span><strong>Matricule:</strong> {selectedPayment?.studentReg || '---'}</span>
                                     <span><strong>Classe:</strong> {selectedPayment.studentClass}</span>
                                 </div>
                             </div>
@@ -625,11 +625,11 @@ const Accounting = () => {
                             <tbody>
                                 <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
                                     <td style={{ padding: '1.5rem 1rem', fontWeight: '600' }}>
-                                        {selectedPayment.feeName}
-                                        {selectedPayment.notes && <div style={{ fontSize: '0.8rem', fontStyle: 'italic', fontWeight: '400', color: '#666', marginTop: '0.4rem' }}>Note: {selectedPayment.notes}</div>}
+                                        {selectedPayment?.feeName || '---'}
+                                        {selectedPayment?.notes && <div style={{ fontSize: '0.8rem', fontStyle: 'italic', fontWeight: '400', color: '#666', marginTop: '0.4rem' }}>Note: {selectedPayment.notes}</div>}
                                     </td>
-                                    <td style={{ padding: '1.5rem 1rem', textAlign: 'right' }}>{selectedPayment.method}</td>
-                                    <td style={{ padding: '1.5rem 1rem', textAlign: 'right', fontWeight: '800', fontSize: '1.1rem' }}>{selectedPayment.amount.toLocaleString()}</td>
+                                    <td style={{ padding: '1.5rem 1rem', textAlign: 'right' }}>{selectedPayment?.method || '---'}</td>
+                                    <td style={{ padding: '1.5rem 1rem', textAlign: 'right', fontWeight: '800', fontSize: '1.1rem' }}>{(selectedPayment?.amount || 0).toLocaleString()}</td>
                                 </tr>
                                 <tr style={{ background: 'var(--primary-dark)', color: 'white' }}>
                                     <td colSpan="2" style={{ padding: '1rem', textAlign: 'right', fontWeight: '700' }}>TOTAL RÉGLÉ</td>

@@ -522,14 +522,14 @@ const Payments = () => {
                                             <FileText size={20} />
                                         </div>
                                         <div>
-                                            <div style={{ fontWeight: '700', fontSize: '0.95rem' }}>{p.student?.firstName} {p.student?.lastName}</div>
+                                            <div style={{ fontWeight: '700', fontSize: '0.95rem' }}>{p.student?.lastName || '---'} {p.student?.firstName || ''}</div>
                                             <div style={{ fontSize: '0.75rem', color: '#666' }}>
-                                                {p.receiptNumber} • {new Date(p.paymentDate).toLocaleDateString('fr-FR')}
+                                                {(p.receiptNumber || '---')} • {p.paymentDate ? new Date(p.paymentDate).toLocaleDateString('fr-FR') : '---'}
                                             </div>
                                         </div>
                                     </div>
                                     <div style={{ textAlign: 'right' }}>
-                                        <div style={{ fontWeight: '800', color: 'var(--primary-dark)' }}>{p.amount.toLocaleString()} FCFA</div>
+                                        <div style={{ fontWeight: '800', color: 'var(--primary-dark)' }}>{(p.amount || 0).toLocaleString()} FCFA</div>
                                         <button
                                             onClick={() => downloadReceipt(p.id)}
                                             style={{
