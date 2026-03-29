@@ -64,6 +64,12 @@ router.post('/login', async (req, res) => {
                 role: user.role,
                 establishmentId: user.role === 'SUPER_ADMIN' ? establishment.id : user.establishmentId,
                 establishmentName: establishment.name,
+                establishmentInfo: {
+                    address: establishment.address,
+                    phone: establishment.phone,
+                    email: establishment.email,
+                    logoUrl: establishment.logoUrl
+                },
                 token: jwt.sign(
                     { 
                         id: user.id, 
@@ -116,6 +122,12 @@ router.post('/switch-establishment', protect, async (req, res) => {
             role: req.user.role,
             establishmentId: establishment.id,
             establishmentName: establishment.name,
+            establishmentInfo: {
+                address: establishment.address,
+                phone: establishment.phone,
+                email: establishment.email,
+                logoUrl: establishment.logoUrl
+            },
             token: newToken
         });
     } catch (error) {

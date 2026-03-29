@@ -6,7 +6,7 @@ import {
     CreditCard, Search, FileText,
     CheckCircle, User, BookOpen, AlertCircle,
     Download, ArrowRight, History, Calendar,
-    Wallet, TrendingUp, Calculator
+    Wallet, TrendingUp, Calculator, Printer, X
 } from 'lucide-react';
 
 const Payments = () => {
@@ -32,6 +32,7 @@ const Payments = () => {
     const [showResults, setShowResults] = useState(false);
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [confirmationData, setConfirmationData] = useState(null);
+    const [showInvoice, setShowInvoice] = useState(false);
 
     const searchRef = useRef(null);
 
@@ -171,17 +172,24 @@ const Payments = () => {
             fetchDailySummary();
             fetchRecentTransactions();
 
-            // Open receipt (might be blocked by popup blocker)
-            window.open(`${API_BASE}/payments/receipt/${res.data.id}?token=${user.token}`, '_blank');
+            // Set data for invoice visualization
+            setSuccessData({
+                id: res.data.id,
+                amount: confirmationData.amount,
+                studentName: confirmationData.studentName,
+                studentClass: confirmationData.studentClass,
+                studentReg: selectedStudent.regNumber,
+                receiptNumber: res.data.receiptNumber,
+                feeName: confirmationData.feeName,
+                paymentDate: res.data.paymentDate,
+                method: confirmationData.method,
+                notes: confirmationData.notes,
+                remaining: selectedStudent.financials.remaining - confirmationData.amount
+            });
 
             // Reset form
             resetForm();
             setLastPaymentId(res.data.id);
-            setSuccessData({
-                amount: confirmationData.amount,
-                studentName: confirmationData.studentName,
-                receiptNumber: res.data.receiptNumber
-            });
             setShowConfirmation(false);
             setPaymentSuccess(true);
 
@@ -686,7 +694,10 @@ const Payments = () => {
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
                             <button
-                                onClick={() => downloadReceipt(lastPaymentId)}
+                                onClick={() => {
+                                    setPaymentSuccess(false);
+                                    setShowInvoice(true);
+                                }}
                                 className="btn btn-primary"
                                 style={{
                                     padding: '1rem', borderRadius: '12px', fontSize: '1.1rem',
@@ -694,7 +705,7 @@ const Payments = () => {
                                     fontWeight: '700'
                                 }}
                             >
-                                <Download size={24} /> Télécharger / Imprimer Reçu
+                                <FileText size={24} /> Visualiser la Facture
                             </button>
                             <button
                                 onClick={() => {
@@ -713,6 +724,153 @@ const Payments = () => {
                     </div>
                 </div>
             )}
+
+            {/* INVOICE VISUALIZATION MODAL (A4) */}
+            {showInvoice && successData && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', 
+                    zIndex: 2000, overflowY: 'auto', padding: '2rem 0'
+                }}>
+                    <div className="no-print" style={{ 
+                        width: '210mm', display: 'flex', justifyContent: 'space-between', 
+                        marginBottom: '1rem', alignItems: 'center' 
+                    }}>
+                        <button 
+                            onClick={() => setShowInvoice(false)}
+                            style={{ 
+                                background: 'white', border: 'none', padding: '0.75rem 1.5rem', 
+                                borderRadius: '8px', fontWeight: '700', cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                            }}
+                        >
+                            <X size={20} /> Fermer
+                        </button>
+                        <button 
+                            onClick={() => window.print()}
+                            style={{ 
+                                background: 'var(--primary)', color: 'white', border: 'none', 
+                                padding: '0.75rem 2rem', borderRadius: '8px', fontWeight: '700', 
+                                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem',
+                                boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                            }}
+                        >
+                            <Printer size={20} /> Imprimer (A4)
+                        </button>
+                    </div>
+
+                    <div id="invoice-print-area" className="invoice-a4">
+                        {/* Header Section */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3rem', borderBottom: '2px solid var(--primary)', paddingBottom: '1.5rem' }}>
+                            <div style={{ flex: 1 }}>
+                                {user.establishmentInfo?.logoUrl ? (
+                                    <div style={{ marginBottom: '1rem' }}>
+                                        <img src={user.establishmentInfo.logoUrl} alt="Logo" style={{ maxHeight: '100px', maxWidth: '200px', objectFit: 'contain' }} />
+                                    </div>
+                                ) : (
+                                    <div style={{ 
+                                        width: '120px', height: '120px', border: '2px dashed #ddd', 
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                                        borderRadius: '8px', color: '#999', fontSize: '0.8rem',
+                                        marginBottom: '1rem', background: '#fcfcfc'
+                                    }}>
+                                        LOGO ÉCOLE
+                                    </div>
+                                )}
+                                <h2 style={{ margin: 0, color: 'var(--primary-dark)', fontSize: '1.5rem', textTransform: 'uppercase' }}>
+                                    {user.establishmentName}
+                                </h2>
+                                <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.9rem', color: '#444' }}>{user.establishmentInfo?.address || 'Cotonou, Bénin'}</p>
+                                <p style={{ margin: '0.2rem 0', fontSize: '0.9rem', color: '#444' }}>Tél: {user.establishmentInfo?.phone || '+229 00 00 00 00'}</p>
+                                <p style={{ margin: '0.2rem 0', fontSize: '0.9rem', color: '#444' }}>Email: {user.establishmentInfo?.email || 'contact@ecole.bj'}</p>
+                            </div>
+                            <div style={{ textAlign: 'right', flex: 1 }}>
+                                <div style={{ 
+                                    display: 'inline-block', padding: '1rem 2rem', background: '#f8fafc', 
+                                    border: '1px solid #e2e8f0', borderRadius: '12px', textAlign: 'center'
+                                }}>
+                                    <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase' }}>Reçu de Paiement</div>
+                                    <div style={{ fontSize: '1.5rem', fontWeight: '900', color: 'var(--primary-dark)' }}>N° {successData.receiptNumber}</div>
+                                    <div style={{ fontSize: '0.9rem', color: '#64748b', marginTop: '0.25rem' }}>Fait le: {new Date(successData.paymentDate).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Student Info */}
+                        <div style={{ marginBottom: '3rem', display: 'flex', gap: '2rem' }}>
+                            <div style={{ flex: 1, padding: '1.5rem', background: '#fcfcfc', border: '1px solid #f1f5f9', borderRadius: '12px' }}>
+                                <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: '800', textTransform: 'uppercase', marginBottom: '0.75rem' }}>Informations de l'Élève</div>
+                                <div style={{ fontSize: '1.25rem', fontWeight: '800', marginBottom: '0.4rem' }}>{successData.studentName}</div>
+                                <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.95rem', color: '#444' }}>
+                                    <span><strong>Matricule:</strong> {successData.studentReg}</span>
+                                    <span><strong>Classe:</strong> {successData.studentClass}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Transaction Details Table */}
+                        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '3rem' }}>
+                            <thead>
+                                <tr style={{ borderBottom: '2px solid #333' }}>
+                                    <th style={{ textAlign: 'left', padding: '1rem', fontSize: '0.9rem', color: '#64748b' }}>DÉSIGNATION / MOTIF DU PAIEMENT</th>
+                                    <th style={{ textAlign: 'right', padding: '1rem', fontSize: '0.9rem', color: '#64748b' }}>MODE</th>
+                                    <th style={{ textAlign: 'right', padding: '1rem', fontSize: '0.9rem', color: '#64748b' }}>MONTANT (FCFA)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                    <td style={{ padding: '1.5rem 1rem', fontWeight: '600' }}>
+                                        {successData.feeName}
+                                        {successData.notes && <div style={{ fontSize: '0.8rem', fontStyle: 'italic', fontWeight: '400', color: '#666', marginTop: '0.4rem' }}>Note: {successData.notes}</div>}
+                                    </td>
+                                    <td style={{ padding: '1.5rem 1rem', textAlign: 'right' }}>{successData.method}</td>
+                                    <td style={{ padding: '1.5rem 1rem', textAlign: 'right', fontWeight: '800', fontSize: '1.1rem' }}>{successData.amount.toLocaleString()}</td>
+                                </tr>
+                                <tr style={{ background: 'var(--primary-dark)', color: 'white' }}>
+                                    <td colSpan="2" style={{ padding: '1rem', textAlign: 'right', fontWeight: '700' }}>TOTAL RÉGLÉ</td>
+                                    <td style={{ padding: '1rem', textAlign: 'right', fontWeight: '900', fontSize: '1.4rem' }}>{successData.amount.toLocaleString()}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        {/* Recap / Balance */}
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '4rem' }}>
+                            <div style={{ width: '300px', borderTop: '1px solid #eee', paddingTop: '1rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.95rem' }}>
+                                    <span>Reste à payer après ce versement:</span>
+                                    <span style={{ fontWeight: '800', color: successData.remaining > 0 ? 'var(--error)' : 'var(--success)' }}>
+                                        {successData.remaining.toLocaleString()} FCFA
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Signatures */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4rem' }}>
+                            <div style={{ textAlign: 'center', width: '200px' }}>
+                                <div style={{ fontSize: '0.9rem', fontWeight: '700', marginBottom: '4rem', textDecoration: 'underline' }}>Le Parent / Tuteur</div>
+                                <div style={{ borderTop: '1px dashed #ccc' }}></div>
+                            </div>
+                            <div style={{ textAlign: 'center', width: '200px' }}>
+                                <div style={{ fontSize: '0.9rem', fontWeight: '700', marginBottom: '4rem', textDecoration: 'underline' }}>La Comptabilité / Cachet</div>
+                                <div style={{ borderTop: '1px dashed #ccc' }}></div>
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div style={{ 
+                            position: 'absolute', bottom: '20mm', left: '20mm', right: '20mm', 
+                            textAlign: 'center', fontSize: '0.75rem', color: '#94a3b8',
+                            borderTop: '1px solid #f1f5f9', paddingTop: '1rem'
+                        }}>
+                            Ce reçu est généré par EduSoft. Toute altération manuelle annule sa validité. 
+                            Merci pour votre confiance.
+                        </div>
+                    </div>
+                </div>
+            )}
+
 
             {/* Global styles for components */}
             <style dangerouslySetInnerHTML={{

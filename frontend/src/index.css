@@ -106,3 +106,46 @@ input {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(0, 77, 64, 0.1);
 }
+
+/* --- Print Styles for Invoices --- */
+@media print {
+    body * {
+        visibility: hidden !important;
+    }
+    #invoice-print-area, #invoice-print-area * {
+        visibility: visible !important;
+    }
+    #invoice-print-area {
+        position: fixed !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: white !important;
+        z-index: 9999 !important;
+    }
+    .no-print {
+        display: none !important;
+    }
+}
+
+.invoice-a4 {
+    width: 210mm;
+    min-height: 297mm;
+    padding: 20mm;
+    margin: 2rem auto;
+    background: white;
+    box-shadow: 0 0 20px rgba(0,0,0,0.15);
+    position: relative;
+    box-sizing: border-box;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+@media screen and (max-width: 210mm) {
+    .invoice-a4 {
+        width: 95%;
+        padding: 10mm;
+    }
+}

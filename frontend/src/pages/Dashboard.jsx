@@ -163,8 +163,39 @@ const Dashboard = () => {
                             <h2 style={{ fontSize: '1.25rem', fontWeight: '700' }}>Analyses des Revenus</h2>
                             <span style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem', background: '#eee', borderRadius: '4px' }}>Données en cours</span>
                         </div>
-                        <div style={{ padding: '2rem', textAlign: 'center', backgroundColor: '#f8f9fa', borderRadius: '8px', color: 'var(--text-muted)' }}>
-                            Graphique temporairement indisponible (en cours de maintenance)
+                        <div style={{ height: '200px', width: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', padding: '1rem 0', gap: '8px' }}>
+                            {stats?.chartData?.map((item, index) => {
+                                const maxAmount = Math.max(...stats.chartData.map(d => d.amount), 1);
+                                const height = (item.amount / maxAmount) * 100;
+                                return (
+                                    <div key={index} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                                        <div style={{ 
+                                            width: '100%', 
+                                            height: `${height}%`, 
+                                            backgroundColor: 'var(--primary)', 
+                                            borderRadius: '4px 4px 0 0',
+                                            transition: 'height 1s ease-out',
+                                            minHeight: item.amount > 0 ? '4px' : '0',
+                                            position: 'relative'
+                                        }} title={`${item.amount.toLocaleString()} FCFA`}>
+                                            {height > 15 && (
+                                                <span style={{ 
+                                                    position: 'absolute', 
+                                                    top: '-20px', 
+                                                    left: '50%', 
+                                                    transform: 'translateX(-50%)', 
+                                                    fontSize: '0.65rem',
+                                                    fontWeight: 'bold',
+                                                    color: 'var(--primary-dark)'
+                                                }}>
+                                                    {Math.round(item.amount / 1000)}k
+                                                </span>
+                                            )}
+                                        </div>
+                                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>{item.day}</span>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </section>
 

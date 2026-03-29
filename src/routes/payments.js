@@ -123,22 +123,44 @@ router.post('/', protect, authorize('ADMIN', 'ACCOUNTANT', 'SECRETARY', 'SUPER_A
     }
 });
 
-// @desc    Get payment history for a student
-// @route   GET /api/payments/student/:studentId
-router.get('/student/:studentId', protect, async (req, res) => {
+// @desc    Get all payments (Journal de Caisse)
+// @route   GET /api/payments
+router.get('/', protect, authorize('ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'), async (req, res) => {
+    const { startDate, endDate, method } = req.query;
     try {
+        const where = { establishmentId: req.user.establishmentId };
+        
+        if (startDate || endDate) {
+            where.paymentDate = {};
+            if (startDate) where.paymentDate.gte = new Date(startDate);
+            if (endDate) where.paymentDate.lte = new Date(new Date(endDate).setHours(23, 59, 59, 999));
+        }
+        
+        if (method) where.method = method;
+
         const payments = await prisma.payment.findMany({
-            where: { 
-                studentId: req.params.studentId,
-                establishmentId: req.user.establishmentId
+            where,
+            include: { 
+                student: { 
+                    include: { 
+                        enrollments: { 
+                            where: { status: 'VALIDATED' },
+                            include: { class: { include: { fees: true } } },
+                            take: 1
+                        },
+                        payments: true // Needed for balance calculation in detail view
+                    } 
+                } 
             },
             orderBy: { paymentDate: 'desc' }
         });
         res.json(payments);
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        res.status(500).json({ message: 'Error fetching journal', error: error.message });
     }
 });
+
+// @desc    Get payment history for a student
 
 const { generateReceiptPDF } = require('../utils/receipt');
 

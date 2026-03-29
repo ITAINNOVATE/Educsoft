@@ -3,6 +3,7 @@ const { prisma } = require('../context');
 const { protect, authorize } = require('../middleware/auth');
 
 const router = express.Router();
+const { generateAccountingReport } = require('../services/reportService');
 
 // @desc    Get overall financial statistics
 // @route   GET /api/accounting/stats
@@ -100,8 +101,29 @@ router.get('/stats', protect, authorize('ADMIN', 'ACCOUNTANT', 'DIRECTOR', 'SUPE
             : (totalPayments?._sum?.amount || 0);
 
 
-        // Fetch graph data (daily revenue for the last 7 days OR selected range)
-        // ... (Graph data logic would go here, omitting for brevity/complexity in this step)
+        // Fetch last 7 days revenue for the chart
+        const last7Days = [];
+        for (let i = 6; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            date.setHours(0, 0, 0, 0);
+            
+            const nextDate = new Date(date);
+            nextDate.setDate(nextDate.getDate() + 1);
+
+            const dayRev = await prisma.payment.aggregate({
+                _sum: { amount: true },
+                where: {
+                    paymentDate: { gte: date, lt: nextDate },
+                    establishmentId: req.user.establishmentId
+                }
+            });
+
+            last7Days.push({
+                day: date.toLocaleDateString('fr-FR', { weekday: 'short' }),
+                amount: Number(dayRev._sum.amount) || 0
+            });
+        }
 
         res.json({
             revenueDay: Number(dayPayments?._sum?.amount) || 0,
@@ -111,7 +133,8 @@ router.get('/stats', protect, authorize('ADMIN', 'ACCOUNTANT', 'DIRECTOR', 'SUPE
             stats: {
                 students: studentCount || 0,
                 classes: classCount || 0
-            }
+            },
+            chartData: last7Days
         });
     } catch (error) {
         console.error("Accounting Stats Global Error:", error);
@@ -187,6 +210,81 @@ router.get('/debts', protect, authorize('ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'), a
             error: error.message,
             stack: error.stack
         });
+    }
+});
+
+// @desc    Get detailed PDF report
+// @route   GET /api/accounting/report
+router.get('/report', protect, authorize('ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'), async (req, res) => {
+    try {
+        const { startDate, endDate } = req.query;
+        if (!req.user.establishmentId) {
+            return res.status(400).json({ message: 'Aucun établissement sélectionné' });
+        }
+
+        const establishment = await prisma.establishment.findUnique({
+            where: { id: req.user.establishmentId }
+        });
+
+        // 1. Fetch Stats (Same logic as /stats)
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        
+        const [totalPayments, monthPayments, filteredPayments] = await Promise.all([
+            prisma.payment.aggregate({ _sum: { amount: true }, where: { establishmentId: req.user.establishmentId } }),
+            prisma.payment.aggregate({ _sum: { amount: true }, where: { paymentDate: { gte: startOfMonth }, establishmentId: req.user.establishmentId } }),
+            (startDate && endDate) ? prisma.payment.aggregate({
+                _sum: { amount: true },
+                where: { 
+                    paymentDate: { gte: new Date(startDate), lte: new Date(new Date(endDate).setHours(23, 59, 59, 999)) },
+                    establishmentId: req.user.establishmentId
+                }
+            }) : Promise.resolve({ _sum: { amount: 0 } })
+        ]);
+
+        // 2. Fetch Debts (Same logic as /debts)
+        const students = await prisma.student.findMany({
+            where: { status: 'ACTIF', establishmentId: req.user.establishmentId },
+            include: {
+                enrollments: { include: { class: { include: { fees: true } } } },
+                payments: true
+            }
+        });
+
+        const debts = students.map(s => {
+            const enrollment = s.enrollments?.[0];
+            if (!enrollment || !enrollment.class) return null;
+            const financials = calculateStudentFinancials(enrollment.class.fees || [], s.payments || []);
+            return {
+                name: `${s.firstName} ${s.lastName}`,
+                className: enrollment.class.name,
+                paid: financials.global.totalPaid,
+                balance: financials.global.remaining
+            };
+        }).filter(d => d !== null && d.balance > 0);
+
+        // Prepare report data
+        const reportData = {
+            establishmentName: establishment?.name || 'EDUSOFT',
+            dateRange: { start: startDate, end: endDate },
+            stats: {
+                revenueTotal: (startDate && endDate) ? filteredPayments._sum.amount : totalPayments._sum.amount,
+                revenueMonth: monthPayments._sum.amount
+            },
+            totalDebt: debts.reduce((acc, curr) => acc + curr.balance, 0),
+            debts: debts
+        };
+
+        // Set response headers for PDF
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=Rapport_Comptable_${new Date().toISOString().split('T')[0]}.pdf`);
+
+        // Generate and stream
+        generateAccountingReport(reportData, res);
+
+    } catch (error) {
+        console.error("Accounting Report Error:", error);
+        res.status(500).json({ message: 'Erreur lors de la génération du rapport', error: error.message });
     }
 });
 

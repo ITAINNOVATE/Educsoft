@@ -32,6 +32,7 @@ model Establishment {
   classes           Class[]
   payments          Payment[]
   teacherPayments   TeacherPayment[]
+  subjects          Subject[]
   auditLogs         AuditLog[]
   
   createdAt     DateTime  @default(now())
@@ -84,6 +85,7 @@ model Student {
   payments          Payment[]
   documents         Document[]
   schoolHistory     SchoolHistory[]
+  grades            Grade[]
   
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
@@ -150,6 +152,7 @@ model SchoolYear {
   
   enrollments Enrollment[]
   classes     Class[]
+  terms       Term[]
 
   @@unique([name, establishmentId])
 }
@@ -167,6 +170,7 @@ model Class {
   schoolYear   SchoolYear  @relation(fields: [schoolYearId], references: [id])
   
   fees        Fee[]
+  subjects    Subject[]
 }
 
 model Fee {
@@ -250,4 +254,61 @@ model TeacherPayment {
   establishment   Establishment @relation(fields: [establishmentId], references: [id])
   
   teacher       User     @relation(fields: [teacherId], references: [id])
+}
+
+model Subject {
+  id              String      @id @default(uuid())
+  name            String
+  code            String?     // e.g., MATH, PHYS, ENG
+  coefficient     Float       @default(1.0)
+  
+  establishmentId String
+  establishment   Establishment @relation(fields: [establishmentId], references: [id])
+  
+  classId         String
+  class           Class       @relation(fields: [classId], references: [id])
+  
+  grades          Grade[]
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model Term {
+  id              String      @id @default(uuid())
+  name            String      // e.g., 1er Trimestre, 2ème Trimestre, 3ème Trimestre
+  startDate       DateTime?
+  endDate         DateTime?
+  
+  schoolYearId    String
+  schoolYear      SchoolYear  @relation(fields: [schoolYearId], references: [id])
+  
+  grades          Grade[]
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  @@unique([name, schoolYearId])
+}
+
+model Grade {
+  id              String      @id @default(uuid())
+  value           Float       // The grade itself (e.g., 15.5)
+  weight          Float       @default(1.0) // For specific test weight
+  type            String      @default("TEST") // TEST (Interro), EXAM (Composition)
+  date            DateTime    @default(now())
+  
+  studentId       String
+  student         Student     @relation(fields: [studentId], references: [id])
+  
+  subjectId       String
+  subject         Subject     @relation(fields: [subjectId], references: [id])
+  
+  termId          String
+  term            Term        @relation(fields: [termId], references: [id])
+  
+  teacherId       String?
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
 }
