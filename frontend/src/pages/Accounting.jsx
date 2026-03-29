@@ -571,11 +571,11 @@ const Accounting = () => {
                             <div style={{ flex: 1 }}>
                                 {user.establishmentInfo?.logoUrl ? (
                                     <div style={{ marginBottom: '1rem' }}>
-                                        <img src={user.establishmentInfo.logoUrl} alt="Logo" style={{ maxHeight: '100px', maxWidth: '200px', objectFit: 'contain' }} />
+                                        <img src={user.establishmentInfo.logoUrl} alt="Logo" style={{ maxHeight: '130px', maxWidth: '200px', objectFit: 'contain' }} />
                                     </div>
                                 ) : (
                                     <div style={{ marginBottom: '1.5rem' }}>
-                                        <img src={logo} alt="EDUSOFT" style={{ maxHeight: '100px', maxWidth: '200px', objectFit: 'contain' }} />
+                                        <img src={logo} alt="EDUSOFT" style={{ maxHeight: '130px', maxWidth: '200px', objectFit: 'contain' }} />
                                     </div>
                                 )}
                                 <h2 style={{ margin: 0, color: 'var(--primary-dark)', fontSize: '1.5rem', textTransform: 'uppercase' }}>

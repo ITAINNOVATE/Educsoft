@@ -105,7 +105,7 @@ const SuperAdmin = () => {
             <header className="stack-on-mobile" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2.5rem', gap: '1rem' }}>
                 <div>
                     <h1 style={{ fontSize: '2.2rem', color: 'var(--primary-dark)', display: 'flex', alignItems: 'center', gap: '1rem', fontWeight: '800', margin: 0 }}>
-                        <img src={logo} alt="ITA" style={{ height: '50px', width: 'auto' }} /> Système ITA
+                        <img src={logo} alt="ITA" style={{ height: '65px', width: 'auto' }} /> Système ITA
                     </h1>
                     <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>Administration globale des établissements affiliés.</p>
                 </div>

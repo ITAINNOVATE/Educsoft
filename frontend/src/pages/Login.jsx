@@ -87,7 +87,7 @@ const Login = () => {
             <section className="hero-pattern" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1.5rem 1rem' }}>
                 <div style={{ textAlign: 'center', maxWidth: '800px', marginBottom: '1.5rem' }}>
                     <div className="fade-in" style={{ display: 'inline-flex', marginBottom: '1.5rem' }}>
-                        <img src={logo} alt="EDUSOFT" style={{ height: '120px', width: 'auto' }} />
+                        <img src={logo} alt="EDUSOFT" style={{ height: '150px', width: 'auto' }} />
                     </div>
                     <h2 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--primary)', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.2em' }}>Intelligence Scolaire</h2>
                     <p style={{ fontSize: '1rem', color: '#64748b', lineHeight: '1.6', marginBottom: '1rem', maxWidth: '600px', margin: '0 auto' }}>

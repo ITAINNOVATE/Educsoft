@@ -104,7 +104,7 @@ const Layout = () => {
     <div className="app-container">
       {/* Mobile Header */}
       <header className="mobile-header">
-        <img src={logo} alt="EDUSOFT" style={{ height: '32px', width: 'auto' }} />
+        <img src={logo} alt="EDUSOFT" style={{ height: '40px', width: 'auto' }} />
         <button onClick={toggleSidebar} style={{ background: 'none', border: 'none', color: 'white' }}>
           {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -118,7 +118,7 @@ const Layout = () => {
 
       <aside className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
         <div style={{ padding: '2rem 0', textAlign: 'center' }}>
-          <img src={logo} alt="EDUSOFT" style={{ height: '70px', width: 'auto', display: 'block', margin: '0 auto' }} />
+          <img src={logo} alt="EDUSOFT" style={{ height: '85px', width: 'auto', display: 'block', margin: '0 auto' }} />
         </div>
         
         {user?.role === 'SUPER_ADMIN' ? (
