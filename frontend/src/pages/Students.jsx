@@ -405,11 +405,14 @@ const Students = () => {
                             <div style={{ display: 'flex', gap: '1rem', flex: 1, width: '100%' }}>
                                 <select className="form-input" value={filterClass} onChange={e => setFilterClass(e.target.value)}>
                                     <option value="">Toutes les classes</option>
-                                    {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                    {(Array.isArray(classes) ? classes : []).map(c => <option key={c.id} value={c.id}>{c.name || '---'}</option>)}
                                 </select>
                                 <select className="form-input" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
                                     <option value="ACTIF">ACTIF</option>
                                     <option value="SUSPENDU">SUSPENDU</option>
+                                    <option value="TRANSFERE">TRANSFERE</option>
+                                    <option value="ABANDON">ABANDON</option>
+                                    <option value="DIPLOME">DIPLOME</option>
                                     <option value="ARCHIVE">ARCHIVE</option>
                                 </select>
                             </div>
@@ -430,21 +433,21 @@ const Students = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {displayedStudents.map(student => (
+                                    {(Array.isArray(displayedStudents) ? displayedStudents : []).map(student => (
                                         <tr key={student.id} style={{ borderBottom: '1px solid #f5f5f5', transition: 'background 0.2s' }}>
-                                            <td style={{ padding: '1rem', fontWeight: 'bold', color: 'var(--primary)', whiteSpace: 'nowrap' }}>{student.regNumber}</td>
+                                            <td style={{ padding: '1rem', fontWeight: 'bold', color: 'var(--primary)', whiteSpace: 'nowrap' }}>{student.regNumber || '---'}</td>
                                             <td style={{ padding: '1rem' }}>
-                                                <div style={{ fontWeight: '600' }}>{student.lastName}</div>
-                                                <div style={{ fontSize: '0.8rem', color: '#666' }}>{student.firstName}</div>
+                                                <div style={{ fontWeight: '600' }}>{student.lastName || '---'}</div>
+                                                <div style={{ fontSize: '0.8rem', color: '#666' }}>{student.firstName || ''}</div>
                                             </td>
-                                            <td style={{ padding: '1rem', whiteSpace: 'nowrap' }}>{student.enrollments[0]?.class?.name || '---'}</td>
-                                            <td style={{ padding: '1rem' }}>{student.gender}</td>
+                                            <td style={{ padding: '1rem', whiteSpace: 'nowrap' }}>{student.enrollments?.[0]?.class?.name || '---'}</td>
+                                            <td style={{ padding: '1rem' }}>{student.gender || '---'}</td>
                                             <td style={{ padding: '1rem' }}>
                                                 <span style={{ 
                                                     padding: '4px 8px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 'bold',
                                                     backgroundColor: student.status === 'ACTIF' ? '#e8f5e9' : '#ffebee',
                                                     color: student.status === 'ACTIF' ? '#2e7d32' : '#c62828'
-                                                }}>{student.status}</span>
+                                                }}>{student.status || 'INCONNU'}</span>
                                             </td>
                                             <td style={{ padding: '1rem' }}>
                                                 <button className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => openDetails(student)}>
@@ -453,7 +456,7 @@ const Students = () => {
                                             </td>
                                         </tr>
                                     ))}
-                                    {displayedStudents.length === 0 && !loading && (
+                                    {(!Array.isArray(displayedStudents) || displayedStudents.length === 0) && !loading && (
                                         <tr><td colSpan="6" style={{ textAlign: 'center', padding: '3rem', color: '#999' }}>Aucun élève trouvé.</td></tr>
                                     )}
                                 </tbody>
@@ -1003,100 +1006,6 @@ const Students = () => {
                 </div>
             )}
 
-            {view === 'LIST' && (
-                <>
-                    <div className="card" style={{ marginBottom: '1.5rem', padding: '1.5rem' }}>
-                        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                            <div style={{ position: 'relative', flex: 2, minWidth: '300px' }}>
-                                <Search style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} size={18} />
-                                <input
-                                    type="text"
-                                    className="form-input"
-                                    placeholder="Nom, matricule ou parent..."
-                                    style={{ paddingLeft: '3rem' }}
-                                    value={searchTerm}
-                                    onChange={e => setSearchTerm(e.target.value)}
-                                />
-                            </div>
-                            <select className="form-input" style={{ flex: 1 }} value={filterClass} onChange={e => setFilterClass(e.target.value)}>
-                                <option value="">Toutes les Classes</option>
-                                {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                            </select>
-                            <select className="form-input" style={{ flex: 1 }} value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
-                                <option value="ACTIF">ACTIF</option>
-                                <option value="SUSPENDU">SUSPENDU</option>
-                                <option value="TRANSFERE">TRANSFERE</option>
-                                <option value="ARCHIVE">ARCHIVE</option>
-                                <option value="">Tous les Statuts</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
-                        <div style={{ overflowX: 'auto' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                <thead style={{ backgroundColor: '#fafafa', borderBottom: '2px solid #eee' }}>
-                                    <tr>
-                                        <th style={{ padding: '1rem', textAlign: 'left' }}>Matricule</th>
-                                        <th style={{ padding: '1rem', textAlign: 'left' }}>Élève</th>
-                                        <th style={{ padding: '1rem', textAlign: 'left' }}>Classe</th>
-                                        <th style={{ padding: '1rem', textAlign: 'left' }}>Parent Responsable</th>
-                                        <th style={{ padding: '1rem', textAlign: 'left' }}>Statut</th>
-                                        <th style={{ padding: '1rem', textAlign: 'center' }}>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {filteredStudents.map(student => {
-                                        const primaryParent = student.parents.find(p => p.isPrimary)?.parent || student.parents[0]?.parent;
-                                        return (
-                                            <tr key={student.id} style={{ borderBottom: '1px solid #f5f5f5', transition: 'background 0.2s' }} className="table-row-hover">
-                                                <td style={{ padding: '1rem', fontWeight: 'bold', color: 'var(--primary)' }}>{student.regNumber}</td>
-                                                <td style={{ padding: '1rem' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                                        <div style={{ width: '35px', height: '35px', borderRadius: '50%', backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 'bold' }}>
-                                                            {(student.firstName?.[0] || '?')}{(student.lastName?.[0] || '?')}
-                                                        </div>
-                                                        <div>
-                                                            <div style={{ fontWeight: '600' }}>{student.lastName || '---'} {student.firstName || ''}</div>
-                                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{student.gender === 'M' ? 'Masculin' : (student.gender === 'F' ? 'Féminin' : '---')}</div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td style={{ padding: '1rem' }}>
-                                                    <div style={{ fontSize: '0.9rem' }}>{student.enrollments[0]?.class?.name || '---'}</div>
-                                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{student.enrollments[0]?.class?.level}</div>
-                                                </td>
-                                                <td style={{ padding: '1rem' }}>
-                                                    {primaryParent ? (
-                                                        <>
-                                                            <div style={{ fontSize: '0.9rem' }}>{primaryParent.lastName || '---'} {primaryParent.firstName || ''}</div>
-                                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{primaryParent.phonePrimary || '---'}</div>
-                                                        </>
-                                                    ) : '---'}
-                                                </td>
-                                                <td style={{ padding: '1rem' }}>
-                                                    <span style={{ padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 'bold', backgroundColor: student.status === 'ACTIF' ? '#e8f5e9' : '#fafafa', color: student.status === 'ACTIF' ? '#2e7d32' : '#777' }}>
-                                                        {student.status}
-                                                    </span>
-                                                </td>
-                                                <td style={{ padding: '1rem', textAlign: 'center' }}>
-                                                    <button className="btn btn-primary" onClick={() => openDetails(student)} style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>Dossier Complet</button>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                            {filteredStudents.length === 0 && (
-                                <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                                    <Search size={40} style={{ opacity: 0.2, marginBottom: '1rem' }} />
-                                    <p>Aucun élève trouvé pour ces critères.</p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </>
-            )}
         </div>
     );
 };
