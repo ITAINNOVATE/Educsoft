@@ -108,16 +108,16 @@ const Accounting = () => {
                 }
             });
 
-            const newStudents = res.data.students;
+            const newStudents = res.data?.students || [];
             if (reset) {
                 setDebts(newStudents);
             } else {
-                setDebts(prev => [...prev, ...newStudents]);
+                setDebts(prev => [...(Array.isArray(prev) ? prev : []), ...newStudents]);
             }
 
-            setDebtPagination(res.data.pagination);
+            setDebtPagination(res.data?.pagination || { total: 0, pages: 0 });
             setDebtPage(pageNum);
-            setHasMoreDebts(pageNum < res.data.pagination.pages);
+            setHasMoreDebts(pageNum < (res.data?.pagination?.pages || 0));
         } catch (error) {
             console.error('Error fetching debts:', error);
         } finally {
@@ -142,16 +142,16 @@ const Accounting = () => {
                 params
             });
 
-            const newPayments = res.data.payments;
+            const newPayments = res.data?.payments || [];
             if (reset) {
                 setJournalData(newPayments);
             } else {
-                setJournalData(prev => [...prev, ...newPayments]);
+                setJournalData(prev => [...(Array.isArray(prev) ? prev : []), ...newPayments]);
             }
 
-            setJournalPagination(res.data.pagination);
+            setJournalPagination(res.data?.pagination || { total: 0, pages: 0 });
             setJournalPage(pageNum);
-            setHasMoreJournal(pageNum < res.data.pagination.pages);
+            setHasMoreJournal(pageNum < (res.data?.pagination?.pages || 0));
         } catch (error) {
             console.error('Error fetching journal:', error);
         } finally {
@@ -229,10 +229,11 @@ const Accounting = () => {
 
     // ... existing filter logic ...
 
-    const totalDebt = debts.reduce((acc, curr) => acc + curr.balance, 0);
+    const safeDebts = Array.isArray(debts) ? debts : [];
+    const totalDebt = safeDebts.reduce((acc, curr) => acc + (curr.balance || 0), 0);
 
-    const displayedDebts = debts;
-    const displayedJournal = journalData;
+    const displayedDebts = safeDebts;
+    const displayedJournal = Array.isArray(journalData) ? journalData : [];
 
     const handleViewInvoice = (p) => {
         // Calculate balance for the invoice

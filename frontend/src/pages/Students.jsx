@@ -85,20 +85,20 @@ const Students = () => {
                 }
             });
             
-            const newStudents = res.data.students;
+            const newStudents = res.data?.students || [];
             if (reset) {
                 setStudents(newStudents);
             } else {
-                setStudents(prev => [...prev, ...newStudents]);
+                setStudents(prev => [...(Array.isArray(prev) ? prev : []), ...newStudents]);
             }
 
-            setPagination(res.data.pagination);
+            setPagination(res.data?.pagination || { total: 0, pages: 0 });
             setPage(pageNum);
-            setHasMore(pageNum < res.data.pagination.pages);
+            setHasMore(pageNum < (res.data?.pagination?.pages || 0));
 
-            if (selectedStudent) {
+            if (selectedStudent?.id) {
                 const refreshed = await axios.get(`${API_BASE}/students/${selectedStudent.id}`, authHeader);
-                setSelectedStudent(refreshed.data);
+                if (refreshed.data) setSelectedStudent(refreshed.data);
             }
         } catch (error) {
             console.error('Error fetching students:', error);
