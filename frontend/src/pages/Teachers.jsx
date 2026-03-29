@@ -43,11 +43,8 @@ const Teachers = () => {
         try {
             // Re-using the /users endpoint but filtering for TEACHER locally or if API supports it
             // Assuming /users returns all users for admin
-            const res = await axios.get(`${API_BASE}/users`, {
-                headers: { Authorization: `Bearer ${user.token}` }
-            });
-            // Filter only teachers
-            const teacherList = res.data.filter(u => u.role === 'TEACHER');
+            const rawData = Array.isArray(res.data) ? res.data : [];
+            const teacherList = rawData.filter(u => u.role === 'TEACHER');
             setTeachers(teacherList);
         } catch (error) {
             console.error('Error fetching teachers:', error);
@@ -59,7 +56,7 @@ const Teachers = () => {
             const res = await axios.get(`${API_BASE}/teacher-payments`, {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
-            setPayments(res.data);
+            setPayments(Array.isArray(res.data) ? res.data : []);
         } catch (error) {
             console.error('Error fetching payments:', error);
         }
@@ -70,7 +67,7 @@ const Teachers = () => {
             const res = await axios.get(`${API_BASE}/teacher-payments/stats`, {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
-            setStats(res.data);
+            setStats(Array.isArray(res.data) ? res.data : []);
         } catch (error) {
             console.error('Error fetching stats:', error);
         }
@@ -154,12 +151,12 @@ const Teachers = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {teachers.length > 0 ? (
+                                    {Array.isArray(teachers) && teachers.length > 0 ? (
                                         teachers.map(t => (
                                             <tr key={t.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                                                 <td style={{ padding: '1rem 1.5rem' }}>
-                                                    <div style={{ fontWeight: '700', color: 'var(--primary-dark)' }}>{t.lastName} {t.firstName}</div>
-                                                    <div className="mobile-only" style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{t.email}</div>
+                                                    <div style={{ fontWeight: '700', color: 'var(--primary-dark)' }}>{t.lastName || '---'} {t.firstName || ''}</div>
+                                                    <div className="mobile-only" style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{t.email || '---'}</div>
                                                 </td>
                                                 <td style={{ padding: '1rem 1.5rem' }}>
                                                     <div style={{ fontSize: '0.9rem' }}>{t.email}</div>
@@ -202,7 +199,7 @@ const Teachers = () => {
 
                     {/* Stats Cards Responsive */}
                     <div className="grid-resp-3" style={{ gap: '1.5rem', marginBottom: '2rem' }}>
-                        {stats.map(s => (
+                        {(Array.isArray(stats) ? stats : []).map(s => (
                             <div key={s.type} className="card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', borderLeft: '4px solid var(--primary)' }}>
                                 <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                                     {s.type === 'SALARY' ? 'Salaires' : s.type === 'HOURLY' ? 'Heures Supp.' : s.type === 'ADVANCE' ? 'Avances' : 'Primes'}
@@ -228,17 +225,17 @@ const Teachers = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {payments.map(p => (
+                                    {(Array.isArray(payments) ? payments : []).map(p => (
                                         <tr key={p.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                                            <td style={{ padding: '1rem 1.5rem' }}>{new Date(p.paymentDate).toLocaleDateString('fr-FR')}</td>
+                                            <td style={{ padding: '1rem 1.5rem' }}>{p.paymentDate ? new Date(p.paymentDate).toLocaleDateString('fr-FR') : '---'}</td>
                                             <td style={{ padding: '1rem 1.5rem' }}>
-                                                <div style={{ fontWeight: '700', color: 'var(--primary-dark)' }}>{p.teacher.lastName} {p.teacher.firstName}</div>
+                                                <div style={{ fontWeight: '700', color: 'var(--primary-dark)' }}>{p.teacher?.lastName || '---'} {p.teacher?.firstName || ''}</div>
                                             </td>
                                             <td style={{ padding: '1rem 1.5rem' }}>
                                                 <span style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--primary)' }}>{p.type}</span>
                                             </td>
-                                            <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem' }}>{p.period}</td>
-                                            <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontWeight: '900', color: 'var(--primary-dark)' }}>{p.amount.toLocaleString()} FCFA</td>
+                                            <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem' }}>{p.period || '---'}</td>
+                                            <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontWeight: '900', color: 'var(--primary-dark)' }}>{(p.amount || 0).toLocaleString()} FCFA</td>
                                         </tr>
                                     ))}
                                     {payments.length === 0 && (
@@ -300,7 +297,7 @@ const Teachers = () => {
                                 <label className="form-label">Professeur</label>
                                 <select className="form-input" style={{ height: '48px', fontWeight: '700' }} value={newPayment.teacherId} onChange={e => setNewPayment({ ...newPayment, teacherId: e.target.value })} required>
                                     <option value="">-- Choisir un enseignant --</option>
-                                    {teachers.map(t => <option key={t.id} value={t.id}>{t.lastName} {t.firstName}</option>)}
+                                    {(Array.isArray(teachers) ? teachers : []).map(t => <option key={t.id} value={t.id}>{t.lastName} {t.firstName}</option>)}
                                 </select>
                             </div>
                             <div className="grid-resp-2" style={{ gap: '1rem' }}>

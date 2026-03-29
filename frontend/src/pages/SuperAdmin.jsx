@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Building2, Plus, CheckCircle, XCircle, ShieldCheck, Trash2, Pause, Play, Eye } from 'lucide-react';
+import { Building2, Plus, CheckCircle, XCircle, ShieldCheck, Trash2, Pause, Play, Eye, Mail, Phone, MapPin } from 'lucide-react';
 import config from '../config';
 
 const SuperAdmin = () => {
@@ -114,16 +114,16 @@ const SuperAdmin = () => {
             </header>
 
             <div className="grid-resp-2" style={{ gap: '1.5rem' }}>
-                {establishments.map(est => (
+                {(Array.isArray(establishments) ? establishments : []).map(est => (
                     <div key={est.id} className="card fade-in" style={{ borderTop: '5px solid var(--primary)', borderRadius: '20px', padding: '1.75rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', marginBottom: '1.5rem' }}>
                             <div style={{ backgroundColor: 'var(--primary-light)', padding: '0.8rem', borderRadius: '14px', color: 'var(--primary)' }}>
                                 <Building2 size={28} />
                             </div>
                             <div style={{ flex: 1 }}>
-                                <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '800', color: 'var(--primary-dark)' }}>{est.name}</h3>
+                                <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '800', color: 'var(--primary-dark)' }}>{est.name || 'Établissement Sans Nom'}</h3>
                                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.3rem', flexWrap: 'wrap' }}>
-                                    <code style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: '800', backgroundColor: '#f1f5f9', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>{est.code}</code>
+                                    <code style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: '800', backgroundColor: '#f1f5f9', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>{est.code || '---'}</code>
                                     {est.type && (
                                         <span style={{ fontSize: '0.65rem', padding: '0.2rem 0.5rem', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', textTransform: 'uppercase', color: '#64748b', fontWeight: '700' }}>
                                             {est.type === 'Autre' ? est.typeOther : est.type}
@@ -196,7 +196,7 @@ const SuperAdmin = () => {
                             </div>
                             <div className="form-group">
                                 <label className="form-label">Code d'accès unique</label>
-                                <input type="text" className="form-input" style={{ height: '48px', fontWeight: '800', letterSpacing: '1px' }} required value={est.code} onChange={e => setNewEst({...newEst, code: e.target.value.toUpperCase()})} placeholder="EX: ITA2026" />
+                                <input type="text" className="form-input" style={{ height: '48px', fontWeight: '800', letterSpacing: '1px' }} required value={newEst.code} onChange={e => setNewEst({...newEst, code: e.target.value.toUpperCase()})} placeholder="EX: ITA2026" />
                             </div>
                             <div className="grid-resp-2" style={{ gap: '1rem' }}>
                                 <div className="form-group">

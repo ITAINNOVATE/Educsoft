@@ -225,11 +225,13 @@ const Configuration = () => {
                     </form>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                        {schoolYears.map(year => (
+                        {(Array.isArray(schoolYears) ? schoolYears : []).map(year => (
                             <div key={year.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem', border: '1px solid #f1f5f9', borderRadius: '12px', alignItems: 'center', background: year.current ? '#f0f9ff' : 'white', borderColor: year.current ? '#bae6fd' : '#f1f5f9' }}>
                                 <div>
-                                    <div style={{ fontWeight: '700', color: 'var(--primary-dark)' }}>{year.name}</div>
-                                    <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{new Date(year.startDate).toLocaleDateString('fr-FR')} - {new Date(year.endDate).toLocaleDateString('fr-FR')}</div>
+                                    <div style={{ fontWeight: '700', color: 'var(--primary-dark)' }}>{year.name || '---'}</div>
+                                    <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                                        {year.startDate ? new Date(year.startDate).toLocaleDateString('fr-FR') : '---'} - {year.endDate ? new Date(year.endDate).toLocaleDateString('fr-FR') : '---'}
+                                    </div>
                                 </div>
                                 {year.current && <span style={{ background: 'var(--success)', color: 'white', padding: '0.3rem 0.75rem', borderRadius: '20px', fontSize: '0.7rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><CheckCircle size={14} /> ACTIVE</span>}
                             </div>
@@ -266,7 +268,7 @@ const Configuration = () => {
                                 <label className="form-label">Année Académique</label>
                                 <select className="form-input" value={newClass.schoolYearId} onChange={e => setNewClass({ ...newClass, schoolYearId: e.target.value })} required>
                                     <option value="">Année...</option>
-                                    {schoolYears.map(y => <option key={y.id} value={y.id}>{y.name}</option>)}
+                                    {(Array.isArray(schoolYears) ? schoolYears : []).map(y => <option key={y.id} value={y.id}>{y.name || '---'}</option>)}
                                 </select>
                             </div>
                         </div>
@@ -274,12 +276,12 @@ const Configuration = () => {
                     </form>
 
                     <div className="grid-resp-2" style={{ gap: '0.75rem' }}>
-                        {classes.map(c => (
+                        {(Array.isArray(classes) ? classes : []).map(c => (
                             <div key={c.id} style={{ padding: '1rem', background: 'white', border: '1px solid #f1f5f9', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                                <div style={{ fontWeight: '700', color: 'var(--primary-dark)' }}>{c.name}</div>
+                                <div style={{ fontWeight: '700', color: 'var(--primary-dark)' }}>{c.name || '---'}</div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <span style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem', background: '#f1f5f9', borderRadius: '4px', color: 'var(--primary)', fontWeight: '700' }}>{c.level}</span>
-                                    <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{c.schoolYear?.name}</span>
+                                    <span style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem', background: '#f1f5f9', borderRadius: '4px', color: 'var(--primary)', fontWeight: '700' }}>{c.level || '---'}</span>
+                                    <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{c.schoolYear?.name || '---'}</span>
                                 </div>
                             </div>
                         ))}
@@ -307,7 +309,7 @@ const Configuration = () => {
                             }}
                         >
                             <option value="">-- Choisir une classe --</option>
-                            {classes.map(c => <option key={c.id} value={c.id}>{c.name} ({c.level})</option>)}
+                            {(Array.isArray(classes) ? classes : []).map(c => <option key={c.id} value={c.id}>{c.name || '---'} ({c.level || '---'})</option>)}
                         </select>
                     </div>
 
@@ -341,14 +343,14 @@ const Configuration = () => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {subjects.map(s => (
+                                        {(Array.isArray(subjects) ? subjects : []).map(s => (
                                             <tr key={s.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                                                 <td style={{ padding: '0.75rem' }}>
-                                                    <div style={{ fontWeight: '600', fontSize: '0.9rem' }}>{s.name}</div>
+                                                    <div style={{ fontWeight: '600', fontSize: '0.9rem' }}>{s.name || '---'}</div>
                                                     <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{s.code || 'SANS CODE'}</div>
                                                 </td>
                                                 <td style={{ padding: '0.75rem' }}>
-                                                    <span style={{ fontWeight: '800', color: 'var(--primary)' }}>{s.coefficient}</span>
+                                                    <span style={{ fontWeight: '800', color: 'var(--primary)' }}>{s.coefficient || 1}</span>
                                                 </td>
                                                 <td style={{ padding: '0.75rem', textAlign: 'right' }}>
                                                     <button onClick={() => handleDeleteSubject(s.id)} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', padding: '0.5rem' }}><Trash2 size={16} /></button>
@@ -409,10 +411,10 @@ const Configuration = () => {
                             </form>
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                {terms.map(t => (
+                                {(Array.isArray(terms) ? terms : []).map(t => (
                                     <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem', background: 'white', border: '1px solid #f1f5f9', borderRadius: '12px', alignItems: 'center' }}>
                                         <div>
-                                            <div style={{ fontWeight: '700', color: 'var(--primary-dark)' }}>{t.name}</div>
+                                            <div style={{ fontWeight: '700', color: 'var(--primary-dark)' }}>{t.name || '---'}</div>
                                             <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
                                                 {t.startDate ? new Date(t.startDate).toLocaleDateString('fr-FR') : 'N/A'} - {t.endDate ? new Date(t.endDate).toLocaleDateString('fr-FR') : 'N/A'}
                                             </div>
@@ -420,7 +422,7 @@ const Configuration = () => {
                                         <button onClick={() => handleDeleteTerm(t.id)} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', padding: '0.5rem' }}><Trash2 size={18} /></button>
                                     </div>
                                 ))}
-                                {terms.length === 0 && <div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.85rem' }}>Aucun découpage défini.</div>}
+                                {(!Array.isArray(terms) || terms.length === 0) && <div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.85rem' }}>Aucun découpage défini.</div>}
                             </div>
                         </div>
                     )}
@@ -467,7 +469,7 @@ const Configuration = () => {
                                     <label className="form-label">Classe Concernée</label>
                                     <select name="classId" className="form-input" required>
                                         <option value="">Sélectionner une classe...</option>
-                                        {classes.map(c => <option key={c.id} value={c.id}>{c.name} ({c.level})</option>)}
+                                        {(Array.isArray(classes) ? classes : []).map(c => <option key={c.id} value={c.id}>{c.name || '---'} ({c.level || '---'})</option>)}
                                     </select>
                                 </div>
                                 <div className="form-group">
@@ -509,15 +511,15 @@ const Configuration = () => {
 
                         {/* Fees List with Table Scroll */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                            {classes.filter(c => c.fees && c.fees.length > 0).map(c => (
+                            {(Array.isArray(classes) ? classes : []).filter(c => Array.isArray(c.fees) && c.fees.length > 0).map(c => (
                                 <div key={c.id} style={{ border: '1px solid #e2e8f0', borderRadius: '16px', overflow: 'hidden', background: 'white', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
                                     <div style={{ background: 'var(--primary-dark)', color: 'white', padding: '1rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <div>
-                                            <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '800' }}>{c.name}</h4>
-                                            <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>{c.level} • {c.schoolYear?.name}</span>
+                                            <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '800' }}>{c.name || '---'}</h4>
+                                            <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>{c.level || '---'} • {c.schoolYear?.name || '---'}</span>
                                         </div>
                                         <div style={{ background: 'rgba(255,255,255,0.15)', padding: '0.4rem 0.8rem', borderRadius: '20px', fontSize: '0.8rem', fontWeight: '700' }}>
-                                            {c.fees.length} Frais
+                                            {(Array.isArray(c.fees) ? c.fees.length : 0)} Frais
                                         </div>
                                     </div>
 
@@ -532,10 +534,10 @@ const Configuration = () => {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {c.fees.map((f, idx) => (
+                                                {(Array.isArray(c.fees) ? c.fees : []).map((f, idx) => (
                                                     <tr key={f.id} style={{ borderBottom: idx < c.fees.length - 1 ? '1px solid #f1f5f9' : 'none' }}>
                                                         <td style={{ padding: '0.875rem 1rem' }}>
-                                                            <div style={{ fontWeight: '600', fontSize: '0.875rem' }}>{f.name}</div>
+                                                            <div style={{ fontWeight: '600', fontSize: '0.875rem' }}>{f.name || '---'}</div>
                                                             <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
                                                                 {f.type === 'TUITION' ? 'Scolarité' : f.type === 'REGISTRATION' ? 'Inscription' : 'Service'}
                                                             </div>
@@ -550,7 +552,7 @@ const Configuration = () => {
                                                             </span>
                                                         </td>
                                                         <td style={{ padding: '0.875rem 1rem', textAlign: 'right', fontWeight: '800', color: 'var(--primary-dark)', fontSize: '0.9rem' }}>
-                                                            {f.amount.toLocaleString()}
+                                                            {(f.amount || 0).toLocaleString()}
                                                         </td>
                                                         <td style={{ padding: '0.875rem 1rem' }}>
                                                             <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>

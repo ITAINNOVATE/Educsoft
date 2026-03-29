@@ -128,8 +128,8 @@ const Layout = () => {
               onChange={(e) => handleSwitch(e.target.value)}
               style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', background: 'rgba(255,255,255,0.15)', color: 'white', border: '1px solid rgba(255,255,255,0.1)', fontSize: '0.8rem', outline: 'none', cursor: 'pointer' }}
             >
-              {establishments.map(est => (
-                <option key={est.id} value={est.id} style={{ color: 'black' }}>{est.name}</option>
+              {(Array.isArray(establishments) ? establishments : []).map(est => (
+                <option key={est.id} value={est.id} style={{ color: 'black' }}>{est.name || 'Sans Nom'}</option>
               ))}
             </select>
           </div>

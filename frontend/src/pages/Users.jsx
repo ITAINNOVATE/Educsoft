@@ -159,15 +159,15 @@ const Users = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {users.map(u => (
+                            {(Array.isArray(users) ? users : []).map(u => (
                                 <tr key={u.id} style={{ borderBottom: '1px solid #f1f5f9', transition: 'background 0.2s' }}>
                                     <td style={{ padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                                         <div style={{ width: '40px', height: '40px', borderRadius: '12px', backgroundColor: 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
                                             <UserCheck size={20} />
                                         </div>
                                         <div>
-                                            <div style={{ fontWeight: '800', color: 'var(--primary-dark)' }}>{u.firstName} {u.lastName}</div>
-                                            <div className="mobile-only" style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{u.email}</div>
+                                            <div style={{ fontWeight: '800', color: 'var(--primary-dark)' }}>{u.firstName || '---'} {u.lastName || ''}</div>
+                                            <div className="mobile-only" style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{u.email || '---'}</div>
                                         </div>
                                     </td>
                                     <td className="desktop-only" style={{ padding: '1rem 1.5rem', color: '#64748b', fontSize: '0.9rem' }}>{u.email}</td>
@@ -182,15 +182,15 @@ const Users = () => {
                                         </span>
                                     </td>
                                     <td className="desktop-only" style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: '#94a3b8' }}>
-                                        {new Date(u.createdAt).toLocaleDateString()}
+                                        {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '---'}
                                     </td>
                                     <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
                                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                                             <button onClick={() => handleEdit(u)} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', color: 'var(--primary)', cursor: 'pointer', padding: '0.5rem' }} title="Modifier">
                                                 <Pencil size={18} />
                                             </button>
-                                            {u.id !== user.id && (
-                                                <button onClick={() => handleDelete(u.id)} style={{ background: '#fff5f5', border: '1px solid #fed7d7', borderRadius: '8px', color: 'var(--error)', cursor: 'pointer', padding: '0.5rem' }} title="Supprimer">
+                                            {u?.id !== user?.id && (
+                                                <button onClick={() => handleDelete(u?.id)} style={{ background: '#fff5f5', border: '1px solid #fed7d7', borderRadius: '8px', color: 'var(--error)', cursor: 'pointer', padding: '0.5rem' }} title="Supprimer">
                                                     <Trash2 size={18} />
                                                 </button>
                                             )}

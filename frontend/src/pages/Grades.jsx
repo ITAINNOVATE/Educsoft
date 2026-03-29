@@ -33,7 +33,8 @@ const Grades = () => {
             ]);
             setClasses(classesRes.data);
             
-            const currentYear = yearsRes.data.find(y => y.current) || yearsRes.data[0];
+            const schoolYears = Array.isArray(yearsRes.data) ? yearsRes.data : [];
+            const currentYear = schoolYears.find(y => y.current) || schoolYears[0];
             if (currentYear) {
                 const termsRes = await axios.get(`${API_URL}/config/terms/${currentYear.id}`, authHeader);
                 setTerms(termsRes.data);
@@ -122,7 +123,7 @@ const Grades = () => {
                         <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><UsersIcon size={14} /> Classe</label>
                         <select className="form-input" style={{ height: '48px' }} value={selectedClass} onChange={e => handleClassChange(e.target.value)}>
                             <option value="">Sélectionner une classe...</option>
-                            {classes.map(c => <option key={c.id} value={c.id}>{c.name} ({c.level})</option>)}
+                            {(Array.isArray(classes) ? classes : []).map(c => <option key={c.id} value={c.id}>{c.name || '---'} ({c.level || '---'})</option>)}
                         </select>
                     </div>
 
@@ -130,7 +131,7 @@ const Grades = () => {
                         <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><BookOpen size={14} /> Matière</label>
                         <select className="form-input" style={{ height: '48px' }} value={selectedSubject} onChange={e => setSelectedSubject(e.target.value)} disabled={!selectedClass}>
                             <option value="">Sélectionner une matière...</option>
-                            {subjects.map(s => <option key={s.id} value={s.id}>{s.name} (Coeff: {s.coefficient})</option>)}
+                            {(Array.isArray(subjects) ? subjects : []).map(s => <option key={s.id} value={s.id}>{s.name || '---'} (Coeff: {s.coefficient || 1})</option>)}
                         </select>
                     </div>
 
@@ -138,7 +139,7 @@ const Grades = () => {
                         <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Clock size={14} /> Période / Trimestre</label>
                         <select className="form-input" style={{ height: '48px' }} value={selectedTerm} onChange={e => setSelectedTerm(e.target.value)}>
                             <option value="">Sélectionner la période...</option>
-                            {terms.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                            {(Array.isArray(terms) ? terms : []).map(t => <option key={t.id} value={t.id}>{t.name || '---'}</option>)}
                         </select>
                     </div>
 
@@ -154,7 +155,7 @@ const Grades = () => {
             </section>
 
             {/* Grades Grid */}
-            {studentGrades.length > 0 ? (
+            {Array.isArray(studentGrades) && studentGrades.length > 0 ? (
                 <section className="card fade-in" style={{ padding: 0, borderRadius: '24px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
                     <div className="stack-on-mobile" style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', gap: '1rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -163,9 +164,9 @@ const Grades = () => {
                             </div>
                             <div>
                                 <h3 style={{ margin: 0, fontWeight: '800', color: 'var(--primary-dark)', fontSize: '1.25rem' }}>
-                                    {subjects.find(s => s.id === selectedSubject)?.name}
+                                    {subjects.find(s => s.id === selectedSubject)?.name || 'Matière'}
                                 </h3>
-                                <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', fontWeight: '600' }}>{studentGrades.length} élèves à évaluer</p>
+                                <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', fontWeight: '600' }}>{(Array.isArray(studentGrades) ? studentGrades.length : 0)} élèves à évaluer</p>
                             </div>
                         </div>
                         <button 
@@ -190,11 +191,11 @@ const Grades = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {studentGrades.map((sg) => (
+                                {(Array.isArray(studentGrades) ? studentGrades : []).map((sg) => (
                                     <tr key={sg.studentId} style={{ borderBottom: '1px solid #f1f5f9', transition: 'background 0.2s' }}>
-                                        <td style={{ padding: '1.25rem 1.5rem', color: '#94a3b8', fontSize: '0.85rem', fontWeight: '700' }}>#{sg.regNumber}</td>
+                                        <td style={{ padding: '1.25rem 1.5rem', color: '#94a3b8', fontSize: '0.85rem', fontWeight: '700' }}>#{sg.regNumber || '---'}</td>
                                         <td style={{ padding: '1.25rem 1.5rem' }}>
-                                            <div style={{ fontWeight: '800', color: 'var(--primary-dark)', fontSize: '1rem' }}>{sg.studentName}</div>
+                                            <div style={{ fontWeight: '800', color: 'var(--primary-dark)', fontSize: '1rem' }}>{sg.studentName || 'Élève Inconnu'}</div>
                                         </td>
                                         <td style={{ padding: '1.25rem 1.5rem', textAlign: 'center' }}>
                                             <input 
