@@ -7,8 +7,16 @@ import { Plus, Calendar, BookOpen, CheckCircle, Edit, Trash2 } from 'lucide-reac
 const Configuration = () => {
     const [schoolYears, setSchoolYears] = useState([]);
     const [classes, setClasses] = useState([]);
+    const [subjects, setSubjects] = useState([]);
+    const [terms, setTerms] = useState([]);
+    const [selectedClassId, setSelectedClassId] = useState('');
+    const [selectedYearId, setSelectedYearId] = useState('');
+    
     const [newYear, setNewYear] = useState({ name: '', startDate: '', endDate: '', current: false });
     const [newClass, setNewClass] = useState({ name: '', level: '', schoolYearId: '' });
+    const [newSubject, setNewSubject] = useState({ name: '', code: '', coefficient: 1, classId: '' });
+    const [newTerm, setNewTerm] = useState({ name: '', startDate: '', endDate: '', schoolYearId: '' });
+    
     const [editingFee, setEditingFee] = useState(null);
     const [showEditModal, setShowEditModal] = useState(false);
     const { user } = useAuth();
@@ -28,8 +36,39 @@ const Configuration = () => {
             ]);
             setSchoolYears(yearsRes.data);
             setClasses(classesRes.data);
+            
+            // Set first year as default for terms if exists
+            if (yearsRes.data.length > 0 && !selectedYearId) {
+                const current = yearsRes.data.find(y => y.current) || yearsRes.data[0];
+                setSelectedYearId(current.id);
+                fetchTerms(current.id);
+            }
         } catch (error) {
             console.error('Error fetching config data:', error);
+        }
+    };
+
+    const fetchSubjects = async (classId) => {
+        if (!classId) return;
+        try {
+            const res = await axios.get(`${API_URL}/subjects/${classId}`, {
+                headers: { Authorization: `Bearer ${user.token}` }
+            });
+            setSubjects(res.data);
+        } catch (error) {
+            console.error('Error fetching subjects:', error);
+        }
+    };
+
+    const fetchTerms = async (yearId) => {
+        if (!yearId) return;
+        try {
+            const res = await axios.get(`${API_URL}/terms/${yearId}`, {
+                headers: { Authorization: `Bearer ${user.token}` }
+            });
+            setTerms(res.data);
+        } catch (error) {
+            console.error('Error fetching terms:', error);
         }
     };
 
@@ -56,6 +95,58 @@ const Configuration = () => {
             fetchData();
         } catch (error) {
             alert('Error adding class');
+        }
+    };
+
+    const handleAddSubject = async (e) => {
+        e.preventDefault();
+        if (!selectedClassId) return alert('Veuillez choisir une classe');
+        try {
+            await axios.post(`${API_URL}/subjects`, { ...newSubject, classId: selectedClassId }, {
+                headers: { Authorization: `Bearer ${user.token}` },
+            });
+            setNewSubject({ name: '', code: '', coefficient: 1, classId: '' });
+            fetchSubjects(selectedClassId);
+        } catch (error) {
+            alert('Erreur lors de l\'ajout de la matière');
+        }
+    };
+
+    const handleDeleteSubject = async (id) => {
+        if (!confirm('Supprimer cette matière ?')) return;
+        try {
+            await axios.delete(`${API_URL}/subjects/${id}`, {
+                headers: { Authorization: `Bearer ${user.token}` },
+            });
+            fetchSubjects(selectedClassId);
+        } catch (error) {
+            alert('Erreur lors de la suppression');
+        }
+    };
+
+    const handleAddTerm = async (e) => {
+        e.preventDefault();
+        if (!selectedYearId) return alert('Veuillez choisir une année');
+        try {
+            await axios.post(`${API_URL}/terms`, { ...newTerm, schoolYearId: selectedYearId }, {
+                headers: { Authorization: `Bearer ${user.token}` },
+            });
+            setNewTerm({ name: '', startDate: '', endDate: '', schoolYearId: '' });
+            fetchTerms(selectedYearId);
+        } catch (error) {
+            alert('Erreur lors de l\'ajout du trimestre');
+        }
+    };
+
+    const handleDeleteTerm = async (id) => {
+        if (!confirm('Supprimer ce découpage ?')) return;
+        try {
+            await axios.delete(`${API_URL}/terms/${id}`, {
+                headers: { Authorization: `Bearer ${user.token}` },
+            });
+            fetchTerms(selectedYearId);
+        } catch (error) {
+            alert('Erreur lors de la suppression');
         }
     };
 
@@ -184,6 +275,124 @@ const Configuration = () => {
                             </div>
                         ))}
                     </div>
+                </section>
+
+                {/* Subjects Management */}
+                <section className="card">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                        <BookOpen color="var(--primary)" />
+                        <h2 style={{ fontSize: '1.25rem' }}>Matières par Classe</h2>
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">Choisir une Classe</label>
+                        <select 
+                            className="form-input" 
+                            value={selectedClassId} 
+                            onChange={(e) => {
+                                setSelectedClassId(e.target.value);
+                                fetchSubjects(e.target.value);
+                            }}
+                        >
+                            <option value="">Sélectionner une classe...</option>
+                            {classes.map(c => <option key={c.id} value={c.id}>{c.name} ({c.level})</option>)}
+                        </select>
+                    </div>
+
+                    {selectedClassId && (
+                        <>
+                            <form onSubmit={handleAddSubject} style={{ marginBottom: '2rem', padding: '1rem', background: '#f9f9f9', borderRadius: '8px' }}>
+                                <div className="form-group">
+                                    <label className="form-label">Nom de la Matière</label>
+                                    <input type="text" className="form-input" value={newSubject.name} onChange={e => setNewSubject({...newSubject, name: e.target.value})} placeholder="ex: Mathématiques" required />
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div className="form-group">
+                                        <label className="form-label">Code (Optionnel)</label>
+                                        <input type="text" className="form-input" value={newSubject.code} onChange={e => setNewSubject({...newSubject, code: e.target.value})} placeholder="ex: MATH" />
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label">Coefficient</label>
+                                        <input type="number" step="0.5" className="form-input" value={newSubject.coefficient} onChange={e => setNewSubject({...newSubject, coefficient: e.target.value})} required />
+                                    </div>
+                                </div>
+                                <button type="submit" className="btn btn-primary btn-block">Ajouter la Matière</button>
+                            </form>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                {subjects.map(s => (
+                                    <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 1rem', border: '1px solid #eee', borderRadius: '8px', alignItems: 'center' }}>
+                                        <div>
+                                            <div style={{ fontWeight: '600' }}>{s.name} <span style={{ color: '#666', fontWeight: '400' }}>({s.code})</span></div>
+                                            <div style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: '700' }}>Coefficient: {s.coefficient}</div>
+                                        </div>
+                                        <button onClick={() => handleDeleteSubject(s.id)} style={{ color: '#991b1b', background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={16} /></button>
+                                    </div>
+                                ))}
+                                {subjects.length === 0 && <p style={{ textAlign: 'center', color: '#999', fontSize: '0.9rem' }}>Aucune matière définie.</p>}
+                            </div>
+                        </>
+                    )}
+                </section>
+
+                {/* Terms Management */}
+                <section className="card">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                        <Calendar color="var(--primary)" />
+                        <h2 style={{ fontSize: '1.25rem' }}>Découpage (Trimestres/Semestres)</h2>
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">Choisir l'Année Académique</label>
+                        <select 
+                            className="form-input" 
+                            value={selectedYearId} 
+                            onChange={(e) => {
+                                setSelectedYearId(e.target.value);
+                                fetchTerms(e.target.value);
+                            }}
+                        >
+                            <option value="">Sélectionner une année...</option>
+                            {schoolYears.map(y => <option key={y.id} value={y.id}>{y.name}</option>)}
+                        </select>
+                    </div>
+
+                    {selectedYearId && (
+                        <>
+                            <form onSubmit={handleAddTerm} style={{ marginBottom: '2rem', padding: '1rem', background: '#f9f9f9', borderRadius: '8px' }}>
+                                <div className="form-group">
+                                    <label className="form-label">Nom du Trimestre</label>
+                                    <input type="text" className="form-input" value={newTerm.name} onChange={e => setNewTerm({...newTerm, name: e.target.value})} placeholder="ex: 1er Trimestre" required />
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div className="form-group">
+                                        <label className="form-label">Début (Optionnel)</label>
+                                        <input type="date" className="form-input" value={newTerm.startDate} onChange={e => setNewTerm({...newTerm, startDate: e.target.value})} />
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label">Fin (Optionnel)</label>
+                                        <input type="date" className="form-input" value={newTerm.endDate} onChange={e => setNewTerm({...newTerm, endDate: e.target.value})} />
+                                    </div>
+                                </div>
+                                <button type="submit" className="btn btn-primary btn-block">Ajouter le Trimestre</button>
+                            </form>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                {terms.map(t => (
+                                    <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 1rem', border: '1px solid #eee', borderRadius: '8px', alignItems: 'center' }}>
+                                        <div>
+                                            <div style={{ fontWeight: '600' }}>{t.name}</div>
+                                            <div style={{ fontSize: '0.75rem', color: '#666' }}>
+                                                {t.startDate ? new Date(t.startDate).toLocaleDateString() : 'N/A'} - {t.endDate ? new Date(t.endDate).toLocaleDateString() : 'N/A'}
+                                            </div>
+                                        </div>
+                                        <button onClick={() => handleDeleteTerm(t.id)} style={{ color: '#991b1b', background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={16} /></button>
+                                    </div>
+                                ))}
+                                {terms.length === 0 && <p style={{ textAlign: 'center', color: '#999', fontSize: '0.9rem' }}>Aucun trimestre défini.</p>}
+                            </div>
+                        </>
+                    )}
                 </section>
 
                 {/* ADVANCED FEE CONFIGURATION */}

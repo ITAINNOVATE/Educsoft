@@ -106,4 +106,109 @@ router.post('/classes', protect, authorize('ADMIN', 'DIRECTOR', 'SUPER_ADMIN'), 
     }
 });
 
+// --- Subject Management ---
+
+// @desc    Get subjects for a class
+// @route   GET /api/config/subjects/:classId
+router.get('/subjects/:classId', protect, async (req, res) => {
+    try {
+        const subjects = await prisma.subject.findMany({
+            where: { 
+                classId: req.params.classId,
+                establishmentId: req.user.establishmentId 
+            },
+            orderBy: { name: 'asc' },
+        });
+        res.json(subjects);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+// @desc    Create a new subject
+// @route   POST /api/config/subjects
+router.post('/subjects', protect, authorize('ADMIN', 'DIRECTOR', 'SUPER_ADMIN'), async (req, res) => {
+    const { name, code, coefficient, classId } = req.body;
+
+    try {
+        const subject = await prisma.subject.create({
+            data: {
+                name,
+                code,
+                coefficient: parseFloat(coefficient) || 1.0,
+                classId,
+                establishmentId: req.user.establishmentId
+            },
+        });
+        res.status(201).json(subject);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+// @desc    Delete a subject
+// @route   DELETE /api/config/subjects/:id
+router.delete('/subjects/:id', protect, authorize('ADMIN', 'DIRECTOR', 'SUPER_ADMIN'), async (req, res) => {
+    try {
+        await prisma.subject.delete({
+            where: { 
+                id: req.params.id,
+                establishmentId: req.user.establishmentId
+            },
+        });
+        res.json({ message: 'Matière supprimée' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+// --- Term Management ---
+
+// @desc    Get terms for a school year
+// @route   GET /api/config/terms/:schoolYearId
+router.get('/terms/:schoolYearId', protect, async (req, res) => {
+    try {
+        const terms = await prisma.term.findMany({
+            where: { schoolYearId: req.params.schoolYearId },
+            orderBy: { createdAt: 'asc' },
+        });
+        res.json(terms);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+// @desc    Create a new term
+// @route   POST /api/config/terms
+router.post('/terms', protect, authorize('ADMIN', 'DIRECTOR', 'SUPER_ADMIN'), async (req, res) => {
+    const { name, startDate, endDate, schoolYearId } = req.body;
+
+    try {
+        const term = await prisma.term.create({
+            data: {
+                name,
+                startDate: startDate ? new Date(startDate) : null,
+                endDate: endDate ? new Date(endDate) : null,
+                schoolYearId
+            },
+        });
+        res.status(201).json(term);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+// @desc    Delete a term
+// @route   DELETE /api/config/terms/:id
+router.delete('/terms/:id', protect, authorize('ADMIN', 'DIRECTOR', 'SUPER_ADMIN'), async (req, res) => {
+    try {
+        await prisma.term.delete({
+            where: { id: req.params.id },
+        });
+        res.json({ message: 'Trimestre supprimé' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
 module.exports = router;

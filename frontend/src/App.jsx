@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard';
 import Users from './pages/Users';
 import Accounting from './pages/Accounting';
 import SuperAdmin from './pages/SuperAdmin';
+import Grades from './pages/Grades';
 import axios from 'axios';
 import config from './config';
 import './index.css';
@@ -130,6 +131,9 @@ const Layout = () => {
           {user && (user.role === 'ADMIN' || user.role === 'ACCOUNTANT' || user.role === 'SUPER_ADMIN') && (
             <SidebarLink to="/payments" label="Paiements" />
           )}
+          {user && (user.role === 'ADMIN' || user.role === 'SECRETARY' || user.role === 'DIRECTOR' || user.role === 'TEACHER' || user.role === 'SUPER_ADMIN') && (
+            <SidebarLink to="/grades" label="Notes & Bulletins" />
+          )}
           {user && (user.role === 'ADMIN' || user.role === 'ACCOUNTANT' || user.role === 'SUPER_ADMIN') && (
             <SidebarLink to="/accounting" label="Comptabilité" />
           )}
@@ -197,6 +201,9 @@ function App() {
               </Route>
               <Route element={<ProtectedRoute roleRequired={['ADMIN', 'ACCOUNTANT']} />}>
                 <Route path="/accounting" element={<Accounting />} />
+              </Route>
+              <Route element={<ProtectedRoute roleRequired={['ADMIN', 'SECRETARY', 'DIRECTOR', 'TEACHER']} />}>
+                <Route path="/grades" element={<Grades />} />
               </Route>
               <Route element={<ProtectedRoute roleRequired="SUPER_ADMIN" />}>
                 <Route path="/system" element={<SuperAdmin />} />
