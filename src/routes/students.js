@@ -139,25 +139,66 @@ router.post('/register', protect, authorize('ADMIN', 'SECRETARY', 'DIRECTOR', 'S
     }
 });
 
-// @desc    Get all students
+// @desc    Get all students (paginated)
 // @route   GET /api/students
 // @access  Private
 router.get('/', protect, async (req, res) => {
     try {
-        const students = await prisma.student.findMany({
-            where: { establishmentId: req.user.establishmentId },
-            include: {
-                enrollments: {
-                    where: { schoolYear: { current: true } },
-                    include: { class: true, schoolYear: true }
-                },
-                parents: {
-                    include: { parent: true }
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 50;
+        const skip = (page - 1) * limit;
+        const search = req.query.search || '';
+        const classId = req.query.classId || '';
+
+        let where = { 
+            establishmentId: req.user.establishmentId 
+        };
+
+        if (search) {
+            where.OR = [
+                { firstName: { contains: search, mode: 'insensitive' } },
+                { lastName: { contains: search, mode: 'insensitive' } },
+                { regNumber: { contains: search, mode: 'insensitive' } }
+            ];
+        }
+
+        if (classId) {
+            where.enrollments = {
+                some: {
+                    classId: classId,
+                    schoolYear: { current: true }
                 }
-            },
-            orderBy: { lastName: 'asc' }
+            };
+        }
+
+        const [students, total] = await Promise.all([
+            prisma.student.findMany({
+                where,
+                include: {
+                    enrollments: {
+                        where: { schoolYear: { current: true } },
+                        include: { class: true, schoolYear: true }
+                    },
+                    parents: {
+                        include: { parent: true }
+                    }
+                },
+                orderBy: { lastName: 'asc' },
+                skip,
+                take: limit
+            }),
+            prisma.student.count({ where })
+        ]);
+
+        res.json({
+            students,
+            pagination: {
+                total,
+                page,
+                limit,
+                pages: Math.ceil(total / limit)
+            }
         });
-        res.json(students);
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }

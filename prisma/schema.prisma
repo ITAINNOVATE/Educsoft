@@ -48,13 +48,9 @@ model User {
   role          String    // SUPER_ADMIN, ADMIN, DIRECTOR, ACCOUNTANT, SECRETARY, TEACHER, PARENT
   lastLogin     DateTime?
   
-  establishmentId String?
-  establishment   Establishment? @relation(fields: [establishmentId], references: [id])
-  
-  logs          AuditLog[]
-  payments      TeacherPayment[]
-  createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+
+  @@index([establishmentId])
 }
 
 model Student {
@@ -91,6 +87,8 @@ model Student {
   updatedAt         DateTime    @updatedAt
 
   @@unique([regNumber, establishmentId]) // regNumber is unique per school
+  @@index([establishmentId])
+  @@index([status])
 }
 
 model Parent {
@@ -110,6 +108,8 @@ model Parent {
   
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
+
+  @@index([establishmentId])
 }
 
 model ParentStudent {
@@ -123,6 +123,8 @@ model ParentStudent {
   parent      Parent   @relation(fields: [parentId], references: [id])
 
   @@unique([studentId, parentId])
+  @@index([studentId])
+  @@index([parentId])
 }
 
 model Enrollment {
@@ -138,6 +140,10 @@ model Enrollment {
 
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
+
+  @@index([studentId])
+  @@index([classId])
+  @@index([schoolYearId])
 }
 
 model SchoolYear {
@@ -155,6 +161,7 @@ model SchoolYear {
   terms       Term[]
 
   @@unique([name, establishmentId])
+  @@index([establishmentId])
 }
 
 model Class {
@@ -171,6 +178,9 @@ model Class {
   
   fees        Fee[]
   subjects    Subject[]
+
+  @@index([establishmentId])
+  @@index([schoolYearId])
 }
 
 model Fee {
@@ -181,6 +191,8 @@ model Fee {
   type        String   @default("TUITION") // TUITION, REGISTRATION, TRANSPORT, CANTEEN, UNIFORM, BOOKS, EXAM, ACTIVITY, HEALTH, INTERNAT, PENALTY, DIPLOMA, OTHER
   classId     String
   class       Class    @relation(fields: [classId], references: [id])
+
+  @@index([classId])
 }
 
 model Payment {
@@ -200,6 +212,9 @@ model Payment {
   student       Student  @relation(fields: [studentId], references: [id])
 
   @@unique([receiptNumber, establishmentId])
+  @@index([establishmentId])
+  @@index([studentId])
+  @@index([paymentDate])
 }
 
 model Document {
@@ -213,6 +228,8 @@ model Document {
   student   Student  @relation(fields: [studentId], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([studentId])
 }
 
 model SchoolHistory {
@@ -224,6 +241,8 @@ model SchoolHistory {
   result       String   // ADMIS, REDOUBLANT, EXCLU, TRANSFERE
   average      Float?
   student      Student  @relation(fields: [studentId], references: [id])
+
+  @@index([studentId])
 }
 
 model AuditLog {
@@ -238,6 +257,9 @@ model AuditLog {
   
   user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
+
+  @@index([establishmentId])
+  @@index([userId])
 }
 
 model TeacherPayment {
@@ -254,6 +276,9 @@ model TeacherPayment {
   establishment   Establishment @relation(fields: [establishmentId], references: [id])
   
   teacher       User     @relation(fields: [teacherId], references: [id])
+
+  @@index([establishmentId])
+  @@index([teacherId])
 }
 
 model Subject {
@@ -272,6 +297,9 @@ model Subject {
   
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
+
+  @@index([establishmentId])
+  @@index([classId])
 }
 
 model Term {
@@ -289,6 +317,7 @@ model Term {
   updatedAt       DateTime    @updatedAt
   
   @@unique([name, schoolYearId])
+  @@index([schoolYearId])
 }
 
 model Grade {
@@ -311,4 +340,8 @@ model Grade {
   
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
+
+  @@index([studentId])
+  @@index([subjectId])
+  @@index([termId])
 }

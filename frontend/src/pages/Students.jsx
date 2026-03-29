@@ -32,6 +32,9 @@ const Students = () => {
     const [filterStatus, setFilterStatus] = useState('ACTIF');
     const [uploading, setUploading] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [page, setPage] = useState(1);
+    const [pagination, setPagination] = useState({ total: 0, pages: 0 });
+    const [hasMore, setHasMore] = useState(false);
 
     const [formData, setFormData] = useState({
         studentData: {
@@ -53,28 +56,60 @@ const Students = () => {
 
     useEffect(() => {
         if (user?.token) {
-            fetchData();
+            fetchData(1, true); // Reset to first page
             fetchConfig();
         }
-    }, [user]);
+    }, [user, filterClass, filterStatus]); // Reload on filter change
 
-    const fetchData = async () => {
+    // Debounced search
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            if (user?.token) fetchData(1, true);
+        }, 500);
+        return () => clearTimeout(handler);
+    }, [searchTerm]);
+
+    const fetchData = async (pageNum = 1, reset = false) => {
         try {
-            setLoading(true);
+            if (reset) setLoading(true);
+            const authHeader = { headers: { Authorization: `Bearer ${user.token}` } };
+            
             const res = await axios.get(`${API_BASE}/students`, {
-                headers: { Authorization: `Bearer ${user.token}` }
+                ...authHeader,
+                params: {
+                    page: pageNum,
+                    limit: 50,
+                    search: searchTerm,
+                    classId: filterClass,
+                    status: filterStatus
+                }
             });
-            setStudents(res.data);
+            
+            const newStudents = res.data.students;
+            if (reset) {
+                setStudents(newStudents);
+            } else {
+                setStudents(prev => [...prev, ...newStudents]);
+            }
+
+            setPagination(res.data.pagination);
+            setPage(pageNum);
+            setHasMore(pageNum < res.data.pagination.pages);
+
             if (selectedStudent) {
-                const refreshed = await axios.get(`${API_BASE}/students/${selectedStudent.id}`, {
-                    headers: { Authorization: `Bearer ${user.token}` }
-                });
+                const refreshed = await axios.get(`${API_BASE}/students/${selectedStudent.id}`, authHeader);
                 setSelectedStudent(refreshed.data);
             }
         } catch (error) {
             console.error('Error fetching students:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleLoadMore = () => {
+        if (!loading && hasMore) {
+            fetchData(page + 1);
         }
     };
 
@@ -253,12 +288,8 @@ const Students = () => {
         }
     };
 
-    const filteredStudents = students.filter(s => {
-        const matchesSearch = `${s.firstName} ${s.lastName} ${s.regNumber}`.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesClass = !filterClass || s.enrollments[0]?.classId === filterClass;
-        const matchesStatus = !filterStatus || s.status === filterStatus;
-        return matchesSearch && matchesClass && matchesStatus;
-    });
+    // Frontend filtering removed as it is now handled by the backend
+    const displayedStudents = students;
 
     const openDetails = async (student) => {
         try {
@@ -399,7 +430,7 @@ const Students = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {filteredStudents.map(student => (
+                                    {displayedStudents.map(student => (
                                         <tr key={student.id} style={{ borderBottom: '1px solid #f5f5f5', transition: 'background 0.2s' }}>
                                             <td style={{ padding: '1rem', fontWeight: 'bold', color: 'var(--primary)', whiteSpace: 'nowrap' }}>{student.regNumber}</td>
                                             <td style={{ padding: '1rem' }}>
@@ -422,12 +453,37 @@ const Students = () => {
                                             </td>
                                         </tr>
                                     ))}
-                                    {filteredStudents.length === 0 && (
+                                    {displayedStudents.length === 0 && !loading && (
                                         <tr><td colSpan="6" style={{ textAlign: 'center', padding: '3rem', color: '#999' }}>Aucun élève trouvé.</td></tr>
                                     )}
                                 </tbody>
                             </table>
                         </div>
+                        
+                        {hasMore && (
+                            <div style={{ textAlign: 'center', padding: '2rem', borderTop: '1px solid #eee' }}>
+                                <button 
+                                    className="btn" 
+                                    onClick={handleLoadMore} 
+                                    disabled={loading}
+                                    style={{ 
+                                        padding: '0.75rem 2rem', 
+                                        backgroundColor: '#f1f5f9', 
+                                        color: 'var(--primary)',
+                                        fontWeight: '700',
+                                        border: '1px solid #e2e8f0'
+                                    }}
+                                >
+                                    {loading ? 'Chargement...' : 'Charger plus d\'élèves'}
+                                </button>
+                            </div>
+                        )}
+                        
+                        {!hasMore && displayedStudents.length > 0 && (
+                            <div style={{ textAlign: 'center', padding: '1.5rem', color: '#999', fontSize: '0.85rem' }}>
+                                Fin de la liste ({displayedStudents.length} élèves affichés)
+                            </div>
+                        )}
                     </div>
                 </>
             )}

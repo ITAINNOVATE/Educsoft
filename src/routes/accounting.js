@@ -153,13 +153,17 @@ const { calculateStudentFinancials } = require('../utils/finance');
 
 const XLSX = require('xlsx');
 
-// @desc    Get debt report (Students with unpaid fees)
+// @desc    Get debt report (Students with unpaid fees) (paginated)
 // @route   GET /api/accounting/debts
 router.get('/debts', protect, authorize('ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'), async (req, res) => {
     try {
-        const { classId } = req.query;
+        const { classId, search } = req.query;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 50;
+        const skip = (page - 1) * limit;
+
         if (!req.user.establishmentId) {
-            return res.json([]); 
+            return res.json({ students: [], pagination: { total: 0, page, limit, pages: 0 } }); 
         }
 
         const where = { 
@@ -171,7 +175,20 @@ router.get('/debts', protect, authorize('ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'), a
             where.enrollments = { some: { classId: classId, schoolYear: { current: true } } };
         }
 
-        const students = await prisma.student.findMany({
+        if (search) {
+            where.OR = [
+                { firstName: { contains: search, mode: 'insensitive' } },
+                { lastName: { contains: search, mode: 'insensitive' } },
+                { regNumber: { contains: search, mode: 'insensitive' } }
+            ];
+        }
+
+        // We fetch more students if we are filtering for debtors after calculating financials
+        // But to properly paginate, we should ideally have the debt status in the database.
+        // For now, we'll fetch a larger set and filter, but this is a bottleneck.
+        // Temporary optimization: Fetch students and calculate.
+        
+        const allStudents = await prisma.student.findMany({
             where,
             include: {
                 enrollments: { include: { class: { include: { fees: true } } } },
@@ -179,7 +196,7 @@ router.get('/debts', protect, authorize('ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'), a
             }
         });
 
-        const report = students.map(s => {
+        const debtors = allStudents.map(s => {
             const enrollment = s.enrollments?.[0];
             if (!enrollment || !enrollment.class) return null;
 
@@ -211,7 +228,18 @@ router.get('/debts', protect, authorize('ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'), a
             }
         }).filter(r => r !== null);
 
-        res.json(report);
+        const total = debtors.length;
+        const paginatedDebtors = debtors.slice(skip, skip + limit);
+
+        res.json({
+            students: paginatedDebtors,
+            pagination: {
+                total,
+                page,
+                limit,
+                pages: Math.ceil(total / limit)
+            }
+        });
     } catch (error) {
         console.error("Accounting Debts Global Error:", error);
         res.status(500).json({ message: 'Erreur lors du calcul des impayés', error: error.message });

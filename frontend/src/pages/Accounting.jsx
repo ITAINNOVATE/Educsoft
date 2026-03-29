@@ -34,15 +34,33 @@ const Accounting = () => {
     const [classes, setClasses] = useState([]);
     const [filterClass, setFilterClass] = useState('');
     const [isExporting, setIsExporting] = useState(false);
+    
+    // Pagination states
+    const [debtPage, setDebtPage] = useState(1);
+    const [journalPage, setJournalPage] = useState(1);
+    const [debtPagination, setDebtPagination] = useState({ total: 0, pages: 0 });
+    const [journalPagination, setJournalPagination] = useState({ total: 0, pages: 0 });
+    const [hasMoreDebts, setHasMoreDebts] = useState(false);
+    const [hasMoreJournal, setHasMoreJournal] = useState(false);
 
     const API_BASE = `${config.API_URL}/accounting`;
     const PAYMENTS_API = `${config.API_URL}/payments`;
 
     useEffect(() => {
         if (user?.token) {
-            fetchData();
+            fetchStats();
+            fetchDebts(1, true);
+            fetchJournal(1, true);
         }
-    }, [user, dateRange, filterClass]); // Re-fetch when date range or class changes
+    }, [user, dateRange, filterClass]);
+
+    // Debounced search for debts
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            if (user?.token) fetchDebts(1, true);
+        }, 500);
+        return () => clearTimeout(handler);
+    }, [searchTerm]);
 
     useEffect(() => {
         if (user?.token) {
@@ -61,30 +79,95 @@ const Accounting = () => {
         }
     };
 
-    const fetchData = async () => {
+    const fetchStats = async () => {
         try {
-            setLoading(true);
+            const authHeader = { headers: { Authorization: `Bearer ${user.token}` } };
+            let query = '';
+            if (dateRange.start && dateRange.end) {
+                query = `?startDate=${dateRange.start}&endDate=${dateRange.end}`;
+            }
+            const res = await axios.get(`${API_BASE}/stats${query}`, authHeader);
+            setStats(res.data);
+        } catch (error) {
+            console.error('Error fetching stats:', error);
+        }
+    };
+
+    const fetchDebts = async (pageNum = 1, reset = false) => {
+        try {
+            if (reset) setLoading(true);
             const authHeader = { headers: { Authorization: `Bearer ${user.token}` } };
             
-            let statsQuery = '';
-            if (dateRange.start && dateRange.end) {
-                statsQuery = `?startDate=${dateRange.start}&endDate=${dateRange.end}`;
+            const res = await axios.get(`${API_BASE}/debts`, {
+                ...authHeader,
+                params: {
+                    page: pageNum,
+                    limit: 50,
+                    classId: filterClass,
+                    search: searchTerm
+                }
+            });
+
+            const newStudents = res.data.students;
+            if (reset) {
+                setDebts(newStudents);
+            } else {
+                setDebts(prev => [...prev, ...newStudents]);
             }
 
-            let debtsQuery = filterClass ? `?classId=${filterClass}` : '';
-
-            const [statsRes, debtsRes, journalRes] = await Promise.all([
-                axios.get(`${API_BASE}/stats${statsQuery}`, authHeader),
-                axios.get(`${API_BASE}/debts${debtsQuery}`, authHeader),
-                axios.get(`${PAYMENTS_API}${statsQuery}`, authHeader)
-            ]);
-            setStats(statsRes.data);
-            setDebts(debtsRes.data);
-            setJournalData(journalRes.data);
+            setDebtPagination(res.data.pagination);
+            setDebtPage(pageNum);
+            setHasMoreDebts(pageNum < res.data.pagination.pages);
         } catch (error) {
-            console.error('Error fetching accounting data:', error);
+            console.error('Error fetching debts:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchJournal = async (pageNum = 1, reset = false) => {
+        try {
+            if (reset) setLoading(true);
+            const authHeader = { headers: { Authorization: `Bearer ${user.token}` } };
+            
+            const params = {
+                page: pageNum,
+                limit: 30
+            };
+            if (dateRange.start) params.startDate = dateRange.start;
+            if (dateRange.end) params.endDate = dateRange.end;
+
+            const res = await axios.get(`${PAYMENTS_API}`, {
+                ...authHeader,
+                params
+            });
+
+            const newPayments = res.data.payments;
+            if (reset) {
+                setJournalData(newPayments);
+            } else {
+                setJournalData(prev => [...prev, ...newPayments]);
+            }
+
+            setJournalPagination(res.data.pagination);
+            setJournalPage(pageNum);
+            setHasMoreJournal(pageNum < res.data.pagination.pages);
+        } catch (error) {
+            console.error('Error fetching journal:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleLoadMoreDebts = () => {
+        if (!loading && hasMoreDebts) {
+            fetchDebts(debtPage + 1);
+        }
+    };
+
+    const handleLoadMoreJournal = () => {
+        if (!loading && hasMoreJournal) {
+            fetchJournal(journalPage + 1);
         }
     };
 
@@ -148,11 +231,8 @@ const Accounting = () => {
 
     const totalDebt = debts.reduce((acc, curr) => acc + curr.balance, 0);
 
-    const filteredJournal = journalData.filter(p =>
-        p.student?.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.student?.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.receiptNumber.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const displayedDebts = debts;
+    const displayedJournal = journalData;
 
     const handleViewInvoice = (p) => {
         // Calculate balance for the invoice
@@ -336,7 +416,7 @@ const Accounting = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {debts.filter(debt => debt.name.toLowerCase().includes(searchTerm.toLowerCase())).map(debt => (
+                                {displayedDebts.map(debt => (
                                     <tr key={debt.id} style={{ borderBottom: '1px solid #f9f9f9', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.backgroundColor = '#fcfcfc'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
                                         <td style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.875rem' }}>{debt.regNumber}</td>
                                         <td style={{ padding: '1rem', fontWeight: '500' }}>{debt.name}</td>
@@ -386,7 +466,7 @@ const Accounting = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredJournal.map(p => (
+                                {displayedJournal.map(p => (
                                     <tr key={p.id} style={{ borderBottom: '1px solid #f9f9f9', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.backgroundColor = '#fcfcfc'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
                                         <td style={{ padding: '1rem', fontSize: '0.85rem' }}>{new Date(p.paymentDate).toLocaleDateString('fr-FR')}</td>
                                         <td style={{ padding: '1rem', fontWeight: '700', color: 'var(--primary-dark)' }}>{p.receiptNumber}</td>
@@ -424,9 +504,25 @@ const Accounting = () => {
                             </tbody>
                         </table>
                     )}
-                    {((viewMode === 'DEBTS' && debts.length === 0) || (viewMode === 'JOURNAL' && filteredJournal.length === 0)) && (
+                    {((viewMode === 'DEBTS' && displayedDebts.length === 0) || (viewMode === 'JOURNAL' && displayedJournal.length === 0)) && !loading && (
                         <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
                             {searchTerm ? 'Aucun résultat pour cette recherche.' : 'Aucun enregistrement disponible.'}
+                        </div>
+                    )}
+                    
+                    {viewMode === 'DEBTS' && hasMoreDebts && (
+                        <div style={{ textAlign: 'center', padding: '1.5rem', borderTop: '1px solid #eee' }}>
+                            <button className="btn" onClick={handleLoadMoreDebts} disabled={loading} style={{ background: '#f1f5f9', color: 'var(--primary)', fontWeight: '700' }}>
+                                {loading ? 'Chargement...' : 'Charger plus d\'arriérés'}
+                            </button>
+                        </div>
+                    )}
+
+                    {viewMode === 'JOURNAL' && hasMoreJournal && (
+                        <div style={{ textAlign: 'center', padding: '1.5rem', borderTop: '1px solid #eee' }}>
+                            <button className="btn" onClick={handleLoadMoreJournal} disabled={loading} style={{ background: '#f1f5f9', color: 'var(--primary)', fontWeight: '700' }}>
+                                {loading ? 'Chargement...' : 'Charger plus d\'entrées'}
+                            </button>
                         </div>
                     )}
                 </div>

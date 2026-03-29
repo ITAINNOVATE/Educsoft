@@ -123,11 +123,15 @@ router.post('/', protect, authorize('ADMIN', 'ACCOUNTANT', 'SECRETARY', 'SUPER_A
     }
 });
 
-// @desc    Get all payments (Journal de Caisse)
+// @desc    Get all payments (Journal de Caisse) (paginated)
 // @route   GET /api/payments
 router.get('/', protect, authorize('ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'), async (req, res) => {
     const { startDate, endDate, method } = req.query;
     try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 30;
+        const skip = (page - 1) * limit;
+
         const where = { establishmentId: req.user.establishmentId };
         
         if (startDate || endDate) {
@@ -138,23 +142,37 @@ router.get('/', protect, authorize('ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'), async 
         
         if (method) where.method = method;
 
-        const payments = await prisma.payment.findMany({
-            where,
-            include: { 
-                student: { 
-                    include: { 
-                        enrollments: { 
-                            where: { status: 'VALIDATED' },
-                            include: { class: { include: { fees: true } } },
-                            take: 1
-                        },
-                        payments: true // Needed for balance calculation in detail view
+        const [payments, total] = await Promise.all([
+            prisma.payment.findMany({
+                where,
+                include: { 
+                    student: { 
+                        include: { 
+                            enrollments: { 
+                                where: { status: 'VALIDATED' },
+                                include: { class: { include: { fees: true } } },
+                                take: 1
+                            },
+                            payments: true // Needed for balance calculation in detail view
+                        } 
                     } 
-                } 
-            },
-            orderBy: { paymentDate: 'desc' }
+                },
+                orderBy: { paymentDate: 'desc' },
+                skip,
+                take: limit
+            }),
+            prisma.payment.count({ where })
+        ]);
+
+        res.json({
+            payments,
+            pagination: {
+                total,
+                page,
+                limit,
+                pages: Math.ceil(total / limit)
+            }
         });
-        res.json(payments);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching journal', error: error.message });
     }
@@ -308,17 +326,34 @@ router.get('/daily-summary', protect, async (req, res) => {
     }
 });
 
-// @desc    Get all payments
+// @desc    Get all payments (paginated)
 // @route   GET /api/payments/student/all
 router.get('/student/all', protect, async (req, res) => {
     try {
-        const payments = await prisma.payment.findMany({
-            where: { establishmentId: req.user.establishmentId },
-            include: { student: { include: { enrollments: { include: { class: true } } } } },
-            orderBy: { paymentDate: 'desc' },
-            take: 15
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 15;
+        const skip = (page - 1) * limit;
+
+        const [payments, total] = await Promise.all([
+            prisma.payment.findMany({
+                where: { establishmentId: req.user.establishmentId },
+                include: { student: { include: { enrollments: { include: { class: true } } } } },
+                orderBy: { paymentDate: 'desc' },
+                skip,
+                take: limit
+            }),
+            prisma.payment.count({ where: { establishmentId: req.user.establishmentId } })
+        ]);
+
+        res.json({
+            payments,
+            pagination: {
+                total,
+                page,
+                limit,
+                pages: Math.ceil(total / limit)
+            }
         });
-        res.json(payments);
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
