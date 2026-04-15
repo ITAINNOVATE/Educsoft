@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ProductProvider } from './context/ProductContext';
 import Login from './pages/Login';
 import Configuration from './pages/Configuration';
 import Students from './pages/Students';
@@ -207,37 +208,39 @@ function App() {
     <ErrorBoundary>
       <Router>
         <AuthProvider>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route element={<ProtectedRoute roleRequired={['ADMIN', 'ACCOUNTANT']} />}>
-                <Route path="/payments" element={<Payments />} />
+          <ProductProvider>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route element={<ProtectedRoute roleRequired={['ADMIN', 'ACCOUNTANT']} />}>
+                  <Route path="/payments" element={<Payments />} />
+                </Route>
+                <Route element={<ProtectedRoute roleRequired="ADMIN" />}>
+                  <Route path="/configuration" element={<Configuration />} />
+                </Route>
+                <Route element={<ProtectedRoute roleRequired={['ADMIN', 'SECRETARY', 'ACCOUNTANT']} />}>
+                  <Route path="/students" element={<Students />} />
+                </Route>
+                <Route element={<ProtectedRoute roleRequired="ADMIN" />}>
+                  <Route path="/users" element={<Users />} />
+                </Route>
+                <Route element={<ProtectedRoute roleRequired={['ADMIN', 'ACCOUNTANT']} />}>
+                  <Route path="/accounting" element={<Accounting />} />
+                </Route>
+                <Route element={<ProtectedRoute roleRequired={['ADMIN', 'SECRETARY', 'DIRECTOR', 'TEACHER']} />}>
+                  <Route path="/grades" element={<Grades />} />
+                </Route>
+                <Route element={<ProtectedRoute roleRequired="SUPER_ADMIN" />}>
+                  <Route path="/system" element={<SuperAdmin />} />
+                </Route>
               </Route>
-              <Route element={<ProtectedRoute roleRequired="ADMIN" />}>
-                <Route path="/configuration" element={<Configuration />} />
-              </Route>
-              <Route element={<ProtectedRoute roleRequired={['ADMIN', 'SECRETARY', 'ACCOUNTANT']} />}>
-                <Route path="/students" element={<Students />} />
-              </Route>
-              <Route element={<ProtectedRoute roleRequired="ADMIN" />}>
-                <Route path="/users" element={<Users />} />
-              </Route>
-              <Route element={<ProtectedRoute roleRequired={['ADMIN', 'ACCOUNTANT']} />}>
-                <Route path="/accounting" element={<Accounting />} />
-              </Route>
-              <Route element={<ProtectedRoute roleRequired={['ADMIN', 'SECRETARY', 'DIRECTOR', 'TEACHER']} />}>
-                <Route path="/grades" element={<Grades />} />
-              </Route>
-              <Route element={<ProtectedRoute roleRequired="SUPER_ADMIN" />}>
-                <Route path="/system" element={<SuperAdmin />} />
-              </Route>
-            </Route>
-            <Route path="/superadmin" element={<Navigate to="/system" replace />} />
-            <Route path="/establishments" element={<Navigate to="/system" replace />} />
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
-          </Routes>
+              <Route path="/superadmin" element={<Navigate to="/system" replace />} />
+              <Route path="/establishments" element={<Navigate to="/system" replace />} />
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            </Routes>
+          </ProductProvider>
         </AuthProvider>
       </Router>
     </ErrorBoundary>
