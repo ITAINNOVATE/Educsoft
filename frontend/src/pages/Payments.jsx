@@ -215,13 +215,12 @@ const Payments = () => {
         window.open(`${API_BASE}/payments/receipt/${id}?token=${user.token}`, '_blank');
     };
 
-    return (
-        <div style={{ padding: '1rem', maxWidth: '1400px', margin: '0 auto', fontFamily: 'Inter, sans-serif' }}>
+        <div className="responsive-container" style={{ maxWidth: '1400px', margin: '0 auto', fontFamily: 'Inter, sans-serif' }}>
 
             {/* Header section */}
-            <header className="stack-on-mobile" style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1.5rem' }}>
+            <header className="stack-on-mobile" style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1.5rem' }}>
                 <div style={{ flex: 1 }}>
-                    <h1 style={{ color: 'var(--primary-dark)', fontWeight: '800', marginBottom: '0.5rem', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
+                    <h1 style={{ color: 'var(--primary-dark)', fontWeight: '900', fontSize: '2.2rem', marginBottom: '0.4rem', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
                         Caisse & Paiements
                     </h1>
                     <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>
@@ -718,13 +717,13 @@ const Payments = () => {
             {showInvoice && successData && (
                 <div style={{
                     position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                    background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)',
+                    background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', 
-                    zIndex: 2000, overflowY: 'auto', padding: '2rem 0'
+                    zIndex: 3000, overflowY: 'auto', padding: '1rem'
                 }}>
                     <div className="no-print" style={{ 
-                        width: '210mm', display: 'flex', justifyContent: 'space-between', 
-                        marginBottom: '1rem', alignItems: 'center' 
+                        width: '100%', maxWidth: '210mm', display: 'flex', justifyContent: 'space-between', 
+                        marginBottom: '1.5rem', alignItems: 'center', gap: '1rem' 
                     }}>
                         <button 
                             onClick={() => setShowInvoice(false)}

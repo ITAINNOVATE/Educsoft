@@ -56,9 +56,9 @@ const Dashboard = () => {
     if (error || !data) return <ErrorScreen error={error} retry={() => window.location.reload()} />;
 
     return (
-        <div className="fade-in" style={{ padding: '1rem', maxWidth: '1400px', margin: '0 auto' }}>
+        <div className="responsive-container" style={{ maxWidth: '1400px', margin: '0 auto' }}>
             {/* Common Header */}
-            <header className="stack-on-mobile" style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1.5rem', background: 'white', padding: '1.5rem', borderRadius: '24px', border: '1px solid #f1f5f9', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+            <header className="stack-on-mobile" style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1.5rem', background: 'white', padding: '1.5rem', borderRadius: '24px', border: '1px solid #f1f5f9', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
                 <div>
                     <h1 style={{ fontSize: '2rem', color: 'var(--primary-dark)', fontWeight: '900', margin: 0 }}>Tableau de Bord</h1>
                     <p style={{ color: 'var(--text-muted)', fontSize: '1rem', margin: '0.5rem 0 0 0' }}>Bonjour, <span style={{ color: 'var(--primary)', fontWeight: '700' }}>{user.firstName}</span>. {dashboardMotto(user.role)}</p>

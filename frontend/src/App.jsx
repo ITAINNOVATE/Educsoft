@@ -11,6 +11,7 @@ import Users from './pages/Users';
 import Accounting from './pages/Accounting';
 import SuperAdmin from './pages/SuperAdmin';
 import Grades from './pages/Grades';
+import Expenses from './pages/Expenses';
 import axios from 'axios';
 import config from './config';
 import './index.css';
@@ -161,6 +162,9 @@ const Layout = () => {
           {(user && (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN')) && (
             <SidebarLink to="/users" label="Utilisateurs" onClick={closeSidebar} />
           )}
+          {user && (user.role === 'ADMIN' || user.role === 'ACCOUNTANT' || user.role === 'SUPER_ADMIN') && (
+            <SidebarLink to="/expenses" label="Dépenses" onClick={closeSidebar} />
+          )}
           {user && user.role === 'SUPER_ADMIN' && (
             <SidebarLink to="/system" label="🏠 Établissements" onClick={closeSidebar} />
           )}
@@ -227,6 +231,9 @@ function App() {
                 </Route>
                 <Route element={<ProtectedRoute roleRequired={['ADMIN', 'ACCOUNTANT']} />}>
                   <Route path="/accounting" element={<Accounting />} />
+                </Route>
+                <Route element={<ProtectedRoute roleRequired={['ADMIN', 'ACCOUNTANT']} />}>
+                  <Route path="/expenses" element={<Expenses />} />
                 </Route>
                 <Route element={<ProtectedRoute roleRequired={['ADMIN', 'SECRETARY', 'DIRECTOR', 'TEACHER']} />}>
                   <Route path="/grades" element={<Grades />} />

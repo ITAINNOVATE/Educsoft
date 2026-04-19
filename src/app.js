@@ -26,6 +26,7 @@ const userRoutes = require('./routes/users');
 const establishmentRoutes = require('./routes/establishments');
 const gradeRoutes = require('./routes/grades');
 const dashboardRoutes = require('./routes/dashboard');
+const expenseRoutes = require('./routes/expenses');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/config', configRoutes);
@@ -37,5 +38,6 @@ app.use('/api/teacher-payments', teacherPaymentRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/grades', gradeRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/expenses', expenseRoutes);
 
 module.exports = app;

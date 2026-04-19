@@ -331,13 +331,13 @@ const Students = () => {
     };
 
     return (
-        <div style={{ padding: '1rem', maxWidth: '1200px', margin: '0 auto' }}>
-            <header className="stack-on-mobile" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', gap: '1.5rem', background: 'white', padding: '1.5rem', borderRadius: '20px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
-                <div>
-                    <h1 style={{ fontSize: '2rem', color: 'var(--primary-dark)', margin: 0, fontWeight: '800' }}>
+        <div className="responsive-container" style={{ maxWidth: '1400px', margin: '0 auto' }}>
+            <header className="stack-on-mobile" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2.5rem', gap: '1.5rem', background: 'white', padding: '1.5rem', borderRadius: '20px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', border: '1px solid #f1f5f9' }}>
+                <div style={{ flex: 1 }}>
+                    <h1 style={{ fontSize: '2.2rem', color: 'var(--primary-dark)', margin: 0, fontWeight: '900', letterSpacing: '-0.02em' }}>
                         {view === 'DETAILS' ? 'Dossier Élève' : 'Gestion des Élèves'}
                     </h1>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginTop: '0.25rem' }}>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '1rem', marginTop: '0.4rem' }}>
                         {view === 'DETAILS' ? `${selectedStudent?.firstName} ${selectedStudent?.lastName} • ${selectedStudent?.regNumber}` : 'Base de données centrale des élèves et tuteurs.'}
                     </p>
                 </div>
@@ -389,25 +389,28 @@ const Students = () => {
 
             {view === 'LIST' && (
                 <>
-                    <div className="card" style={{ marginBottom: '2rem', padding: '1rem' }}>
-                        <div className="stack-on-mobile" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                    <section className="card" style={{ marginBottom: '2rem', padding: '1.5rem', borderRadius: '20px', border: '1px solid #f1f5f9' }}>
+                        <div className="stack-on-mobile" style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
                             <div style={{ position: 'relative', flex: 2, width: '100%' }}>
-                                <Search style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#999' }} size={18} />
+                                <Search style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} size={18} />
                                 <input 
                                     type="text" 
                                     placeholder="Rechercher par nom, matricule..." 
                                     className="form-input" 
-                                    style={{ paddingLeft: '40px' }}
+                                    style={{ paddingLeft: '3rem', height: '48px', borderRadius: '12px' }}
                                     value={searchTerm}
                                     onChange={e => setSearchTerm(e.target.value)}
                                 />
                             </div>
-                            <div style={{ display: 'flex', gap: '1rem', flex: 1, width: '100%' }}>
-                                <select className="form-input" value={filterClass} onChange={e => setFilterClass(e.target.value)}>
-                                    <option value="">Toutes les classes</option>
-                                    {(Array.isArray(classes) ? classes : []).map(c => <option key={c.id} value={c.id}>{c.name || '---'}</option>)}
-                                </select>
-                                <select className="form-input" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
+                            <div className="grid-resp-2" style={{ flex: 1.5, width: '100%', gap: '1rem' }}>
+                                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                    <Filter size={18} color="var(--primary)" />
+                                    <select className="form-input" style={{ height: '48px', borderRadius: '12px' }} value={filterClass} onChange={e => setFilterClass(e.target.value)}>
+                                        <option value="">Toutes les classes</option>
+                                        {(Array.isArray(classes) ? classes : []).map(c => <option key={c.id} value={c.id}>{c.name || '---'}</option>)}
+                                    </select>
+                                </div>
+                                <select className="form-input" style={{ height: '48px', borderRadius: '12px' }} value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
                                     <option value="ACTIF">ACTIF</option>
                                     <option value="SUSPENDU">SUSPENDU</option>
                                     <option value="TRANSFERE">TRANSFERE</option>
@@ -417,7 +420,7 @@ const Students = () => {
                                 </select>
                             </div>
                         </div>
-                    </div>
+                    </section>
 
                     <div className="card" style={{ padding: '0' }}>
                         <div className="table-container fade-in">

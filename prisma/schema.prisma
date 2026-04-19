@@ -33,6 +33,7 @@ model Establishment {
   classes           Class[]
   payments          Payment[]
   teacherPayments   TeacherPayment[]
+  expenses          Expense[]
   subjects          Subject[]
   auditLogs         AuditLog[]
   
@@ -370,4 +371,28 @@ model Grade {
   @@index([studentId])
   @@index([subjectId])
   @@index([termId])
+}
+
+model Expense {
+  id              String   @id @default(uuid())
+  platformId      String?  @map("platform_id")
+  description     String
+  amount          Float
+  category        String   // ACHAT, SALAIRE, LOYRE, MAINTENANCE, TRANSPORT, DIVERS
+  date            DateTime @default(now())
+  notes           String?
+  spentBy         String?  // Person who made the expense
+  receiptUrl      String?  @map("receipt_url")
+  method          String   @default("CASH") // CASH, MOBILE_MONEY, TRANSFER
+  
+  establishmentId String   @map("establishment_id")
+  establishment   Establishment @relation(fields: [establishmentId], references: [id])
+  
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("expenses")
+  @@index([establishmentId])
+  @@index([platformId])
+  @@index([date])
 }
