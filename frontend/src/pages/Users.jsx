@@ -201,8 +201,6 @@ const Users = () => {
                         </tbody>
                     </table>
                 </div>
-
-                </div>
             </div>
         </div>
     );
