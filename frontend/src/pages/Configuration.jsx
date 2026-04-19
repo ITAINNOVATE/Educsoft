@@ -333,8 +333,8 @@ const Configuration = () => {
                                 <button type="submit" className="btn btn-primary btn-block">Ajouter à la Classe</button>
                             </form>
 
-                            <div className="table-container" style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <div className="table-container" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                                <table className="responsive-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                                     <thead style={{ position: 'sticky', top: 0, background: 'white', zIndex: 10 }}>
                                         <tr style={{ textAlign: 'left', borderBottom: '2px solid #f1f5f9' }}>
                                             <th style={{ padding: '0.75rem', fontSize: '0.8rem', color: '#64748b' }}>Matière</th>
@@ -345,14 +345,14 @@ const Configuration = () => {
                                     <tbody>
                                         {(Array.isArray(subjects) ? subjects : []).map(s => (
                                             <tr key={s.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                                                <td style={{ padding: '0.75rem' }}>
+                                                <td data-label="Matière" style={{ padding: '0.75rem' }}>
                                                     <div style={{ fontWeight: '600', fontSize: '0.9rem' }}>{s.name || '---'}</div>
                                                     <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{s.code || 'SANS CODE'}</div>
                                                 </td>
-                                                <td style={{ padding: '0.75rem' }}>
+                                                <td data-label="Coef." style={{ padding: '0.75rem' }}>
                                                     <span style={{ fontWeight: '800', color: 'var(--primary)' }}>{s.coefficient || 1}</span>
                                                 </td>
-                                                <td style={{ padding: '0.75rem', textAlign: 'right' }}>
+                                                <td data-label="Actions" style={{ padding: '0.75rem', textAlign: 'right' }}>
                                                     <button onClick={() => handleDeleteSubject(s.id)} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', padding: '0.5rem' }}><Trash2 size={16} /></button>
                                                 </td>
                                             </tr>
@@ -437,7 +437,7 @@ const Configuration = () => {
                         <h2 style={{ fontSize: '1.25rem', margin: 0 }}>Tableau des Frais Scolaires</h2>
                     </div>
 
-                    <div className="stack-on-mobile" style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) 2fr', gap: '2rem' }}>
+                    <div className="grid-resp-2" style={{ gap: '2rem' }}>
                         {/* Add Fee Form */}
                         <div style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: '16px', border: '1px solid #e2e8f0', height: 'fit-content' }}>
                             <h3 style={{ fontSize: '1rem', marginBottom: '1.25rem', fontWeight: '700', color: 'var(--primary-dark)' }}>Définir un Nouveau Frais</h3>
@@ -524,7 +524,7 @@ const Configuration = () => {
                                     </div>
 
                                     <div className="table-container">
-                                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                        <table className="responsive-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                                             <thead>
                                                 <tr style={{ background: '#f8fafc', borderBottom: '2px solid #f1f5f9' }}>
                                                     <th style={{ padding: '0.75rem 1rem', textAlign: 'left', fontSize: '0.75rem', color: '#64748b' }}>LIBELLÉ</th>
@@ -536,13 +536,13 @@ const Configuration = () => {
                                             <tbody>
                                                 {(Array.isArray(c.fees) ? c.fees : []).map((f, idx) => (
                                                     <tr key={f.id} style={{ borderBottom: idx < c.fees.length - 1 ? '1px solid #f1f5f9' : 'none' }}>
-                                                        <td style={{ padding: '0.875rem 1rem' }}>
+                                                        <td data-label="Frais" style={{ padding: '0.875rem 1rem' }}>
                                                             <div style={{ fontWeight: '600', fontSize: '0.875rem' }}>{f.name || '---'}</div>
                                                             <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
                                                                 {f.type === 'TUITION' ? 'Scolarité' : f.type === 'REGISTRATION' ? 'Inscription' : 'Service'}
                                                             </div>
                                                         </td>
-                                                        <td style={{ padding: '0.875rem 1rem' }}>
+                                                        <td data-label="Catégorie" style={{ padding: '0.875rem 1rem' }}>
                                                             <span style={{
                                                                 fontSize: '0.65rem', fontWeight: '800', padding: '0.2rem 0.5rem', borderRadius: '4px',
                                                                 background: f.category === 'ANNUAL_OBLIGATORY' ? '#dcfce7' : f.category === 'OPTIONAL' ? '#fef3c7' : '#f5f5f5',
@@ -551,10 +551,10 @@ const Configuration = () => {
                                                                 {f.category === 'ANNUAL_OBLIGATORY' ? 'OBLIGATOIRE' : f.category === 'OPTIONAL' ? 'OPTIONNEL' : 'OCCASIONNEL'}
                                                             </span>
                                                         </td>
-                                                        <td style={{ padding: '0.875rem 1rem', textAlign: 'right', fontWeight: '800', color: 'var(--primary-dark)', fontSize: '0.9rem' }}>
+                                                        <td data-label="Montant" style={{ padding: '0.875rem 1rem', textAlign: 'right', fontWeight: '800', color: 'var(--primary-dark)', fontSize: '0.9rem' }}>
                                                             {(f.amount || 0).toLocaleString()}
                                                         </td>
-                                                        <td style={{ padding: '0.875rem 1rem' }}>
+                                                        <td data-label="Actions" style={{ padding: '0.875rem 1rem' }}>
                                                             <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
                                                                 <button onClick={() => { setEditingFee(f); setShowEditModal(true); }} style={{ padding: '0.4rem', color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer' }}><Edit size={16} /></button>
                                                                 <button onClick={() => handleDeleteFee(f.id)} style={{ padding: '0.4rem', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={16} /></button>

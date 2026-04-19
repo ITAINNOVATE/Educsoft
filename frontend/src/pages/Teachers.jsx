@@ -114,7 +114,7 @@ const Teachers = () => {
                     </h1>
                     <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>Gestion du corps professoral et émoluments.</p>
                 </div>
-                <div style={{ display: 'flex', gap: '0.5rem', width: '100%', maxWidth: '400px' }} className="stack-on-mobile">
+                <div className="grid-resp-2" style={{ gap: '0.75rem', width: '100%', maxWidth: '400px' }}>
                     <button
                         className={`btn ${activeTab === 'LIST' ? 'btn-primary' : ''}`}
                         onClick={() => setActiveTab('LIST')}
@@ -142,7 +142,7 @@ const Teachers = () => {
 
                     <div className="card" style={{ padding: '0', borderRadius: '16px', overflow: 'hidden' }}>
                         <div className="table-container">
-                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <table className="responsive-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                                 <thead style={{ backgroundColor: '#f8fafc', borderBottom: '2px solid #f1f5f9' }}>
                                     <tr>
                                         <th style={{ padding: '1rem 1.5rem', textAlign: 'left', fontSize: '0.85rem', color: '#64748b' }}>Nom & Prénoms</th>
@@ -155,18 +155,17 @@ const Teachers = () => {
                                     {Array.isArray(teachers) && teachers.length > 0 ? (
                                         teachers.map(t => (
                                             <tr key={t.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                                                <td style={{ padding: '1rem 1.5rem' }}>
+                                                <td data-label="Enseignant" style={{ padding: '1rem 1.5rem' }}>
                                                     <div style={{ fontWeight: '700', color: 'var(--primary-dark)' }}>{t.lastName || '---'} {t.firstName || ''}</div>
-                                                    <div className="mobile-only" style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{t.email || '---'}</div>
                                                 </td>
-                                                <td style={{ padding: '1rem 1.5rem' }}>
+                                                <td data-label="Contact" style={{ padding: '1rem 1.5rem' }}>
                                                     <div style={{ fontSize: '0.9rem' }}>{t.email}</div>
                                                 </td>
-                                                <td style={{ padding: '1rem 1.5rem' }}>
+                                                <td data-label="Statut" style={{ padding: '1rem 1.5rem' }}>
                                                     <span style={{ padding: '0.3rem 0.6rem', borderRadius: '6px', backgroundColor: '#dcfce7', color: '#166534', fontSize: '0.7rem', fontWeight: '800' }}>ACTIF</span>
                                                 </td>
-                                                <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
-                                                    <button className="btn" style={{ padding: '0.4rem 1rem', fontSize: '0.85rem', fontWeight: 'bold' }} onClick={() => {
+                                                <td data-label="Actions" style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
+                                                    <button className="btn btn-primary btn-block" style={{ fontSize: '0.85rem', fontWeight: 'bold' }} onClick={() => {
                                                         setNewPayment(prev => ({ ...prev, teacherId: t.id }));
                                                         setShowPaymentModal(true);
                                                     }}>
@@ -215,7 +214,7 @@ const Teachers = () => {
                     <div className="card" style={{ padding: '0', borderRadius: '16px', overflow: 'hidden' }}>
                         <h3 style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid #f1f5f9', fontSize: '1.1rem', fontWeight: '800', margin: 0, color: 'var(--primary-dark)' }}>Historique des Rémunérations</h3>
                         <div className="table-container">
-                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <table className="responsive-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                                 <thead style={{ backgroundColor: '#f8fafc', borderBottom: '2px solid #f1f5f9' }}>
                                     <tr>
                                         <th style={{ padding: '1rem 1.5rem', textAlign: 'left', fontSize: '0.75rem', color: '#64748b' }}>DATE</th>
@@ -228,15 +227,15 @@ const Teachers = () => {
                                 <tbody>
                                     {(Array.isArray(payments) ? payments : []).map(p => (
                                         <tr key={p.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                                            <td style={{ padding: '1rem 1.5rem' }}>{p.paymentDate ? new Date(p.paymentDate).toLocaleDateString('fr-FR') : '---'}</td>
-                                            <td style={{ padding: '1rem 1.5rem' }}>
+                                            <td data-label="Date" style={{ padding: '1rem 1.5rem' }}>{p.paymentDate ? new Date(p.paymentDate).toLocaleDateString('fr-FR') : '---'}</td>
+                                            <td data-label="Bénéficiaire" style={{ padding: '1rem 1.5rem' }}>
                                                 <div style={{ fontWeight: '700', color: 'var(--primary-dark)' }}>{p.teacher?.lastName || '---'} {p.teacher?.firstName || ''}</div>
                                             </td>
-                                            <td style={{ padding: '1rem 1.5rem' }}>
+                                            <td data-label="Type" style={{ padding: '1rem 1.5rem' }}>
                                                 <span style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--primary)' }}>{p.type}</span>
                                             </td>
-                                            <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem' }}>{p.period || '---'}</td>
-                                            <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontWeight: '900', color: 'var(--primary-dark)' }}>{(p.amount || 0).toLocaleString()} FCFA</td>
+                                            <td data-label="Période" style={{ padding: '1rem 1.5rem', fontSize: '0.85rem' }}>{p.period || '---'}</td>
+                                            <td data-label="Montant" style={{ padding: '1rem 1.5rem', textAlign: 'right', fontWeight: '900', color: 'var(--primary-dark)' }}>{(p.amount || 0).toLocaleString()} FCFA</td>
                                         </tr>
                                     ))}
                                     {payments.length === 0 && (

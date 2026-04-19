@@ -177,10 +177,8 @@ const Grades = () => {
                         >
                             <Save size={20} /> {saving ? 'Enregistrement...' : 'Enregistrer Notes'}
                         </button>
-                    </div>
-
-                    <div className="table-container">
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                               <div className="table-container fade-in">
+                        <table className="responsive-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <thead>
                                 <tr style={{ background: '#ffffff', borderBottom: '2px solid #f1f5f9' }}>
                                     <th style={{ padding: '1.25rem 1.5rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Matricule</th>
@@ -193,11 +191,11 @@ const Grades = () => {
                             <tbody>
                                 {(Array.isArray(studentGrades) ? studentGrades : []).map((sg) => (
                                     <tr key={sg.studentId} style={{ borderBottom: '1px solid #f1f5f9', transition: 'background 0.2s' }}>
-                                        <td style={{ padding: '1.25rem 1.5rem', color: '#94a3b8', fontSize: '0.85rem', fontWeight: '700' }}>#{sg.regNumber || '---'}</td>
-                                        <td style={{ padding: '1.25rem 1.5rem' }}>
+                                        <td data-label="Matricule" style={{ padding: '1.25rem 1.5rem', color: '#94a3b8', fontSize: '0.85rem', fontWeight: '700' }}>#{sg.regNumber || '---'}</td>
+                                        <td data-label="Nom" style={{ padding: '1.25rem 1.5rem' }}>
                                             <div style={{ fontWeight: '800', color: 'var(--primary-dark)', fontSize: '1rem' }}>{sg.studentName || 'Élève Inconnu'}</div>
                                         </td>
-                                        <td style={{ padding: '1.25rem 1.5rem', textAlign: 'center' }}>
+                                        <td data-label="Note/20" style={{ padding: '1.25rem 1.5rem', textAlign: 'center' }}>
                                             <input 
                                                 type="number" 
                                                 step="0.25"
@@ -238,7 +236,7 @@ const Grades = () => {
                                                 </div>
                                             )}
                                         </td>
-                                        <td style={{ padding: '1.25rem 1.5rem', textAlign: 'center' }}>
+                                        <td data-label="Actions" style={{ padding: '1.25rem 1.5rem', textAlign: 'center' }}>
                                             <a 
                                                 href={`${config.API_URL}/grades/bulletin/${sg.studentId}/${selectedTerm}?token=${user.token}`} 
                                                 target="_blank" 
@@ -254,6 +252,7 @@ const Grades = () => {
                             </tbody>
                         </table>
                     </div>
+              </div>
                     
                     <div style={{ padding: '2rem', textAlign: 'right', background: '#f8fafc', borderTop: '2px solid #f1f5f9' }}>
                         <button 

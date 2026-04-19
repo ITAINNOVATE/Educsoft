@@ -420,8 +420,8 @@ const Students = () => {
                     </div>
 
                     <div className="card" style={{ padding: '0' }}>
-                        <div className="table-container">
-                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <div className="table-container fade-in">
+                            <table className="responsive-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                                 <thead>
                                     <tr style={{ textAlign: 'left', borderBottom: '2px solid #eee', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
                                         <th style={{ padding: '1rem' }}>Matricule</th>
@@ -435,21 +435,21 @@ const Students = () => {
                                 <tbody>
                                     {(Array.isArray(displayedStudents) ? displayedStudents : []).map(student => (
                                         <tr key={student.id} style={{ borderBottom: '1px solid #f5f5f5', transition: 'background 0.2s' }}>
-                                            <td style={{ padding: '1rem', fontWeight: 'bold', color: 'var(--primary)', whiteSpace: 'nowrap' }}>{student.regNumber || '---'}</td>
-                                            <td style={{ padding: '1rem' }}>
+                                            <td data-label="Matricule" style={{ padding: '1rem', fontWeight: 'bold', color: 'var(--primary)', whiteSpace: 'nowrap' }}>{student.regNumber || '---'}</td>
+                                            <td data-label="Élève" style={{ padding: '1rem' }}>
                                                 <div style={{ fontWeight: '600' }}>{student.lastName || '---'}</div>
                                                 <div style={{ fontSize: '0.8rem', color: '#666' }}>{student.firstName || ''}</div>
                                             </td>
-                                            <td style={{ padding: '1rem', whiteSpace: 'nowrap' }}>{student.enrollments?.[0]?.class?.name || '---'}</td>
-                                            <td style={{ padding: '1rem' }}>{student.gender || '---'}</td>
-                                            <td style={{ padding: '1rem' }}>
+                                            <td data-label="Classe" style={{ padding: '1rem', whiteSpace: 'nowrap' }}>{student.enrollments?.[0]?.class?.name || '---'}</td>
+                                            <td data-label="Sexe" style={{ padding: '1rem' }}>{student.gender || '---'}</td>
+                                            <td data-label="Statut" style={{ padding: '1rem' }}>
                                                 <span style={{ 
                                                     padding: '4px 8px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 'bold',
                                                     backgroundColor: student.status === 'ACTIF' ? '#e8f5e9' : '#ffebee',
                                                     color: student.status === 'ACTIF' ? '#2e7d32' : '#c62828'
                                                 }}>{student.status || 'INCONNU'}</span>
                                             </td>
-                                            <td style={{ padding: '1rem' }}>
+                                            <td data-label="Action" style={{ padding: '1rem' }}>
                                                 <button className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => openDetails(student)}>
                                                     Détails
                                                 </button>
@@ -594,21 +594,16 @@ const Students = () => {
                             </section>
                         </div>
 
-                        <div style={{ marginTop: '3rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                            <button type="button" className="btn" onClick={() => setView('LIST')}>Annuler</button>
-                            <button type="submit" className="btn btn-primary" style={{ padding: '1rem 2.5rem' }}>Valider l'Inscription</button>
+                        <div style={{ marginTop: '3rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }} className="stack-on-mobile">
+                            <button type="button" className="btn btn-block" style={{ backgroundColor: '#eee' }} onClick={() => setView('LIST')}>Annuler</button>
+                            <button type="submit" className="btn btn-primary btn-block" style={{ padding: '1rem' }}>Valider l'Inscription</button>
                         </div>
                     </form>
                 </div>
             )}
 
             {view === 'DETAILS' && selectedStudent && (
-                <div id="student-details-grid" style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '2rem' }}>
-                    <style>{`
-                        @media (max-width: 900px) {
-                            #student-details-grid { grid-template-columns: 1fr !important; }
-                        }
-                    `}</style>
+                <div className="grid-resp-2" style={{ gridTemplateColumns: 'minmax(0, 300px) 1fr' }}>
                     <aside>
                         <div className="card" style={{ textAlign: 'center', position: 'sticky', top: '2rem' }}>
                             <div style={{ position: 'relative', width: '120px', height: '120px', margin: '0 auto 1.5rem' }}>
@@ -722,7 +717,7 @@ const Students = () => {
                                                         </span>
                                                     </div>
                                                     <div style={{ overflowX: 'auto' }}>
-                                                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                                                        <table className="responsive-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
                                                             <thead>
                                                                 <tr style={{ textAlign: 'left', color: '#777', borderBottom: '1px solid #eee' }}>
                                                                     <th style={{ padding: '0.5rem' }}>Libellé</th>
@@ -734,10 +729,10 @@ const Students = () => {
                                                             <tbody>
                                                                 {cat.data.details.map(f => (
                                                                     <tr key={f.id} style={{ borderBottom: '1px solid #f5f5f5' }}>
-                                                                        <td style={{ padding: '0.6rem 0.5rem', fontWeight: '600' }}>{f.name}</td>
-                                                                        <td style={{ padding: '0.6rem 0.5rem', textAlign: 'right' }}>{f.amount.toLocaleString()}</td>
-                                                                        <td style={{ padding: '0.6rem 0.5rem', textAlign: 'right', color: 'var(--success)', fontWeight: '600' }}>{f.paid.toLocaleString()}</td>
-                                                                        <td style={{ padding: '0.6rem 0.5rem', textAlign: 'right', fontWeight: '800', color: f.remaining > 0 ? 'var(--error)' : 'var(--success)' }}>
+                                                                        <td data-label="Libellé" style={{ padding: '0.6rem 0.5rem', fontWeight: '600' }}>{f.name}</td>
+                                                                        <td data-label="Dû" style={{ padding: '0.6rem 0.5rem', textAlign: 'right' }}>{f.amount.toLocaleString()}</td>
+                                                                        <td data-label="Payé" style={{ padding: '0.6rem 0.5rem', textAlign: 'right', color: 'var(--success)', fontWeight: '600' }}>{f.paid.toLocaleString()}</td>
+                                                                        <td data-label="Solde" style={{ padding: '0.6rem 0.5rem', textAlign: 'right', fontWeight: '800', color: f.remaining > 0 ? 'var(--error)' : 'var(--success)' }}>
                                                                             {f.remaining.toLocaleString()}
                                                                         </td>
                                                                     </tr>
@@ -751,7 +746,7 @@ const Students = () => {
                                     </div>
 
                                     <h4 style={{ fontSize: '1rem', marginBottom: '1.5rem', fontWeight: '700' }}>Historique des Paiements</h4>
-                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                    <table className="responsive-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                                         <thead>
                                             <tr style={{ textAlign: 'left', borderBottom: '2px solid #eee', fontSize: '0.85rem', color: '#666' }}>
                                                 <th style={{ padding: '0.75rem' }}>Date</th>
@@ -764,11 +759,11 @@ const Students = () => {
                                         <tbody>
                                             {selectedStudent.payments?.sort((a, b) => new Date(b.paymentDate) - new Date(a.paymentDate)).map(p => (
                                                 <tr key={p.id} style={{ borderBottom: '1px solid #f9f9f9' }}>
-                                                    <td style={{ padding: '0.75rem' }}>{new Date(p.paymentDate).toLocaleDateString()}</td>
-                                                    <td style={{ padding: '0.75rem', fontSize: '0.75rem', fontFamily: 'monospace' }}>{p.receiptNumber}</td>
-                                                    <td style={{ padding: '0.75rem' }}>{p.feeName || 'Divers'}</td>
-                                                    <td style={{ padding: '0.75rem', fontWeight: 'bold' }}>{p.amount.toLocaleString()} FCFA</td>
-                                                    <td style={{ padding: '0.75rem', fontSize: '0.75rem' }}>{p.method}</td>
+                                                    <td data-label="Date" style={{ padding: '0.75rem' }}>{new Date(p.paymentDate).toLocaleDateString()}</td>
+                                                    <td data-label="Réf" style={{ padding: '0.75rem', fontSize: '0.75rem', fontFamily: 'monospace' }}>{p.receiptNumber}</td>
+                                                    <td data-label="Frais" style={{ padding: '0.75rem' }}>{p.feeName || 'Divers'}</td>
+                                                    <td data-label="Montant" style={{ padding: '0.75rem', fontWeight: 'bold' }}>{p.amount.toLocaleString()} FCFA</td>
+                                                    <td data-label="Mode" style={{ padding: '0.75rem', fontSize: '0.75rem' }}>{p.method}</td>
                                                 </tr>
                                             ))}
                                             {selectedStudent.payments?.length === 0 && (
@@ -780,7 +775,7 @@ const Students = () => {
                             )}
                             {activeTab === 'BIO' && (
                                 <form onSubmit={handleUpdate}>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                                    <div className="grid-resp-2" style={{ gap: '1.25rem' }}>
                                         <div className="form-group">
                                             <label className="form-label">Prénom(s)</label>
                                             <input type="text" className="form-input" value={selectedStudent.firstName} onChange={e => setSelectedStudent({ ...selectedStudent, firstName: e.target.value })} disabled={user?.role === 'ACCOUNTANT'} />

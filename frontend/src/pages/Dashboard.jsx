@@ -113,7 +113,7 @@ const ManagementDashboard = ({ data, navigate }) => {
     const { management, totals } = data;
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-            <div className="grid-resp-2" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.5rem' }}>
+            <div className="grid-resp-2" style={{ gap: '1.25rem' }}>
                 <StatCard icon={<TrendingUp />} label="Recettes du Mois" value={`${(management.revenueMonth || 0).toLocaleString()} FCFA`} color="var(--primary)" bg="rgba(var(--primary-rgb), 0.1)" />
                 <StatCard icon={<Users />} label="Élèves Actifs" value={totals.students} color="#0ea5e9" bg="#f0f9ff" />
                 <StatCard icon={<BookOpen />} label="Classes" value={totals.classes} color="#8b5cf6" bg="#f5f3ff" />
@@ -143,8 +143,8 @@ const ManagementDashboard = ({ data, navigate }) => {
                 <div style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9' }}>
                     <h3 style={{ margin: 0, fontWeight: '800' }}>Derniers Paiements</h3>
                 </div>
-                <div className="table-container">
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <div className="table-container fade-in">
+                    <table className="responsive-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
                             <tr style={{ textAlign: 'left', background: '#f8fafc', fontSize: '0.75rem', textTransform: 'uppercase' }}>
                                 <th style={{ padding: '1rem 1.5rem' }}>Élève</th>
@@ -155,9 +155,9 @@ const ManagementDashboard = ({ data, navigate }) => {
                         <tbody>
                             {management.recentPayments.map(p => (
                                 <tr key={p.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                                    <td style={{ padding: '1rem 1.5rem', fontWeight: '700' }}>{p.student.lastName} {p.student.firstName}</td>
-                                    <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: '#64748b' }}>{new Date(p.paymentDate).toLocaleDateString()}</td>
-                                    <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontWeight: '900', color: 'var(--primary)' }}>{p.amount.toLocaleString()} FCFA</td>
+                                    <td data-label="Élève" style={{ padding: '1rem 1.5rem', fontWeight: '700' }}>{p.student.lastName} {p.student.firstName}</td>
+                                    <td data-label="Date" style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: '#64748b' }}>{new Date(p.paymentDate).toLocaleDateString()}</td>
+                                    <td data-label="Montant" style={{ padding: '1rem 1.5rem', textAlign: 'right', fontWeight: '900', color: 'var(--primary)' }}>{p.amount.toLocaleString()} FCFA</td>
                                 </tr>
                             ))}
                         </tbody>
@@ -172,14 +172,14 @@ const SecretaryDashboard = ({ data, navigate }) => {
     const { administrative, totals } = data;
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-            <div className="grid-resp-2" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.5rem' }}>
+            <div className="grid-resp-2" style={{ gap: '1.25rem' }}>
                 <StatCard icon={<UserPlus />} label="Nouveaux Élèves (30j)" value={administrative.newStudentsMonth} color="var(--primary)" bg="rgba(var(--primary-rgb), 0.1)" />
                 <StatCard icon={<Clock />} label="Inscriptions en Attente" value={administrative.pendingEnrollments} color="#f59e0b" bg="#fffbeb" />
                 <StatCard icon={<Users />} label="Effectif Total" value={totals.students} color="#0ea5e9" bg="#f0f9ff" />
                 <StatCard icon={<BookOpen />} label="Classes Actives" value={totals.classes} color="#8b5cf6" bg="#f5f3ff" />
             </div>
 
-            <div className="grid-resp-2" style={{ gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
+            <div className="grid-resp-2" style={{ gap: '1.5rem' }}>
                 <section className="card" style={{ padding: 0, overflow: 'hidden', borderRadius: '24px' }}>
                     <div style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9' }}>
                         <h3 style={{ margin: 0, fontWeight: '800' }}>Dernières Inscriptions</h3>
@@ -265,14 +265,14 @@ const DirectorDashboard = ({ data, navigate }) => {
     const { administrative, academic, totals } = data;
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-             <div className="grid-resp-2" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.5rem' }}>
+            <div className="grid-resp-2" style={{ gap: '1.25rem' }}>
                 <StatCard icon={<Users />} label="Élèves Actifs" value={totals.students} color="#0ea5e9" bg="#f0f9ff" />
                 <StatCard icon={<BookOpen />} label="Classes Totales" value={totals.classes} color="#8b5cf6" bg="#f5f3ff" />
                 <StatCard icon={<UserPlus />} label="Inscr. Mensuelles" value={administrative.newStudentsMonth} color="var(--primary)" bg="rgba(var(--primary-rgb), 0.1)" />
                 <StatCard icon={<Clock />} label="Alertes Admin" value={administrative.pendingEnrollments} color="#f59e0b" bg="#fffbeb" />
             </div>
             
-            <div className="grid-resp-2" style={{ gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+            <div className="grid-resp-2" style={{ gap: '1.5rem' }}>
                 <section className="card" style={{ padding: '1.5rem', borderRadius: '24px' }}>
                     <h3 style={{ marginBottom: '1.5rem', fontWeight: '800' }}>Dernières Notes</h3>
                     {academic.recentGrades.map((g, i) => (

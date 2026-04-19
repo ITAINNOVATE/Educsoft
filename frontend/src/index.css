@@ -145,8 +145,14 @@ input {
 
 @media screen and (max-width: 210mm) {
     .invoice-a4 {
-        width: 95%;
-        padding: 10mm;
+        width: 98% !important;
+        padding: 5mm !important;
+        margin: 1rem auto !important;
+        font-size: 0.8rem;
+    }
+    
+    .invoice-a4 header, .invoice-a4 footer {
+        padding: 5mm 0 !important;
     }
 }
 
@@ -216,6 +222,9 @@ input {
     gap: 1rem;
 }
 
+.hide-mobile, .desktop-only { display: block; }
+.show-mobile, .mobile-only { display: none; }
+
 @media (max-width: 1024px) {
     .grid-resp-3 {
         grid-template-columns: repeat(2, 1fr);
@@ -252,7 +261,7 @@ input {
     }
 
     .grid-resp-2, .grid-resp-3 {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
     }
 
     .stack-on-mobile {
@@ -266,4 +275,54 @@ input {
     h1 {
         font-size: 1.75rem !important;
     }
+
+    .hide-mobile { display: none !important; }
+    .show-mobile { display: block !important; }
+
+    /* Responsive Table to Cards */
+    .responsive-table thead {
+        display: none;
+    }
+
+    .responsive-table tr {
+        display: block;
+        margin-bottom: 1rem;
+        border: 1px solid #edf2f7;
+        border-radius: 12px;
+        background: white;
+        padding: 1rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .responsive-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0 !important;
+        border-bottom: 1px solid #f7fafc;
+        text-align: right;
+    }
+
+    .responsive-table td:last-child {
+        border-bottom: none;
+    }
+
+    .responsive-table td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        text-align: left;
+        color: var(--text-muted);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.4s ease-out;
 }

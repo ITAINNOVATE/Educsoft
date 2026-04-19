@@ -220,8 +220,8 @@ const Payments = () => {
 
             {/* Header section */}
             <header className="stack-on-mobile" style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1.5rem' }}>
-                <div>
-                    <h1 style={{ fontSize: '2.2rem', fontWeight: '800', color: 'var(--primary-dark)', marginBottom: '0.5rem', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
+                <div style={{ flex: 1 }}>
+                    <h1 style={{ color: 'var(--primary-dark)', fontWeight: '800', marginBottom: '0.5rem', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
                         Caisse & Paiements
                     </h1>
                     <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>
@@ -229,7 +229,7 @@ const Payments = () => {
                     </p>
                 </div>
 
-                <div className="grid-resp-2" style={{ display: 'grid', gap: '1rem', flexShrink: 0 }}>
+                <div className="grid-resp-2" style={{ gap: '1rem', flexShrink: 0 }}>
                     <div className="card" style={{ padding: '0.75rem 1rem', background: 'white', display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: '180px' }}>
                         <div style={{ background: '#e0f2f1', padding: '0.5rem', borderRadius: '10px' }}>
                             <TrendingUp color="var(--primary)" size={18} />
@@ -251,12 +251,7 @@ const Payments = () => {
                 </div>
             </header>
 
-            <div className="grid-resp-2" style={{ gridTemplateColumns: '1.5fr 1fr', gap: '2rem' }} id="payments-grid">
-                <style>{`
-                    @media (max-width: 1000px) {
-                        #payments-grid { grid-template-columns: 1fr !important; }
-                    }
-                `}</style>
+            <div className="grid-resp-2" style={{ gap: '2rem' }}>
 
                 {/* PAYMENT FORM COLUMN */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>

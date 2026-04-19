@@ -351,7 +351,7 @@ const Accounting = () => {
             </div>
 
             {/* Stats Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
+            <div className="grid-resp-2" style={{ gap: '1.5rem', marginBottom: '3rem' }}>
                 <StatCard
                     label="Recettes Totales"
                     value={`${(stats?.revenueTotal || 0).toLocaleString()} FCFA`}
@@ -405,7 +405,7 @@ const Accounting = () => {
 
                 <div className="table-container">
                     {viewMode === 'DEBTS' ? (
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <table className="responsive-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <thead>
                                 <tr style={{ textAlign: 'left', borderBottom: '2px solid #eee', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
                                     <th style={{ padding: '1rem' }}>Matricule</th>
@@ -420,14 +420,14 @@ const Accounting = () => {
                             <tbody>
                                 {displayedDebts.map(debt => (
                                         <tr key={debt.id} style={{ borderBottom: '1px solid #f9f9f9', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.backgroundColor = '#fcfcfc'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                                            <td style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.875rem' }}>{debt.regNumber || '---'}</td>
-                                            <td style={{ padding: '1rem', fontWeight: '500' }}>{debt.name || 'Inconnu'}</td>
-                                            <td style={{ padding: '1rem' }}>{debt.className || '---'}</td>
-                                            <td style={{ padding: '1rem' }}>{(debt.totalFees || 0).toLocaleString()}</td>
-                                            <td style={{ padding: '1rem', color: '#2e7d32' }}>{(debt.paid || 0).toLocaleString()}</td>
-                                            <td style={{ padding: '1rem' }}>
+                                            <td data-label="Matricule" style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.875rem' }}>{debt.regNumber || '---'}</td>
+                                            <td data-label="Élève" style={{ padding: '1rem', fontWeight: '500' }}>{debt.name || 'Inconnu'}</td>
+                                            <td data-label="Classe" style={{ padding: '1rem' }}>{debt.className || '---'}</td>
+                                            <td data-label="Total" style={{ padding: '1rem' }}>{(debt.totalFees || 0).toLocaleString()}</td>
+                                            <td data-label="Payé" style={{ padding: '1rem', color: '#2e7d32' }}>{(debt.paid || 0).toLocaleString()}</td>
+                                            <td data-label="Solde" style={{ padding: '1rem' }}>
                                                 <div style={{ color: 'var(--error)', fontWeight: 'bold' }}>{(debt.balance || 0).toLocaleString()}</div>
-                                                <div style={{ display: 'flex', gap: '4px', marginTop: '4px' }}>
+                                                <div className="desktop-only" style={{ display: 'flex', gap: '4px', marginTop: '4px' }}>
                                                     {(debt.breakdown?.obligatory > 0) && (
                                                         <span title="Obligatoire" style={{ padding: '2px 6px', background: '#ffebee', color: '#c62828', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 'bold' }}>
                                                             OBL: {(debt.breakdown.obligatory || 0).toLocaleString()}
@@ -445,7 +445,7 @@ const Accounting = () => {
                                                     )}
                                                 </div>
                                             </td>
-                                        <td style={{ padding: '1rem' }}>
+                                        <td data-label="Actions" style={{ padding: '1rem' }}>
                                             <button style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                                                 <FileText size={16} /> Relancer
                                             </button>
@@ -455,7 +455,7 @@ const Accounting = () => {
                             </tbody>
                         </table>
                     ) : (
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <table className="responsive-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <thead>
                                 <tr style={{ textAlign: 'left', borderBottom: '2px solid #eee', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
                                     <th style={{ padding: '1rem' }}>Date</th>
@@ -470,21 +470,21 @@ const Accounting = () => {
                             <tbody>
                                 {displayedJournal.map(p => (
                                     <tr key={p.id} style={{ borderBottom: '1px solid #f9f9f9', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.backgroundColor = '#fcfcfc'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                                        <td style={{ padding: '1rem', fontSize: '0.85rem' }}>{p.paymentDate ? new Date(p.paymentDate).toLocaleDateString('fr-FR') : '---'}</td>
-                                        <td style={{ padding: '1rem', fontWeight: '700', color: 'var(--primary-dark)' }}>{p.receiptNumber || '---'}</td>
-                                        <td style={{ padding: '1rem' }}>
+                                        <td data-label="Date" style={{ padding: '1rem', fontSize: '0.85rem' }}>{p.paymentDate ? new Date(p.paymentDate).toLocaleDateString('fr-FR') : '---'}</td>
+                                        <td data-label="Reçu" style={{ padding: '1rem', fontWeight: '700', color: 'var(--primary-dark)' }}>{p.receiptNumber || '---'}</td>
+                                        <td data-label="Élève" style={{ padding: '1rem' }}>
                                             <div style={{ fontWeight: '500' }}>{p.student?.lastName || '---'} {p.student?.firstName || ''}</div>
-                                            <div style={{ fontSize: '0.75rem', color: '#666' }}>{p.student?.regNumber || '---'}</div>
+                                            <div className="desktop-only" style={{ fontSize: '0.75rem', color: '#666' }}>{p.student?.regNumber || '---'}</div>
                                         </td>
-                                        <td style={{ padding: '1rem', fontSize: '0.9rem' }}>{p.feeName || '---'}</td>
-                                        <td style={{ padding: '1rem', fontWeight: '800' }}>{(p.amount || 0).toLocaleString()}</td>
-                                        <td style={{ padding: '1rem' }}>
+                                        <td data-label="Motif" style={{ padding: '1rem', fontSize: '0.9rem' }}>{p.feeName || '---'}</td>
+                                        <td data-label="Montant" style={{ padding: '1rem', fontWeight: '800' }}>{(p.amount || 0).toLocaleString()}</td>
+                                        <td data-label="Mode" style={{ padding: '1rem' }}>
                                             <span style={{ padding: '4px 8px', background: '#f0f4f8', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '600' }}>
                                                 {p.method || '---'}
                                             </span>
                                         </td>
-                                        <td style={{ padding: '0.5rem 1rem' }}>
-                                            <div style={{ display: 'flex', gap: '10px' }}>
+                                        <td data-label="Actions" style={{ padding: '0.5rem 1rem' }}>
+                                            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
                                                 <button 
                                                     onClick={() => handleViewInvoice(p)}
                                                     title="Voir détail / Reçu"
