@@ -6,7 +6,7 @@ import {
     Wallet, TrendingDown, Calendar, Search, 
     Plus, Trash2, FileText, Filter, Receipt,
     AlertCircle, CheckCircle, Package, Truck, 
-    UserCheck, Tool, HelpCircle, X, Paperclip,
+    UserCheck, Wrench, HelpCircle, X, Paperclip,
     User, Eye, Link as LinkIcon
 } from 'lucide-react';
 
@@ -38,7 +38,7 @@ const Expenses = () => {
         { id: 'ACHAT', label: 'Achats / Fournitures', icon: <Package size={16} /> },
         { id: 'SALAIRE', label: 'Salaires / Primes', icon: <UserCheck size={16} /> },
         { id: 'LOYER', label: 'Loyer / Factures', icon: <FileText size={16} /> },
-        { id: 'MAINTENANCE', label: 'Maintenance / Travaux', icon: <Tool size={16} /> },
+        { id: 'MAINTENANCE', label: 'Maintenance / Travaux', icon: <Wrench size={16} /> },
         { id: 'TRANSPORT', label: 'Transport / Carburant', icon: <Truck size={16} /> },
         { id: 'DIVERS', label: 'Dépenses Diverses', icon: <HelpCircle size={16} /> }
     ];

@@ -215,6 +215,7 @@ const Payments = () => {
         window.open(`${API_BASE}/payments/receipt/${id}?token=${user.token}`, '_blank');
     };
 
+    return (
         <div className="responsive-container" style={{ maxWidth: '1400px', margin: '0 auto', fontFamily: 'Inter, sans-serif' }}>
 
             {/* Header section */}

@@ -316,6 +316,7 @@ input {
     .responsive-table td:last-child {
         border-bottom: none;
     }
+}
 
 /* --- Advanced Responsive Fixes --- */
 
