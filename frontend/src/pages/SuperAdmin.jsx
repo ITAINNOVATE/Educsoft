@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Building2, Plus, CheckCircle, XCircle, Trash2, Pause, Play, Eye, Mail, Phone, MapPin } from 'lucide-react';
+import { Building2, Plus, CheckCircle, XCircle, Trash2, Pause, Play, Eye, Mail, Phone, MapPin, Pencil } from 'lucide-react';
 import config from '../config';
 import logo from '../assets/logo.png';
 
@@ -12,6 +12,8 @@ const SuperAdmin = () => {
     const [establishments, setEstablishments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editingId, setEditingId] = useState(null);
     const [newEst, setNewEst] = useState({ name: '', code: '', email: '', phone: '', address: '', type: '', typeOther: '', directorName: '' });
     const establishmentTypes = [
         "Maternelle",
@@ -78,24 +80,53 @@ const SuperAdmin = () => {
         }
     };
 
+    const handleEditClick = (est) => {
+        setNewEst({
+            name: est.name || '',
+            code: est.code || '',
+            email: est.email || '',
+            phone: est.phone || '',
+            address: est.address || '',
+            type: est.type || '',
+            typeOther: est.typeOther || '',
+            directorName: est.directorName || ''
+        });
+        setEditingId(est.id);
+        setIsEditing(true);
+        setShowModal(true);
+    };
+
     const handleCreate = async (e) => {
         e.preventDefault();
         try {
-            await axios.post(API_BASE, newEst, {
-                headers: { Authorization: `Bearer ${user.token}` }
-            });
-            alert('Établissement créé avec succès !');
+            if (isEditing) {
+                await axios.patch(`${API_BASE}/${editingId}`, newEst, {
+                    headers: { Authorization: `Bearer ${user.token}` }
+                });
+                alert('Établissement mis à jour avec succès !');
+            } else {
+                await axios.post(API_BASE, newEst, {
+                    headers: { Authorization: `Bearer ${user.token}` }
+                });
+                alert('Établissement créé avec succès !');
+            }
             setShowModal(false);
-            setNewEst({ name: '', code: '', email: '', phone: '', address: '', type: '', typeOther: '', directorName: '' });
+            resetForm();
             fetchEstablishments();
         } catch (error) {
-            const msg = error.response?.data?.message || 'Erreur lors de la création';
+            const msg = error.response?.data?.message || 'Erreur lors de l’opération';
             const technicalError = error.response?.data?.error;
             const detail = technicalError 
                 ? ` (${typeof technicalError === 'object' ? JSON.stringify(technicalError) : technicalError})` 
                 : '';
             alert(msg + detail);
         }
+    };
+
+    const resetForm = () => {
+        setNewEst({ name: '', code: '', email: '', phone: '', address: '', type: '', typeOther: '', directorName: '' });
+        setIsEditing(false);
+        setEditingId(null);
     };
 
     if (loading) return <div className="p-8">Chargement du système...</div>;
@@ -109,7 +140,7 @@ const SuperAdmin = () => {
                     </h1>
                     <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>Administration globale des établissements affiliés.</p>
                 </div>
-                <button className="btn btn-primary" style={{ height: '48px', padding: '0 1.5rem', fontWeight: '700', width: '100%', maxWidth: '250px' }} onClick={() => setShowModal(true)}>
+                <button className="btn btn-primary" style={{ height: '48px', padding: '0 1.5rem', fontWeight: '700', width: '100%', maxWidth: '250px' }} onClick={() => { resetForm(); setShowModal(true); }}>
                     <Plus size={20} style={{ marginRight: '0.5rem' }} /> Nouvel Établissement
                 </button>
             </header>
@@ -159,6 +190,13 @@ const SuperAdmin = () => {
                                     <Eye size={20} />
                                 </button>
                                 <button
+                                    onClick={() => handleEditClick(est)}
+                                    title="Modifier l'établissement"
+                                    style={{ border: 'none', background: '#f1f5f9', color: '#475569', padding: '0.6rem', borderRadius: '10px', cursor: 'pointer' }}
+                                >
+                                    <Pencil size={20} />
+                                </button>
+                                <button
                                     onClick={() => handleToggleStatus(est.id, est.isActive)}
                                     title={est.isActive ? 'Suspendre' : 'Activer'}
                                     style={{ border: 'none', background: est.isActive ? '#fff7ed' : '#f0fdf4', color: est.isActive ? '#9a3412' : '#166534', padding: '0.6rem', borderRadius: '10px', cursor: 'pointer' }}
@@ -183,8 +221,10 @@ const SuperAdmin = () => {
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000, padding: '1rem' }}>
                     <div className="card fade-in" style={{ width: '100%', maxWidth: '550px', maxHeight: '90vh', overflowY: 'auto', borderRadius: '24px', padding: '2rem' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                            <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '800', color: 'var(--primary-dark)' }}>Nouvel Établissement</h2>
-                            <button onClick={() => setShowModal(false)} style={{ background: '#f1f5f9', border: 'none', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer' }}>×</button>
+                            <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '800', color: 'var(--primary-dark)' }}>
+                                {isEditing ? 'Modifier l’établissement' : 'Nouvel Établissement'}
+                            </h2>
+                            <button onClick={() => { setShowModal(false); resetForm(); }} style={{ background: '#f1f5f9', border: 'none', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer' }}>×</button>
                         </div>
                         <form onSubmit={handleCreate}>
                             <div className="form-group">
@@ -196,8 +236,17 @@ const SuperAdmin = () => {
                                 <input type="text" className="form-input" style={{ height: '48px' }} value={newEst.directorName} onChange={e => setNewEst({...newEst, directorName: e.target.value})} />
                             </div>
                             <div className="form-group">
-                                <label className="form-label">Code d'accès unique</label>
-                                <input type="text" className="form-input" style={{ height: '48px', fontWeight: '800', letterSpacing: '1px' }} required value={newEst.code} onChange={e => setNewEst({...newEst, code: e.target.value.toUpperCase()})} placeholder="EX: ITA2026" />
+                                <label className="form-label">Code d'accès unique {isEditing && <span style={{ color: '#94a3b8', fontSize: '0.8rem', fontWeight: 'normal' }}>(Non modifiable)</span>}</label>
+                                <input 
+                                    type="text" 
+                                    className="form-input" 
+                                    style={{ height: '48px', fontWeight: '800', letterSpacing: '1px', opacity: isEditing ? 0.6 : 1 }} 
+                                    required 
+                                    disabled={isEditing}
+                                    value={newEst.code} 
+                                    onChange={e => setNewEst({...newEst, code: e.target.value.toUpperCase()})} 
+                                    placeholder="EX: ITA2026" 
+                                />
                             </div>
                             <div className="grid-resp-2" style={{ gap: '1rem' }}>
                                 <div className="form-group">
@@ -234,9 +283,11 @@ const SuperAdmin = () => {
                                     <input type="text" className="form-input" style={{ height: '48px' }} required value={newEst.typeOther} onChange={e => setNewEst({...newEst, typeOther: e.target.value})} />
                                 </div>
                             )}
-                            <div style={{ display: 'flex', gap: '1rem', marginTop: '2.5rem' }}>
-                                <button type="button" className="btn" style={{ flex: 1, height: '48px', background: '#f8fafc' }} onClick={() => setShowModal(false)}>Annuler</button>
-                                <button type="submit" className="btn btn-primary" style={{ flex: 1, height: '48px' }}>Enregistrer l'école</button>
+                             <div style={{ display: 'flex', gap: '1rem', marginTop: '2.5rem' }}>
+                                <button type="button" className="btn" style={{ flex: 1, height: '48px', background: '#f8fafc' }} onClick={() => { setShowModal(false); resetForm(); }}>Annuler</button>
+                                <button type="submit" className="btn btn-primary" style={{ flex: 1, height: '48px' }}>
+                                    {isEditing ? 'Enregistrer les modifications' : 'Enregistrer l\'école'}
+                                </button>
                             </div>
                         </form>
                     </div>
