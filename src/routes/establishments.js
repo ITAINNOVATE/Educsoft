@@ -26,7 +26,7 @@ router.get('/', protect, authorize('SUPER_ADMIN'), async (req, res) => {
 // @route   POST /api/establishments
 // @access  Private (SUPER_ADMIN only)
 router.post('/', protect, authorize('SUPER_ADMIN'), async (req, res) => {
-    const { name, code, address, phone, email, type, typeOther, directorName } = req.body;
+    const { name, code, address, phone, email, type, typeOther, directorName, authorizationNum, educmasterNum } = req.body;
 
     try {
         const existing = await prisma.establishment.findUnique({ where: { code } });
@@ -35,7 +35,7 @@ router.post('/', protect, authorize('SUPER_ADMIN'), async (req, res) => {
         }
 
         const establishment = await prisma.establishment.create({
-            data: { name, code, address, phone, email, type, typeOther, directorName }
+            data: { name, code, address, phone, email, type, typeOther, directorName, authorizationNum, educmasterNum }
         });
 
         res.status(201).json(establishment);
@@ -53,7 +53,7 @@ router.post('/', protect, authorize('SUPER_ADMIN'), async (req, res) => {
 // @access  Private (SUPER_ADMIN only)
 router.patch('/:id', protect, authorize('SUPER_ADMIN'), async (req, res) => {
     try {
-        const { isActive, name, address, phone, email, type, typeOther, directorName } = req.body;
+        const { isActive, name, address, phone, email, type, typeOther, directorName, authorizationNum, educmasterNum } = req.body;
 
         const updateData = {};
         if (typeof isActive !== 'undefined') updateData.isActive = isActive;
@@ -64,6 +64,8 @@ router.patch('/:id', protect, authorize('SUPER_ADMIN'), async (req, res) => {
         if (type) updateData.type = type;
         if (typeof typeOther !== 'undefined') updateData.typeOther = typeOther;
         if (directorName) updateData.directorName = directorName;
+        if (typeof authorizationNum !== 'undefined') updateData.authorizationNum = authorizationNum;
+        if (typeof educmasterNum !== 'undefined') updateData.educmasterNum = educmasterNum;
 
         const establishment = await prisma.establishment.update({
             where: { id: req.params.id },

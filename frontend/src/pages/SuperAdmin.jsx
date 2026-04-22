@@ -14,7 +14,7 @@ const SuperAdmin = () => {
     const [showModal, setShowModal] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editingId, setEditingId] = useState(null);
-    const [newEst, setNewEst] = useState({ name: '', code: '', email: '', phone: '', address: '', type: '', typeOther: '', directorName: '' });
+    const [newEst, setNewEst] = useState({ name: '', code: '', email: '', phone: '', address: '', type: '', typeOther: '', directorName: '', authorizationNum: '', educmasterNum: '' });
     const establishmentTypes = [
         "Maternelle",
         "Maternelle-Primaire-Secondaire",
@@ -89,7 +89,9 @@ const SuperAdmin = () => {
             address: est.address || '',
             type: est.type || '',
             typeOther: est.typeOther || '',
-            directorName: est.directorName || ''
+            directorName: est.directorName || '',
+            authorizationNum: est.authorizationNum || '',
+            educmasterNum: est.educmasterNum || ''
         });
         setEditingId(est.id);
         setIsEditing(true);
@@ -124,7 +126,7 @@ const SuperAdmin = () => {
     };
 
     const resetForm = () => {
-        setNewEst({ name: '', code: '', email: '', phone: '', address: '', type: '', typeOther: '', directorName: '' });
+        setNewEst({ name: '', code: '', email: '', phone: '', address: '', type: '', typeOther: '', directorName: '', authorizationNum: '', educmasterNum: '' });
         setIsEditing(false);
         setEditingId(null);
     };
@@ -169,6 +171,8 @@ const SuperAdmin = () => {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}><Mail size={14} /> {est.email || '-'}</div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}><Phone size={14} /> {est.phone || '-'}</div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}><MapPin size={14} /> {est.address || '-'}</div>
+                            {est.authorizationNum && <div style={{ fontSize: '0.75rem', marginTop: '0.2rem', color: 'var(--primary)' }}><strong>Aut:</strong> {est.authorizationNum}</div>}
+                            {est.educmasterNum && <div style={{ fontSize: '0.75rem', color: 'var(--primary)' }}><strong>Edu:</strong> {est.educmasterNum}</div>}
                         </div>
 
                         <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -234,6 +238,16 @@ const SuperAdmin = () => {
                             <div className="form-group">
                                 <label className="form-label">Nom du Directeur</label>
                                 <input type="text" className="form-input" style={{ height: '48px' }} value={newEst.directorName} onChange={e => setNewEst({...newEst, directorName: e.target.value})} />
+                            </div>
+                            <div className="grid-resp-2" style={{ gap: '1rem' }}>
+                                <div className="form-group">
+                                    <label className="form-label">N° d'autorisation</label>
+                                    <input type="text" className="form-input" style={{ height: '48px' }} value={newEst.authorizationNum} onChange={e => setNewEst({...newEst, authorizationNum: e.target.value})} />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">N° Educmaster</label>
+                                    <input type="text" className="form-input" style={{ height: '48px' }} value={newEst.educmasterNum} onChange={e => setNewEst({...newEst, educmasterNum: e.target.value})} />
+                                </div>
                             </div>
                             <div className="form-group">
                                 <label className="form-label">Code d'accès unique {isEditing && <span style={{ color: '#94a3b8', fontSize: '0.8rem', fontWeight: 'normal' }}>(Non modifiable)</span>}</label>

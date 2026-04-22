@@ -25,6 +25,8 @@ model Establishment {
   type          String?   // Maternelle, Primaire, etc.
   typeOther     String?   // Specific description if 'Autre' is selected
   directorName  String?   // Full name of the school Director
+  authorizationNum String?   // N° d'autorisation
+  educmasterNum    String?   // N° Educmaster
   
   users             User[]
   students          Student[]
