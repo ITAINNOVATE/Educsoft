@@ -35,6 +35,7 @@ const Students = () => {
     const [page, setPage] = useState(1);
     const [pagination, setPagination] = useState({ total: 0, pages: 0 });
     const [hasMore, setHasMore] = useState(false);
+    const [whatsappModal, setWhatsappModal] = useState(null); // { parent: ps, student }
 
     const [formData, setFormData] = useState({
         studentData: {
@@ -53,6 +54,30 @@ const Students = () => {
 
     const { user } = useAuth();
     const API_BASE = config.API_URL;
+
+    // ── WhatsApp helpers ──────────────────────────────────────────────────
+    const formatWhatsAppPhone = (phone) => {
+        if (!phone) return null;
+        let cleaned = phone.replace(/\D/g, '');
+        if (cleaned.startsWith('00229')) cleaned = cleaned.slice(2);
+        else if (cleaned.startsWith('0')) cleaned = '229' + cleaned.slice(1);
+        else if (!cleaned.startsWith('229')) cleaned = '229' + cleaned;
+        return cleaned;
+    };
+    const isBirthdayToday = (dob) => {
+        if (!dob) return false;
+        const today = new Date();
+        const b = new Date(dob);
+        return today.getDate() === b.getDate() && today.getMonth() === b.getMonth();
+    };
+    const getStudentAge = (dob) => {
+        if (!dob) return 0;
+        const today = new Date();
+        const b = new Date(dob);
+        let age = today.getFullYear() - b.getFullYear();
+        if (today.getMonth() < b.getMonth() || (today.getMonth() === b.getMonth() && today.getDate() < b.getDate())) age--;
+        return age;
+    };
 
     useEffect(() => {
         if (user?.token) {
@@ -389,6 +414,24 @@ const Students = () => {
 
             {view === 'LIST' && (
                 <>
+                    {/* ── Birthday Banner ── */}
+                    {(() => {
+                        const todayBirthdays = (Array.isArray(students) ? students : []).filter(s => isBirthdayToday(s.dob));
+                        if (todayBirthdays.length === 0) return null;
+                        return (
+                            <div style={{ background: 'linear-gradient(135deg, #fff7ed, #fef3c7)', border: '1px solid #fcd34d', borderRadius: '16px', padding: '1rem 1.5rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                                <span style={{ fontSize: '1.5rem' }}>🎂</span>
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontWeight: '800', color: '#92400e', fontSize: '0.95rem' }}>Anniversaire(s) aujourd'hui !</div>
+                                    <div style={{ fontSize: '0.85rem', color: '#b45309' }}>
+                                        {todayBirthdays.map(s => `${s.firstName} ${s.lastName}`).join(' • ')}
+                                    </div>
+                                </div>
+                                <button onClick={() => openDetails(todayBirthdays[0])} style={{ background: '#f59e0b', color: 'white', border: 'none', borderRadius: '10px', padding: '0.5rem 1rem', fontWeight: '700', cursor: 'pointer', fontSize: '0.85rem' }}>Envoyer un vœu 📱</button>
+                            </div>
+                        );
+                    })()}
+
                     <section className="card" style={{ marginBottom: '2rem', padding: '1.5rem', borderRadius: '20px', border: '1px solid #f1f5f9' }}>
                         <div className="stack-on-mobile" style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
                             <div style={{ position: 'relative', flex: 2, width: '100%' }}>
@@ -646,6 +689,14 @@ const Students = () => {
                              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '1.5rem' }}>
                                 <button className="btn btn-primary" style={{ width: '100%' }} onClick={handleDownloadDossier}><Download size={16} /> Fiche Élève PDF</button>
                                 <button className="btn" style={{ width: '100%', backgroundColor: '#1a237e', color: 'white' }} onClick={handleDownloadCard}><CreditCard size={16} /> Imprimer Carte ID</button>
+                                {selectedStudent.parents?.length > 0 && (
+                                    <button
+                                        onClick={() => setWhatsappModal({ parent: selectedStudent.parents.find(p => p.isPrimary) || selectedStudent.parents[0] })}
+                                        style={{ width: '100%', background: '#25D366', color: 'white', border: 'none', borderRadius: '12px', padding: '0.75rem', fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontSize: '0.9rem' }}
+                                    >
+                                        📱 WhatsApp Parent
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </aside>
@@ -883,12 +934,23 @@ const Students = () => {
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                                     {selectedStudent.parents.map((ps, idx) => (
                                         <div key={idx} className="card" style={{ backgroundColor: '#fdfdfd', border: '1px solid #efefef' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                                                <h4 style={{ color: 'var(--primary)', fontWeight: 'bold' }}>{ps.relation} {ps.isPrimary ? '(Principal)' : ''}</h4>
-                                                {ps.isEmergency && <span style={{ fontSize: '0.7rem', backgroundColor: '#ffebee', color: '#c62828', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>URGENCE</span>}
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                                <h4 style={{ color: 'var(--primary)', fontWeight: 'bold', margin: 0 }}>{ps.relation} {ps.isPrimary ? '(Principal)' : ''}</h4>
+                                                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                                    {ps.isEmergency && <span style={{ fontSize: '0.7rem', backgroundColor: '#ffebee', color: '#c62828', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>URGENCE</span>}
+                                                    {ps.parent.phonePrimary && (
+                                                        <button
+                                                            onClick={() => setWhatsappModal({ parent: ps })}
+                                                            style={{ background: '#25D366', color: 'white', border: 'none', borderRadius: '8px', padding: '0.4rem 0.8rem', fontWeight: '700', cursor: 'pointer', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                                                        >
+                                                            📱 WhatsApp
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
                                             <p><strong>Nom:</strong> {ps.parent.lastName} {ps.parent.firstName}</p>
                                             <p><strong>Téléphone:</strong> {ps.parent.phonePrimary}</p>
+                                            {ps.parent.phoneSecondary && <p><strong>Tél. 2:</strong> {ps.parent.phoneSecondary}</p>}
                                             <p><strong>Email:</strong> {ps.parent.email || '---'}</p>
                                             <p><strong>Profession:</strong> {ps.parent.occupation || '---'}</p>
                                         </div>
@@ -1004,6 +1066,121 @@ const Students = () => {
                 </div>
             )}
 
+        </div>
+
+        {/* ── WhatsApp Notification Modal ── */}
+        {whatsappModal && selectedStudent && (
+            <WhatsAppNotificationModal
+                student={selectedStudent}
+                parentStudent={whatsappModal.parent}
+                financials={selectedStudent.financials}
+                establishmentName={user.establishmentName || 'Notre Établissement'}
+                onClose={() => setWhatsappModal(null)}
+                formatPhone={formatWhatsAppPhone}
+                getAge={getStudentAge}
+            />
+        )}
+    </div>
+    );
+};
+
+// ══════════════════════════════════════════════════════
+// WhatsApp Notification Modal
+// ══════════════════════════════════════════════════════
+const WhatsAppNotificationModal = ({ student, parentStudent, financials, establishmentName, onClose, formatPhone, getAge }) => {
+    const ps = parentStudent;
+    const parentName = `${ps.parent.firstName} ${ps.parent.lastName}`;
+    const studentName = `${student.firstName} ${student.lastName}`;
+    const className = student.enrollments?.[0]?.class?.name || '---';
+    const remaining = financials?.global?.remaining || 0;
+    const age = getAge(student.dob);
+    const phone = formatPhone(ps.parent.phonePrimary);
+
+    const TEMPLATES = {
+        PAYMENT_REMINDER: {
+            icon: '💳', label: 'Relance Paiement',
+            text: `Bonjour ${parentName},\n\nNous vous rappelons que des frais de scolarité sont en attente pour votre enfant *${studentName}*, inscrit(e) en classe de *${className}*.\n\n💳 Montant restant : *${remaining.toLocaleString()} FCFA*\n\nNous vous prions de bien vouloir régulariser cette situation dans les meilleurs délais. Pour toute question, n'hésitez pas à nous contacter.\n\nCordialement,\n*${establishmentName}*`
+        },
+        BIRTHDAY: {
+            icon: '🎂', label: 'Joyeux Anniversaire',
+            text: `🎂 *Joyeux Anniversaire !*\n\nBonjour ${parentName},\n\nToute l'équipe pédagogique de *${establishmentName}* est heureuse de souhaiter un très joyeux anniversaire à votre enfant *${studentName}* qui fête aujourd'hui ses ${age} ans ! 🎉\n\nQue cette belle journée lui apporte beaucoup de joie, de santé et de succès ! 🌟\n\n*${establishmentName}*`
+        },
+        CONVOCATION: {
+            icon: '📋', label: 'Convocation',
+            text: `Bonjour ${parentName},\n\nNous vous prions de bien vouloir vous présenter à notre établissement *${establishmentName}* afin de discuter d'un sujet concernant votre enfant *${studentName}* (${className}).\n\nMerci de nous contacter au plus tôt afin de convenir d'un rendez-vous.\n\nCordialement,\n*${establishmentName}*`
+        },
+        CUSTOM: {
+            icon: '✏️', label: 'Personnalisé',
+            text: `Bonjour ${parentName},\n\n`
+        }
+    };
+
+    const [msgType, setMsgType] = React.useState('PAYMENT_REMINDER');
+    const [msgText, setMsgText] = React.useState(TEMPLATES.PAYMENT_REMINDER.text);
+
+    const handleTypeChange = (key) => {
+        setMsgType(key);
+        setMsgText(TEMPLATES[key].text);
+    };
+
+    const sendWhatsApp = () => {
+        if (!phone) { alert('Numéro de téléphone invalide ou manquant.'); return; }
+        if (!msgText.trim()) { alert('Le message est vide.'); return; }
+        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msgText)}`, '_blank');
+    };
+
+    return (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }} onClick={(e) => e.target === e.currentTarget && onClose()}>
+            <div className="card" style={{ width: '100%', maxWidth: '560px', maxHeight: '92vh', overflowY: 'auto', borderRadius: '24px', padding: '0' }}>
+                {/* Header */}
+                <div style={{ background: 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)', color: 'white', padding: '1.5rem 2rem', borderRadius: '24px 24px 0 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                        <h3 style={{ margin: 0, fontWeight: '800', fontSize: '1.15rem' }}>📱 Notification WhatsApp</h3>
+                        <p style={{ margin: '0.4rem 0 0', opacity: 0.9, fontSize: '0.85rem' }}>Pour: {parentName} • {ps.parent.phonePrimary}</p>
+                        <p style={{ margin: '0.2rem 0 0', opacity: 0.8, fontSize: '0.8rem' }}>Élève: {studentName} — {className}</p>
+                    </div>
+                    <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.25)', border: 'none', color: 'white', borderRadius: '8px', cursor: 'pointer', padding: '0.4rem 0.7rem', fontSize: '1rem', fontWeight: '700' }}>✕</button>
+                </div>
+
+                <div style={{ padding: '2rem' }}>
+                    {/* Template selector */}
+                    <div style={{ marginBottom: '1.5rem' }}>
+                        <label style={{ fontSize: '0.8rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', display: 'block', marginBottom: '0.75rem' }}>Type de message</label>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem' }}>
+                            {Object.entries(TEMPLATES).map(([key, { icon, label }]) => (
+                                <button key={key} onClick={() => handleTypeChange(key)} style={{
+                                    padding: '0.75rem', border: `2px solid ${msgType === key ? '#25D366' : '#e2e8f0'}`,
+                                    borderRadius: '12px', background: msgType === key ? '#f0fff4' : 'white',
+                                    color: msgType === key ? '#15803d' : '#64748b', fontWeight: '700', cursor: 'pointer',
+                                    fontSize: '0.82rem', transition: 'all 0.15s'
+                                }}>
+                                    {icon} {label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Message editor */}
+                    <div style={{ marginBottom: '1.5rem' }}>
+                        <label style={{ fontSize: '0.8rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', display: 'block', marginBottom: '0.5rem' }}>Message (modifiable)</label>
+                        <textarea
+                            value={msgText}
+                            onChange={e => setMsgText(e.target.value)}
+                            rows={10}
+                            style={{ width: '100%', padding: '1rem', border: '1px solid #e2e8f0', borderRadius: '12px', fontFamily: 'inherit', fontSize: '0.9rem', lineHeight: '1.6', resize: 'vertical', outline: 'none', boxSizing: 'border-box', background: '#f8fafc' }}
+                        />
+                        <p style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '0.3rem' }}>💡 Vous pouvez modifier ce message avant de l'envoyer. WhatsApp s'ouvrira avec le texte pré-rempli.</p>
+                    </div>
+
+                    {/* Actions */}
+                    <div style={{ display: 'flex', gap: '0.75rem' }}>
+                        <button onClick={onClose} style={{ flex: 1, padding: '0.875rem', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: '12px', fontWeight: '700', cursor: 'pointer', color: '#475569' }}>Annuler</button>
+                        <button onClick={sendWhatsApp} style={{ flex: 2, background: '#25D366', color: 'white', border: 'none', padding: '0.875rem', borderRadius: '12px', fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontSize: '0.95rem' }}>
+                            📱 Ouvrir WhatsApp
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };
