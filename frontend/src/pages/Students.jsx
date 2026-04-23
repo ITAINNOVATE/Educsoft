@@ -1066,7 +1066,7 @@ const Students = () => {
                 </div>
             )}
 
-        </div>
+
 
         {/* ── WhatsApp Notification Modal ── */}
         {whatsappModal && selectedStudent && (
