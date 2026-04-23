@@ -4,6 +4,18 @@ import { useAuth } from '../context/AuthContext';
 import config from '../config';
 import { UserPlus, Trash2, Shield, Mail, UserCheck, Pencil, X } from 'lucide-react';
 
+const ROLE_LABELS = {
+    SUPER_ADMIN:         { label: 'Super Admin',        bg: '#fef3c7', color: '#92400e' },
+    ADMIN:               { label: 'Administrateur',     bg: '#fee2e2', color: '#991b1b' },
+    FOUNDER:             { label: 'Fondateur',          bg: '#fde8ff', color: '#7e22ce' },
+    DIRECTOR:            { label: 'Directeur',          bg: '#fff7ed', color: '#c2410c' },
+    CENSEUR:             { label: 'Censeur',            bg: '#ecfdf5', color: '#065f46' },
+    SURVEILLANT_GENERAL: { label: 'Surveillant Gén.', bg: '#eff6ff', color: '#1d4ed8' },
+    ACCOUNTANT:          { label: 'Comptable',          bg: '#dcfce7', color: '#166534' },
+    SECRETARY:           { label: 'Secrétaire',        bg: '#dbeafe', color: '#1e40af' },
+    TEACHER:             { label: 'Enseignant',         bg: '#f3e8ff', color: '#6b21a8' },
+};
+
 const Users = () => {
     const [users, setUsers] = useState([]);
     const [showForm, setShowForm] = useState(false);
@@ -165,30 +177,32 @@ const Users = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {(Array.isArray(users) ? users : []).map(u => (
+                        {(Array.isArray(users) ? users : []).map(u => {
+                                const roleInfo = ROLE_LABELS[u.role] || { label: u.role, bg: '#f1f5f9', color: '#475569' };
+                                return (
                                 <tr key={u.id} style={{ borderBottom: '1px solid #f1f5f9', transition: 'background 0.2s' }}>
-                                    <td data-label="Utilisateur" style={{ padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                        <div className="desktop-only" style={{ width: '40px', height: '40px', borderRadius: '12px', backgroundColor: 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
-                                            <UserCheck size={20} />
-                                        </div>
-                                        <div>
-                                            <div style={{ fontWeight: '800', color: 'var(--primary-dark)' }}>{u.firstName || '---'} {u.lastName || ''}</div>
-                                            <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{u.email || '---'}</div>
+                                    <td data-label="Utilisateur" style={{ padding: '1rem 1.5rem' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                            <div className="desktop-only" style={{ width: '40px', height: '40px', borderRadius: '12px', backgroundColor: 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', flexShrink: 0 }}>
+                                                <UserCheck size={20} />
+                                            </div>
+                                            <div style={{ fontWeight: '800', color: 'var(--primary-dark)' }}>
+                                                {u.firstName || '---'} {u.lastName || ''}
+                                            </div>
                                         </div>
                                     </td>
-                                    <td className="desktop-only" style={{ padding: '1rem 1.5rem', color: '#64748b', fontSize: '0.9rem' }}>{u.email}</td>
+                                    <td data-label="Email" style={{ padding: '1rem 1.5rem', color: '#64748b', fontSize: '0.9rem' }}>{u.email || '---'}</td>
                                     <td data-label="Rôle" style={{ padding: '1rem 1.5rem' }}>
                                         <span style={{
                                             padding: '0.4rem 0.8rem', borderRadius: '8px', fontSize: '0.7rem', fontWeight: '900',
-                                            backgroundColor: u.role === 'ADMIN' ? '#fee2e2' : u.role === 'ACCOUNTANT' ? '#dcfce7' : '#dbeafe',
-                                            color: u.role === 'ADMIN' ? '#991b1b' : u.role === 'ACCOUNTANT' ? '#166534' : '#1e40af',
-                                            textTransform: 'uppercase'
+                                            backgroundColor: roleInfo.bg, color: roleInfo.color,
+                                            textTransform: 'uppercase', whiteSpace: 'nowrap'
                                         }}>
-                                            {u.role === 'ADMIN' ? 'Admin' : u.role === 'ACCOUNTANT' ? 'Comptable' : 'Secrétaire'}
+                                            {roleInfo.label}
                                         </span>
                                     </td>
-                                    <td className="desktop-only" style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: '#94a3b8' }}>
-                                        {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '---'}
+                                    <td data-label="Date" className="desktop-only" style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: '#94a3b8' }}>
+                                        {u.createdAt ? new Date(u.createdAt).toLocaleDateString('fr-FR') : '---'}
                                     </td>
                                     <td data-label="Actions" style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
                                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
@@ -203,7 +217,8 @@ const Users = () => {
                                         </div>
                                     </td>
                                 </tr>
-                            ))}
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>
