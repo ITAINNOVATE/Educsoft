@@ -9,7 +9,7 @@ const router = express.Router();
 // @desc    Get all users (optionally filtered by establishmentId for SUPER_ADMIN)
 // @route   GET /api/users
 // @access  Private (Admin only)
-router.get('/', protect, authorize('ADMIN', 'SUPER_ADMIN'), async (req, res) => {
+router.get('/', protect, authorize('ADMIN', 'SUPER_ADMIN', 'FOUNDER'), async (req, res) => {
     try {
         let where;
         if (req.user.role === 'SUPER_ADMIN') {
@@ -44,12 +44,12 @@ router.get('/', protect, authorize('ADMIN', 'SUPER_ADMIN'), async (req, res) => 
 // @desc    Create a new user
 // @route   POST /api/users
 // @access  Private (Admin only)
-router.post('/', protect, authorize('ADMIN', 'SUPER_ADMIN'), auditLog('CREATE_USER'), async (req, res) => {
+router.post('/', protect, authorize('ADMIN', 'SUPER_ADMIN', 'FOUNDER'), auditLog('CREATE_USER'), async (req, res) => {
     const { firstName, lastName, email, password, role, establishmentId: bodyEstablishmentId } = req.body;
 
-    // Security: Only Super Admin can create an ADMIN role
-    if (role === 'ADMIN' && req.user.role !== 'SUPER_ADMIN') {
-        return res.status(403).json({ message: 'Seul un Super Admin peut désigner un Administrateur.' });
+    // Security: Only Super Admin can create an ADMIN or FOUNDER role
+    if ((role === 'ADMIN' || role === 'FOUNDER') && req.user.role !== 'SUPER_ADMIN') {
+        return res.status(403).json({ message: 'Seul un Super Admin peut désigner un Administrateur ou un Fondateur.' });
     }
 
     // Determine which establishment to assign the new user to
@@ -94,7 +94,7 @@ router.post('/', protect, authorize('ADMIN', 'SUPER_ADMIN'), auditLog('CREATE_US
 // @desc    Update user
 // @route   PUT /api/users/:id
 // @access  Private (Admin only)
-router.put('/:id', protect, authorize('ADMIN', 'SUPER_ADMIN'), auditLog('UPDATE_USER'), async (req, res) => {
+router.put('/:id', protect, authorize('ADMIN', 'SUPER_ADMIN', 'FOUNDER'), auditLog('UPDATE_USER'), async (req, res) => {
     const { firstName, lastName, email, password, role } = req.body;
 
     try {
@@ -103,9 +103,9 @@ router.put('/:id', protect, authorize('ADMIN', 'SUPER_ADMIN'), auditLog('UPDATE_
         if (lastName) updateData.lastName = lastName;
         
         if (role) {
-            // Security: Only Super Admin can promote someone to ADMIN
-            if (role === 'ADMIN' && req.user.role !== 'SUPER_ADMIN') {
-                return res.status(403).json({ message: 'Modification refusée. Seul un Super Admin peut accorder le rôle Administrateur.' });
+            // Security: Only Super Admin can promote someone to ADMIN or FOUNDER
+            if ((role === 'ADMIN' || role === 'FOUNDER') && req.user.role !== 'SUPER_ADMIN') {
+                return res.status(403).json({ message: 'Modification refusée. Seul un Super Admin peut accorder le rôle Administrateur ou Fondateur.' });
             }
             updateData.role = role;
         }
@@ -149,7 +149,7 @@ router.put('/:id', protect, authorize('ADMIN', 'SUPER_ADMIN'), auditLog('UPDATE_
 // @desc    Delete user
 // @route   DELETE /api/users/:id
 // @access  Private (Admin only)
-router.delete('/:id', protect, authorize('ADMIN', 'SUPER_ADMIN'), auditLog('DELETE_USER'), async (req, res) => {
+router.delete('/:id', protect, authorize('ADMIN', 'SUPER_ADMIN', 'FOUNDER'), auditLog('DELETE_USER'), async (req, res) => {
     try {
         // Prevent deleting oneself
         const where = req.user.role === 'SUPER_ADMIN' ? { id: req.params.id } : { id: req.params.id, establishmentId: req.user.establishmentId };

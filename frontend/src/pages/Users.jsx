@@ -16,7 +16,7 @@ const Users = () => {
     const API_URL = `${config.API_URL}/users`;
 
     // Redirect if not admin (though backend protects it too)
-    if (user && user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
+    if (user && user.role !== 'ADMIN' && user.role !== 'FOUNDER' && user.role !== 'SUPER_ADMIN') {
         return <div style={{ padding: '2rem' }}>Accès refusé. Réservé aux administrateurs.</div>;
     }
 
@@ -131,6 +131,9 @@ const Users = () => {
                                 <select className="form-input" style={{ height: '48px', fontWeight: '700' }} value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })}>
                                     {user.role === 'SUPER_ADMIN' && (
                                         <option value="ADMIN">Administrateur (Accès Total)</option>
+                                    )}
+                                    {user.role === 'SUPER_ADMIN' && (
+                                        <option value="FOUNDER">Fondateur (Accès Total)</option>
                                     )}
                                     <option value="ACCOUNTANT">Comptable (Finances)</option>
                                     <option value="SECRETARY">Secrétaire (Gestion)</option>

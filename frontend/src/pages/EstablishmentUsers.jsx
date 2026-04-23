@@ -11,6 +11,7 @@ import {
 const ROLE_LABELS = {
     SUPER_ADMIN: { label: 'Super Admin', bg: '#fef3c7', color: '#92400e' },
     ADMIN:       { label: 'Administrateur', bg: '#fee2e2', color: '#991b1b' },
+    FOUNDER:     { label: 'Fondateur', bg: '#fde8ff', color: '#7e22ce' },
     ACCOUNTANT:  { label: 'Comptable', bg: '#dcfce7', color: '#166534' },
     SECRETARY:   { label: 'Secrétaire', bg: '#dbeafe', color: '#1e40af' },
     TEACHER:     { label: 'Enseignant', bg: '#f3e8ff', color: '#6b21a8' },
@@ -193,6 +194,7 @@ const EstablishmentUsers = () => {
                                     value={formData.role}
                                     onChange={e => setFormData({ ...formData, role: e.target.value })}>
                                     <option value="ADMIN">Administrateur (Accès Total)</option>
+                                    <option value="FOUNDER">Fondateur (Accès Total)</option>
                                     <option value="ACCOUNTANT">Comptable (Finances)</option>
                                     <option value="SECRETARY">Secrétaire (Gestion)</option>
                                     <option value="TEACHER">Enseignant</option>

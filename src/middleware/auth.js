@@ -46,7 +46,11 @@ const authorize = (...roles) => {
         if (req.user.role === 'SUPER_ADMIN') {
             return next();
         }
-        if (!roles.includes(req.user.role)) {
+        // FOUNDER has the same privileges as ADMIN — expand roles check accordingly
+        const effectiveRoles = roles.includes('ADMIN') && !roles.includes('FOUNDER')
+            ? [...roles, 'FOUNDER']
+            : roles;
+        if (!effectiveRoles.includes(req.user.role)) {
             return res.status(403).json({
                 message: `User role ${req.user.role} is not authorized to access this route`,
             });
