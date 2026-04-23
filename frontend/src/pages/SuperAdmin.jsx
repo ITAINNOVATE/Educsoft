@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Building2, Plus, CheckCircle, XCircle, Trash2, Pause, Play, Eye, Mail, Phone, MapPin, Pencil } from 'lucide-react';
+import { Building2, Plus, CheckCircle, XCircle, Trash2, Pause, Play, Eye, Mail, Phone, MapPin, Pencil, Users } from 'lucide-react';
 import config from '../config';
 import logo from '../assets/logo.png';
 
@@ -188,10 +188,17 @@ const SuperAdmin = () => {
                             <div style={{ display: 'flex', gap: '0.6rem' }}>
                                 <button
                                     onClick={() => handleManage(est.id)}
-                                    title="Gérer l'établissement"
+                                    title="Gérer l'établissement (Dashboard)"
                                     style={{ border: 'none', background: 'var(--primary-light)', color: 'var(--primary)', padding: '0.6rem', borderRadius: '10px', cursor: 'pointer' }}
                                 >
                                     <Eye size={20} />
+                                </button>
+                                <button
+                                    onClick={() => navigate(`/system/establishment/${est.id}/users`)}
+                                    title="Gérer les utilisateurs"
+                                    style={{ border: 'none', background: '#f0fdf4', color: '#166534', padding: '0.6rem', borderRadius: '10px', cursor: 'pointer' }}
+                                >
+                                    <Users size={20} />
                                 </button>
                                 <button
                                     onClick={() => handleEditClick(est)}

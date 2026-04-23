@@ -6,12 +6,18 @@ const { auditLog } = require('../middleware/audit');
 
 const router = express.Router();
 
-// @desc    Get all users
+// @desc    Get all users (optionally filtered by establishmentId for SUPER_ADMIN)
 // @route   GET /api/users
 // @access  Private (Admin only)
 router.get('/', protect, authorize('ADMIN', 'SUPER_ADMIN'), async (req, res) => {
     try {
-        const where = req.user.role === 'SUPER_ADMIN' ? {} : { establishmentId: req.user.establishmentId };
+        let where;
+        if (req.user.role === 'SUPER_ADMIN') {
+            // Allow filtering by a specific establishment if provided as query param
+            where = req.query.establishmentId ? { establishmentId: req.query.establishmentId } : {};
+        } else {
+            where = { establishmentId: req.user.establishmentId };
+        }
         const users = await prisma.user.findMany({
             where,
             select: {
@@ -36,12 +42,17 @@ router.get('/', protect, authorize('ADMIN', 'SUPER_ADMIN'), async (req, res) => 
 // @route   POST /api/users
 // @access  Private (Admin only)
 router.post('/', protect, authorize('ADMIN', 'SUPER_ADMIN'), auditLog('CREATE_USER'), async (req, res) => {
-    const { firstName, lastName, email, password, role } = req.body;
+    const { firstName, lastName, email, password, role, establishmentId: bodyEstablishmentId } = req.body;
 
     // Security: Only Super Admin can create an ADMIN role
     if (role === 'ADMIN' && req.user.role !== 'SUPER_ADMIN') {
         return res.status(403).json({ message: 'Seul un Super Admin peut désigner un Administrateur.' });
     }
+
+    // Determine which establishment to assign the new user to
+    const targetEstablishmentId = (req.user.role === 'SUPER_ADMIN' && bodyEstablishmentId)
+        ? bodyEstablishmentId
+        : req.user.establishmentId;
 
     try {
         const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -59,7 +70,7 @@ router.post('/', protect, authorize('ADMIN', 'SUPER_ADMIN'), auditLog('CREATE_US
                 email,
                 password: hashedPassword,
                 role,
-                establishmentId: req.user.establishmentId
+                establishmentId: targetEstablishmentId
             },
             select: {
                 id: true,

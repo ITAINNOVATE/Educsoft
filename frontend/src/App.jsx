@@ -10,6 +10,7 @@ import Dashboard from './pages/Dashboard';
 import Users from './pages/Users';
 import Accounting from './pages/Accounting';
 import SuperAdmin from './pages/SuperAdmin';
+import EstablishmentUsers from './pages/EstablishmentUsers';
 import Grades from './pages/Grades';
 import Expenses from './pages/Expenses';
 import axios from 'axios';
@@ -240,6 +241,7 @@ function App() {
                 </Route>
                 <Route element={<ProtectedRoute roleRequired="SUPER_ADMIN" />}>
                   <Route path="/system" element={<SuperAdmin />} />
+                  <Route path="/system/establishment/:id/users" element={<EstablishmentUsers />} />
                 </Route>
               </Route>
               <Route path="/superadmin" element={<Navigate to="/system" replace />} />
