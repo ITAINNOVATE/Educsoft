@@ -5,35 +5,19 @@ const { auditLog } = require('../middleware/audit');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const supabase = require('../lib/supabase');
 
 const router = express.Router();
 
-// Configure Multer for document uploads
-const documentStorage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const dir = 'uploads/documents';
-        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-        cb(null, dir);
-    },
-    filename: (req, file, cb) => {
-        cb(null, `doc-${Date.now()}-${file.originalname}`);
-    }
+// Use Memory Storage for Vercel compatibility (Disk is read-only on Vercel)
+const storage = multer.memoryStorage();
+const upload = multer({ 
+    storage,
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
 });
-const upload = multer({ storage: documentStorage });
 
-// Configure Multer for student photos
-const photoStorage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const dir = 'uploads/photos';
-        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-        cb(null, dir);
-    },
-    filename: (req, file, cb) => {
-        cb(null, `photo-${req.params.id}-${Date.now()}${path.extname(file.originalname)}`);
-    }
-});
 const uploadPhoto = multer({ 
-    storage: photoStorage,
+    storage,
     limits: { fileSize: 2 * 1024 * 1024 }, // 2MB limit
     fileFilter: (req, file, cb) => {
         const filetypes = /jpeg|jpg|png/;
@@ -412,18 +396,39 @@ router.put('/:id', protect, authorize('ADMIN', 'SECRETARY', 'DIRECTOR', 'CENSEUR
 // @route   POST /api/students/:id/documents
 router.post('/:id/documents', protect, upload.single('document'), async (req, res) => {
     try {
+        if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
+        if (!supabase) return res.status(500).json({ message: 'Supabase storage not configured' });
+
         const { name, type } = req.body;
+        const fileExt = path.extname(req.file.originalname);
+        const fileName = `doc-${Date.now()}${fileExt}`;
+        const filePath = `${req.user.establishmentId}/${req.params.id}/${fileName}`;
+
+        const { data, error } = await supabase.storage
+            .from('students')
+            .upload(filePath, req.file.buffer, {
+                contentType: req.file.mimetype,
+                upsert: true
+            });
+
+        if (error) throw error;
+
+        const { data: { publicUrl } } = supabase.storage
+            .from('students')
+            .getPublicUrl(filePath);
+
         const document = await prisma.document.create({
             data: {
                 name: name || req.file.originalname,
                 type: type || 'OTHER',
-                url: `/uploads/documents/${req.file.filename}`,
+                url: publicUrl,
                 studentId: req.params.id,
                 establishmentId: req.user.establishmentId
             }
         });
         res.status(201).json(document);
     } catch (error) {
+        console.error('Document Upload Error:', error);
         res.status(500).json({ message: 'Error uploading document', error: error.message });
     }
 });
@@ -433,19 +438,36 @@ router.post('/:id/documents', protect, upload.single('document'), async (req, re
 router.post('/:id/photo', protect, uploadPhoto.single('photo'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
+        if (!supabase) return res.status(500).json({ message: 'Supabase storage not configured' });
 
-        const photoUrl = `/uploads/photos/${req.file.filename}`;
+        const fileExt = path.extname(req.file.originalname);
+        const fileName = `photo-${Date.now()}${fileExt}`;
+        const filePath = `${req.user.establishmentId}/${req.params.id}/${fileName}`;
+
+        const { data, error } = await supabase.storage
+            .from('students')
+            .upload(filePath, req.file.buffer, {
+                contentType: req.file.mimetype,
+                upsert: true
+            });
+
+        if (error) throw error;
+
+        const { data: { publicUrl } } = supabase.storage
+            .from('students')
+            .getPublicUrl(filePath);
         
         const student = await prisma.student.update({
             where: { 
                 id: req.params.id,
                 establishmentId: req.user.establishmentId
             },
-            data: { photoUrl }
+            data: { photoUrl: publicUrl }
         });
 
         res.json({ message: 'Photo updated successfully', photoUrl: student.photoUrl });
     } catch (error) {
+        console.error('Photo Upload Error:', error);
         res.status(500).json({ message: 'Error uploading photo', error: error.message });
     }
 });

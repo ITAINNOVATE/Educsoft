@@ -655,7 +655,7 @@ const Students = () => {
                             <div style={{ position: 'relative', width: '120px', height: '120px', margin: '0 auto 1.5rem' }}>
                                 {selectedStudent.photoUrl ? (
                                     <img 
-                                        src={`${API_BASE.replace('/api', '')}${selectedStudent.photoUrl}`} 
+                                        src={config.getAssetUrl(selectedStudent.photoUrl)} 
                                         alt="Profil" 
                                         style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', border: '3px solid #e0f2f1' }}
                                     />
@@ -902,7 +902,7 @@ const Students = () => {
                                             {/* Photo */}
                                             <div style={{ width: '100px', height: '120px', border: '1px solid #ddd', overflow: 'hidden' }}>
                                                 {selectedStudent.photoUrl ? (
-                                                    <img src={`${API_BASE.replace('/api', '')}${selectedStudent.photoUrl}`} alt="Eleve" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                    <img src={config.getAssetUrl(selectedStudent.photoUrl)} alt="Eleve" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                 ) : (
                                                     <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ccc' }}>PHOTO</div>
                                                 )}
@@ -1002,7 +1002,7 @@ const Students = () => {
                                                 <div style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>{doc.name}</div>
                                                 <div style={{ fontSize: '0.7rem', color: '#777' }}>Statut: {doc.status}</div>
                                             </div>
-                                            <a href={`${config.API_URL.replace('/api', '')}${doc.url}`} target="_blank" rel="noreferrer" className="btn" style={{ fontSize: '0.75rem', marginTop: '1rem', width: '100%' }}>Voir / Télécharger</a>
+                                            <a href={config.getAssetUrl(doc.url)} target="_blank" rel="noreferrer" className="btn" style={{ fontSize: '0.75rem', marginTop: '1rem', width: '100%' }}>Voir / Télécharger</a>
                                         </div>
                                     ))}
                                     {user && user.role !== 'ACCOUNTANT' && (

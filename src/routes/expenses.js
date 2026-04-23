@@ -4,21 +4,16 @@ const { protect, authorize } = require('../middleware/auth');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const supabase = require('../lib/supabase');
 
 const router = express.Router();
 
-// Configure Multer for expense receipts
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const dir = 'uploads/expenses';
-        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-        cb(null, dir);
-    },
-    filename: (req, file, cb) => {
-        cb(null, `exp-${Date.now()}-${file.originalname}`);
-    }
+// Use Memory Storage for Vercel
+const storage = multer.memoryStorage();
+const upload = multer({ 
+    storage,
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
 });
-const upload = multer({ storage });
 
 // @desc    Get all expenses for the current establishment
 // @route   GET /api/expenses
@@ -62,7 +57,26 @@ router.post('/', protect, authorize(['ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN']), upl
 
         let receiptUrl = null;
         if (req.file) {
-            receiptUrl = `/uploads/expenses/${req.file.filename}`;
+            if (!supabase) throw new Error('Supabase storage not configured');
+            
+            const fileExt = path.extname(req.file.originalname);
+            const fileName = `exp-${Date.now()}${fileExt}`;
+            const filePath = `${req.user.establishmentId}/expenses/${fileName}`;
+
+            const { data, error } = await supabase.storage
+                .from('students') // We use the same 'students' bucket for all assets to keep it simple, or create 'expenses'
+                .upload(filePath, req.file.buffer, {
+                    contentType: req.file.mimetype,
+                    upsert: true
+                });
+
+            if (error) throw error;
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('students')
+                .getPublicUrl(filePath);
+            
+            receiptUrl = publicUrl;
         }
 
         const expense = await prisma.expense.create({

@@ -13,7 +13,6 @@ import {
 const Expenses = () => {
     const { user } = useAuth();
     const API_URL = `${config.API_URL}/expenses`;
-    const STORAGE_URL = config.API_URL; // To serve static files
 
     const [expenses, setExpenses] = useState([]);
     const [stats, setStats] = useState({ monthlyTotal: 0, categories: [] });
@@ -336,7 +335,7 @@ const Expenses = () => {
                                         <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
                                             {e.receiptUrl && (
                                                 <a 
-                                                    href={`${STORAGE_URL}${e.receiptUrl}`} 
+                                                    href={config.getAssetUrl(e.receiptUrl)} 
                                                     target="_blank" 
                                                     rel="noopener noreferrer"
                                                     style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '10px', color: '#2563eb' }}
