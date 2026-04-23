@@ -61,7 +61,15 @@ const Dashboard = () => {
             <header className="stack-on-mobile" style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1.5rem', background: 'white', padding: '1.5rem', borderRadius: '24px', border: '1px solid #f1f5f9', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
                 <div>
                     <h1 style={{ fontSize: '2rem', color: 'var(--primary-dark)', fontWeight: '900', margin: 0 }}>Tableau de Bord</h1>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '1rem', margin: '0.5rem 0 0 0' }}>Bonjour, <span style={{ color: 'var(--primary)', fontWeight: '700' }}>{user.firstName}</span>. {dashboardMotto(user.role)}</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '1rem', margin: '0.5rem 0 0 0' }}>
+                        Bonjour,{' '}
+                        <span style={{ color: 'var(--primary)', fontWeight: '700' }}>{user.firstName}</span>,{' '}
+                        <span style={{ color: 'var(--primary-dark)', fontWeight: '600' }}>{roleTitle(user.role)}</span>
+                        {user.establishmentName && (
+                            <> de <span style={{ color: 'var(--primary-dark)', fontWeight: '600' }}>{user.establishmentName}</span></>
+                        )}.
+                        {' '}{dashboardMotto(user.role)}
+                    </p>
                 </div>
                 <div className="desktop-only" style={{ textAlign: 'right' }}>
                     <div style={{ fontSize: '0.9rem', fontWeight: '800', color: 'var(--primary)', background: 'rgba(var(--primary-rgb), 0.1)', padding: '0.4rem 1rem', borderRadius: '10px' }}>
@@ -76,18 +84,34 @@ const Dashboard = () => {
     );
 };
 
-// --- MOTO SELECTOR ---
+// --- ROLE TITLE (French labels for roles) ---
+const roleTitle = (role) => {
+    switch (role) {
+        case 'ADMIN':               return 'Administrateur';
+        case 'FOUNDER':             return 'Fondateur';
+        case 'DIRECTOR':            return 'Directeur';
+        case 'CENSEUR':             return 'Censeur';
+        case 'SURVEILLANT_GENERAL': return 'Surveillant Général';
+        case 'ACCOUNTANT':          return 'Comptable';
+        case 'SECRETARY':           return 'Secrétaire';
+        case 'TEACHER':             return 'Enseignant';
+        case 'SUPER_ADMIN':         return 'Super Administrateur';
+        default: return role;
+    }
+};
+
+// --- MOTTO SELECTOR ---
 const dashboardMotto = (role) => {
     switch (role) {
         case 'ADMIN':
         case 'SUPER_ADMIN': return "Voici l'état global de votre établissement.";
-        case 'FOUNDER':     return "Vue d'ensemble de votre établissement.";
-        case 'ACCOUNTANT':  return "Aperçu de la situation financière aujourd'hui.";
-        case 'SECRETARY':   return "Inscriptions et gestion administrative en cours.";
-        case 'TEACHER':     return "Suivi de vos classes et notes.";
-        case 'DIRECTOR':    return "Pilotage pédagogique et administratif.";
-        case 'CENSEUR':     return "Suivi académique et discipline de l'établissement.";
-        case 'SURVEILLANT_GENERAL': return "Surveillance générale et suivi des élèves.";
+        case 'FOUNDER':     return "Vous avez la vue d'ensemble de votre établissement.";
+        case 'ACCOUNTANT':  return "Voici la situation financière du jour.";
+        case 'SECRETARY':   return "Voici les inscriptions et la gestion administrative en cours.";
+        case 'TEACHER':     return "Voici le suivi de vos classes et notes.";
+        case 'DIRECTOR':    return "Voici le tableau de pilotage pédagogique et administratif.";
+        case 'CENSEUR':     return "Voici le suivi académique et disciplinaire de l'établissement.";
+        case 'SURVEILLANT_GENERAL': return "Voici le suivi général et la situation des élèves.";
         default: return "Bienvenue sur votre espace de gestion.";
     }
 };
