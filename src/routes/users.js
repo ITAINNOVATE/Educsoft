@@ -92,7 +92,8 @@ router.post('/', protect, authorize('ADMIN', 'SUPER_ADMIN', 'FOUNDER'), auditLog
 
         res.status(201).json(user);
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error('CREATE_USER error:', error);
+        res.status(500).json({ message: error.message || 'Server error' });
     }
 });
 
@@ -136,10 +137,18 @@ router.put('/:id', protect, authorize('ADMIN', 'SUPER_ADMIN', 'FOUNDER'), auditL
             updateData.password = await bcrypt.hash(password, salt);
         }
 
-        const where = req.user.role === 'SUPER_ADMIN' ? { id: req.params.id } : { id: req.params.id, establishmentId: req.user.establishmentId };
-        
+        // For non-SUPER_ADMIN: verify the user belongs to their establishment before updating
+        if (req.user.role !== 'SUPER_ADMIN') {
+            const targetUser = await prisma.user.findFirst({
+                where: { id: req.params.id, establishmentId: req.user.establishmentId }
+            });
+            if (!targetUser) {
+                return res.status(404).json({ message: 'Utilisateur introuvable dans cet établissement.' });
+            }
+        }
+
         const user = await prisma.user.update({
-            where,
+            where: { id: req.params.id },
             data: updateData,
             select: {
                 id: true,
@@ -153,7 +162,8 @@ router.put('/:id', protect, authorize('ADMIN', 'SUPER_ADMIN', 'FOUNDER'), auditL
 
         res.json(user);
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error('UPDATE_USER error:', error);
+        res.status(500).json({ message: error.message || 'Server error' });
     }
 });
 
@@ -162,13 +172,21 @@ router.put('/:id', protect, authorize('ADMIN', 'SUPER_ADMIN', 'FOUNDER'), auditL
 // @access  Private (Admin only)
 router.delete('/:id', protect, authorize('ADMIN', 'SUPER_ADMIN', 'FOUNDER'), auditLog('DELETE_USER'), async (req, res) => {
     try {
-        // Prevent deleting oneself
-        const where = req.user.role === 'SUPER_ADMIN' ? { id: req.params.id } : { id: req.params.id, establishmentId: req.user.establishmentId };
-        
-        await prisma.user.delete({ where });
+        // For non-SUPER_ADMIN: verify the user belongs to their establishment first
+        if (req.user.role !== 'SUPER_ADMIN') {
+            const targetUser = await prisma.user.findFirst({
+                where: { id: req.params.id, establishmentId: req.user.establishmentId }
+            });
+            if (!targetUser) {
+                return res.status(404).json({ message: 'Utilisateur introuvable dans cet établissement.' });
+            }
+        }
+
+        await prisma.user.delete({ where: { id: req.params.id } });
         res.json({ message: 'User removed' });
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error('DELETE_USER error:', error);
+        res.status(500).json({ message: error.message || 'Server error' });
     }
 });
 
