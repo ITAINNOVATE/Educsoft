@@ -32,8 +32,8 @@ router.post('/login', async (req, res) => {
         }
 
         // 2. Find User
-        // Priority 1: User in this establishment
-        // Priority 2: Super Admin (can login to any establishment)
+        // Priority 1: User in this specific establishment (by email + establishmentId)
+        // Priority 2: Super Admin (can login to any establishment regardless)
         let user = await prisma.user.findFirst({ 
             where: { 
                 email: { equals: email, mode: 'insensitive' },

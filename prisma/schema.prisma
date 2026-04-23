@@ -48,11 +48,11 @@ model Establishment {
 model User {
   id            String    @id @default(uuid())
   platformId    String?   // Multi-tenant isolation
-  email         String    @unique
+  email         String    // No longer globally unique — unique per establishment
   password      String
   firstName     String
   lastName      String
-  role          String    // SUPER_ADMIN, ADMIN, DIRECTOR, ACCOUNTANT, SECRETARY, TEACHER, PARENT
+  role          String    // SUPER_ADMIN, ADMIN, FOUNDER, DIRECTOR, CENSEUR, SURVEILLANT_GENERAL, ACCOUNTANT, SECRETARY, TEACHER, PARENT
   lastLogin     DateTime?
   
   establishmentId String?
@@ -64,6 +64,7 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  @@unique([email, establishmentId]) // Same email allowed in different establishments
   @@index([establishmentId])
   @@index([platformId])
 }

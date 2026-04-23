@@ -58,9 +58,14 @@ router.post('/', protect, authorize('ADMIN', 'SUPER_ADMIN', 'FOUNDER'), auditLog
         : req.user.establishmentId;
 
     try {
-        const existingUser = await prisma.user.findUnique({ where: { email } });
+        // Check if this email already exists in THIS establishment (not globally)
+        const existingUser = await prisma.user.findFirst({
+            where: { email, establishmentId: targetEstablishmentId }
+        });
         if (existingUser) {
-            return res.status(400).json({ message: 'User already exists' });
+            return res.status(400).json({ 
+                message: 'Un utilisateur avec cet email existe déjà dans cet établissement.' 
+            });
         }
 
         const salt = await bcrypt.genSalt(10);
@@ -111,11 +116,17 @@ router.put('/:id', protect, authorize('ADMIN', 'SUPER_ADMIN', 'FOUNDER'), auditL
         }
         
         if (email) {
+            // Check uniqueness per establishment only
+            const targetEstId = req.user.role === 'SUPER_ADMIN' ? undefined : req.user.establishmentId;
             const existingUser = await prisma.user.findFirst({
-                where: { email, id: { not: req.params.id } }
+                where: {
+                    email,
+                    id: { not: req.params.id },
+                    ...(targetEstId ? { establishmentId: targetEstId } : {})
+                }
             });
             if (existingUser) {
-                return res.status(400).json({ message: 'Email already in use by another account.' });
+                return res.status(400).json({ message: 'Email déjà utilisé par un autre compte dans cet établissement.' });
             }
             updateData.email = email;
         }
