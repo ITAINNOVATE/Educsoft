@@ -13,8 +13,11 @@ router.get('/', protect, authorize('ADMIN', 'SUPER_ADMIN'), async (req, res) => 
     try {
         let where;
         if (req.user.role === 'SUPER_ADMIN') {
-            // Allow filtering by a specific establishment if provided as query param
-            where = req.query.establishmentId ? { establishmentId: req.query.establishmentId } : {};
+            // Priority 1: explicit ?establishmentId query param (from EstablishmentUsers page)
+            // Priority 2: active establishment context from the JWT (MODE GESTION)
+            // Priority 3: no filter (show all) when no context
+            const filterById = req.query.establishmentId || req.user.establishmentId || null;
+            where = filterById ? { establishmentId: filterById } : {};
         } else {
             where = { establishmentId: req.user.establishmentId };
         }
