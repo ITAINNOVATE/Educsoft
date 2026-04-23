@@ -550,7 +550,7 @@ router.get('/:id/pdf', protect, async (req, res) => {
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename=Dossier_${student.regNumber}.pdf`);
 
-        generateStudentDossierPDF(student, res);
+        await generateStudentDossierPDF(student, res);
 
     } catch (error) {
         console.error('PDF Generation Error:', error);
@@ -578,7 +578,7 @@ router.get('/:id/card', protect, async (req, res) => {
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `inline; filename=Carte_${student.regNumber}.pdf`);
 
-        generateStudentCardPDF(student, res);
+        await generateStudentCardPDF(student, res);
     } catch (error) {
         res.status(500).json({ message: 'Error generating card', error: error.message });
     }

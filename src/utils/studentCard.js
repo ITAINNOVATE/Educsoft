@@ -2,7 +2,7 @@ const PDFDocument = require('pdfkit');
 const path = require('path');
 const fs = require('fs');
 
-const generateStudentCardPDF = (student, res) => {
+const generateStudentCardPDF = async (student, res) => {
     // 1cm = 28.35 points
     // 8.5cm = 241pt, 5.5cm = 156pt
     const width = 241;
@@ -38,18 +38,34 @@ const generateStudentCardPDF = (student, res) => {
     doc.rect(leftMargin, topMargin, photoWidth, photoHeight).stroke('#1a237e');
     
     if (student.photoUrl) {
-        const absolutePath = path.join(process.cwd(), student.photoUrl);
-        if (fs.existsSync(absolutePath)) {
-            try {
-                doc.image(absolutePath, leftMargin + 1, topMargin + 1, {
+        try {
+            let imageSource;
+            if (student.photoUrl.startsWith('http')) {
+                // Fetch remote image
+                const response = await fetch(student.photoUrl);
+                if (response.ok) {
+                    const arrayBuffer = await response.arrayBuffer();
+                    imageSource = Buffer.from(arrayBuffer);
+                }
+            } else {
+                // Local file
+                const absolutePath = path.join(process.cwd(), student.photoUrl);
+                if (fs.existsSync(absolutePath)) {
+                    imageSource = absolutePath;
+                }
+            }
+
+            if (imageSource) {
+                doc.image(imageSource, leftMargin + 1, topMargin + 1, {
                     fit: [photoWidth - 2, photoHeight - 2],
                     align: 'center',
                     valign: 'center'
                 });
-            } catch (err) {
+            } else {
                 doc.fontSize(6).fillColor('#999').text('PHOTO', leftMargin + 15, topMargin + 30);
             }
-        } else {
+        } catch (err) {
+            console.error('Error loading image for ID Card:', err);
             doc.fontSize(6).fillColor('#999').text('PHOTO', leftMargin + 15, topMargin + 30);
         }
     }

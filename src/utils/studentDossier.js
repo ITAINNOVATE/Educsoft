@@ -1,6 +1,6 @@
 const PDFDocument = require('pdfkit');
 
-const generateStudentDossierPDF = (student, res) => {
+const generateStudentDossierPDF = async (student, res) => {
     const doc = new PDFDocument({ size: 'A4', margin: 50 });
 
     // Stream directly to response
@@ -16,9 +16,41 @@ const generateStudentDossierPDF = (student, res) => {
     // --- STUDENT IDENTITY ---
     const startY = doc.y;
 
-    // Photo Placeholder (Left)
+    // Photo (Left)
     doc.rect(50, startY, 100, 120).stroke('#ddd');
-    doc.fontSize(8).text('PHOTO', 85, startY + 55);
+    
+    if (student.photoUrl) {
+        try {
+            let imageSource;
+            if (student.photoUrl.startsWith('http')) {
+                const response = await fetch(student.photoUrl);
+                if (response.ok) {
+                    const arrayBuffer = await response.arrayBuffer();
+                    imageSource = Buffer.from(arrayBuffer);
+                }
+            } else {
+                const absolutePath = require('path').join(process.cwd(), student.photoUrl);
+                if (require('fs').existsSync(absolutePath)) {
+                    imageSource = absolutePath;
+                }
+            }
+
+            if (imageSource) {
+                doc.image(imageSource, 55, startY + 5, {
+                    fit: [90, 110],
+                    align: 'center',
+                    valign: 'center'
+                });
+            } else {
+                doc.fontSize(8).fillColor('#999').text('PHOTO', 85, startY + 55);
+            }
+        } catch (err) {
+            console.error('Error loading image for Dossier:', err);
+            doc.fontSize(8).fillColor('#999').text('PHOTO', 85, startY + 55);
+        }
+    } else {
+        doc.fontSize(8).fillColor('#999').text('PHOTO', 85, startY + 55);
+    }
 
     // Info (Right)
     const infoX = 170;
