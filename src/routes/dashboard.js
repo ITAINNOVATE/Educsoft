@@ -30,8 +30,8 @@ router.get('/summary', protect, async (req, res) => {
 
         // --- ROLE SPECIFIC LOGIC ---
 
-        // 1. MANAGEMENT ROLES (Admin, Accountant, Super Admin)
-        if (['ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'].includes(role)) {
+        // 1. MANAGEMENT ROLES (Admin, Accountant, Founder, Super Admin)
+        if (['ADMIN', 'ACCOUNTANT', 'FOUNDER', 'SUPER_ADMIN'].includes(role)) {
             const now = new Date();
             const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
@@ -80,8 +80,8 @@ router.get('/summary', protect, async (req, res) => {
             };
         }
 
-        // 2. ADMINISTRATIVE ROLES (Secretary, Director)
-        if (['SECRETARY', 'DIRECTOR', 'ADMIN', 'SUPER_ADMIN'].includes(role)) {
+        // 2. ADMINISTRATIVE ROLES (Secretary, Director, Censeur, Surveillant Général, Founder, Admin)
+        if (['SECRETARY', 'DIRECTOR', 'CENSEUR', 'SURVEILLANT_GENERAL', 'FOUNDER', 'ADMIN', 'SUPER_ADMIN'].includes(role)) {
             const now = new Date();
             const thirtyDaysAgo = new Date();
             thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -113,8 +113,8 @@ router.get('/summary', protect, async (req, res) => {
             };
         }
 
-        // 3. ACADEMIC ROLES (Teacher, Director)
-        if (['TEACHER', 'DIRECTOR'].includes(role)) {
+        // 3. ACADEMIC ROLES (Teacher, Director, Censeur, Surveillant Général, Founder)
+        if (['TEACHER', 'DIRECTOR', 'CENSEUR', 'SURVEILLANT_GENERAL', 'FOUNDER'].includes(role)) {
             const [subjectCount, recentGrades] = await Promise.all([
                 prisma.subject.count({ where: { establishmentId } }),
                 prisma.grade.findMany({

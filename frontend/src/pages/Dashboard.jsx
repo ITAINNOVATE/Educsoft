@@ -81,10 +81,13 @@ const dashboardMotto = (role) => {
     switch (role) {
         case 'ADMIN':
         case 'SUPER_ADMIN': return "Voici l'état global de votre établissement.";
-        case 'ACCOUNTANT': return "Aperçu de la situation financière aujourd'hui.";
-        case 'SECRETARY': return "Inscriptions et gestion administrative en cours.";
-        case 'TEACHER': return "Suivi de vos classes et notes.";
-        case 'DIRECTOR': return "Pilotage pédagogique et administratif.";
+        case 'FOUNDER':     return "Vue d'ensemble de votre établissement.";
+        case 'ACCOUNTANT':  return "Aperçu de la situation financière aujourd'hui.";
+        case 'SECRETARY':   return "Inscriptions et gestion administrative en cours.";
+        case 'TEACHER':     return "Suivi de vos classes et notes.";
+        case 'DIRECTOR':    return "Pilotage pédagogique et administratif.";
+        case 'CENSEUR':     return "Suivi académique et discipline de l'établissement.";
+        case 'SURVEILLANT_GENERAL': return "Surveillance générale et suivi des élèves.";
         default: return "Bienvenue sur votre espace de gestion.";
     }
 };
@@ -94,6 +97,7 @@ const renderDashboardByRole = (role, data, navigate) => {
     switch (role) {
         case 'ADMIN':
         case 'ACCOUNTANT':
+        case 'FOUNDER':
         case 'SUPER_ADMIN':
             return <ManagementDashboard data={data} navigate={navigate} />;
         case 'SECRETARY':
@@ -101,6 +105,8 @@ const renderDashboardByRole = (role, data, navigate) => {
         case 'TEACHER':
             return <TeacherDashboard data={data} navigate={navigate} />;
         case 'DIRECTOR':
+        case 'CENSEUR':
+        case 'SURVEILLANT_GENERAL':
             return <DirectorDashboard data={data} navigate={navigate} />;
         default:
             return <DefaultDashboard data={data} />;
