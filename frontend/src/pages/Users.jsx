@@ -135,6 +135,9 @@ const Users = () => {
                                     {user.role === 'SUPER_ADMIN' && (
                                         <option value="FOUNDER">Fondateur (Accès Total)</option>
                                     )}
+                                    <option value="DIRECTOR">Directeur</option>
+                                    <option value="CENSEUR">Censeur</option>
+                                    <option value="SURVEILLANT_GENERAL">Surveillant Général</option>
                                     <option value="ACCOUNTANT">Comptable (Finances)</option>
                                     <option value="SECRETARY">Secrétaire (Gestion)</option>
                                 </select>

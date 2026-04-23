@@ -58,7 +58,7 @@ router.get('/', protect, async (req, res) => {
 
 // @desc    Bulk save/update grades
 // @route   POST /api/grades/bulk
-router.post('/bulk', protect, authorize('ADMIN', 'TEACHER', 'DIRECTOR', 'SUPER_ADMIN'), async (req, res) => {
+router.post('/bulk', protect, authorize('ADMIN', 'TEACHER', 'DIRECTOR', 'CENSEUR', 'SURVEILLANT_GENERAL', 'SUPER_ADMIN'), async (req, res) => {
     const { classId, subjectId, termId, grades } = req.body;
 
     if (!Array.isArray(grades)) {

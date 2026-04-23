@@ -47,7 +47,7 @@ const uploadPhoto = multer({
 // @desc    Register a new student
 // @route   POST /api/students/register
 // @access  Private (Admin, Secretary)
-router.post('/register', protect, authorize('ADMIN', 'SECRETARY', 'DIRECTOR', 'SUPER_ADMIN'), auditLog('REGISTER_STUDENT'), async (req, res) => {
+router.post('/register', protect, authorize('ADMIN', 'SECRETARY', 'DIRECTOR', 'CENSEUR', 'SUPER_ADMIN'), auditLog('REGISTER_STUDENT'), async (req, res) => {
     const {
         studentData,
         student, // Alias for studentData
@@ -339,7 +339,7 @@ router.get('/:id', protect, async (req, res) => {
 
 // @desc    Update student and parent info
 // @route   PUT /api/students/:id
-router.put('/:id', protect, authorize('ADMIN', 'SECRETARY', 'DIRECTOR', 'SUPER_ADMIN'), auditLog('UPDATE_STUDENT'), async (req, res) => {
+router.put('/:id', protect, authorize('ADMIN', 'SECRETARY', 'DIRECTOR', 'CENSEUR', 'SUPER_ADMIN'), auditLog('UPDATE_STUDENT'), async (req, res) => {
     const { studentData, parents } = req.body;
     try {
         const result = await prisma.$transaction(async (tx) => {

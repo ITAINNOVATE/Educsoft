@@ -24,7 +24,7 @@ router.get('/school-years', protect, async (req, res) => {
 // @desc    Create a new school year
 // @route   POST /api/config/school-years
 // @access  Private/Admin
-router.post('/school-years', protect, authorize('ADMIN', 'DIRECTOR', 'SUPER_ADMIN'), async (req, res) => {
+router.post('/school-years', protect, authorize('ADMIN', 'DIRECTOR', 'CENSEUR', 'SUPER_ADMIN'), async (req, res) => {
     const { name, startDate, endDate, current } = req.body;
     console.log('--- POST /api/config/school-years ---');
     console.log('Payload:', { name, startDate, endDate, current });
@@ -88,7 +88,7 @@ router.get('/classes', protect, async (req, res) => {
 // @desc    Create a new class
 // @route   POST /api/config/classes
 // @access  Private/Admin
-router.post('/classes', protect, authorize('ADMIN', 'DIRECTOR', 'SUPER_ADMIN'), async (req, res) => {
+router.post('/classes', protect, authorize('ADMIN', 'DIRECTOR', 'CENSEUR', 'SUPER_ADMIN'), async (req, res) => {
     const { name, level, schoolYearId } = req.body;
 
     try {
@@ -127,7 +127,7 @@ router.get('/subjects/:classId', protect, async (req, res) => {
 
 // @desc    Create a new subject
 // @route   POST /api/config/subjects
-router.post('/subjects', protect, authorize('ADMIN', 'DIRECTOR', 'SUPER_ADMIN'), async (req, res) => {
+router.post('/subjects', protect, authorize('ADMIN', 'DIRECTOR', 'CENSEUR', 'SUPER_ADMIN'), async (req, res) => {
     const { name, code, coefficient, classId } = req.body;
 
     try {
@@ -148,7 +148,7 @@ router.post('/subjects', protect, authorize('ADMIN', 'DIRECTOR', 'SUPER_ADMIN'),
 
 // @desc    Delete a subject
 // @route   DELETE /api/config/subjects/:id
-router.delete('/subjects/:id', protect, authorize('ADMIN', 'DIRECTOR', 'SUPER_ADMIN'), async (req, res) => {
+router.delete('/subjects/:id', protect, authorize('ADMIN', 'DIRECTOR', 'CENSEUR', 'SUPER_ADMIN'), async (req, res) => {
     try {
         await prisma.subject.delete({
             where: { 
@@ -180,7 +180,7 @@ router.get('/terms/:schoolYearId', protect, async (req, res) => {
 
 // @desc    Create a new term
 // @route   POST /api/config/terms
-router.post('/terms', protect, authorize('ADMIN', 'DIRECTOR', 'SUPER_ADMIN'), async (req, res) => {
+router.post('/terms', protect, authorize('ADMIN', 'DIRECTOR', 'CENSEUR', 'SUPER_ADMIN'), async (req, res) => {
     const { name, startDate, endDate, schoolYearId } = req.body;
 
     try {
@@ -200,7 +200,7 @@ router.post('/terms', protect, authorize('ADMIN', 'DIRECTOR', 'SUPER_ADMIN'), as
 
 // @desc    Delete a term
 // @route   DELETE /api/config/terms/:id
-router.delete('/terms/:id', protect, authorize('ADMIN', 'DIRECTOR', 'SUPER_ADMIN'), async (req, res) => {
+router.delete('/terms/:id', protect, authorize('ADMIN', 'DIRECTOR', 'CENSEUR', 'SUPER_ADMIN'), async (req, res) => {
     try {
         await prisma.term.delete({
             where: { id: req.params.id },

@@ -9,13 +9,15 @@ import {
 } from 'lucide-react';
 
 const ROLE_LABELS = {
-    SUPER_ADMIN: { label: 'Super Admin', bg: '#fef3c7', color: '#92400e' },
-    ADMIN:       { label: 'Administrateur', bg: '#fee2e2', color: '#991b1b' },
-    FOUNDER:     { label: 'Fondateur', bg: '#fde8ff', color: '#7e22ce' },
-    ACCOUNTANT:  { label: 'Comptable', bg: '#dcfce7', color: '#166534' },
-    SECRETARY:   { label: 'Secrétaire', bg: '#dbeafe', color: '#1e40af' },
-    TEACHER:     { label: 'Enseignant', bg: '#f3e8ff', color: '#6b21a8' },
-    DIRECTOR:    { label: 'Directeur', bg: '#fef9c3', color: '#854d0e' },
+    SUPER_ADMIN:         { label: 'Super Admin', bg: '#fef3c7', color: '#92400e' },
+    ADMIN:               { label: 'Administrateur', bg: '#fee2e2', color: '#991b1b' },
+    FOUNDER:             { label: 'Fondateur', bg: '#fde8ff', color: '#7e22ce' },
+    DIRECTOR:            { label: 'Directeur', bg: '#fff7ed', color: '#c2410c' },
+    CENSEUR:             { label: 'Censeur', bg: '#ecfdf5', color: '#065f46' },
+    SURVEILLANT_GENERAL: { label: 'Surveillant Général', bg: '#eff6ff', color: '#1d4ed8' },
+    ACCOUNTANT:          { label: 'Comptable', bg: '#dcfce7', color: '#166534' },
+    SECRETARY:           { label: 'Secrétaire', bg: '#dbeafe', color: '#1e40af' },
+    TEACHER:             { label: 'Enseignant', bg: '#f3e8ff', color: '#6b21a8' },
 };
 
 const EstablishmentUsers = () => {
@@ -195,10 +197,12 @@ const EstablishmentUsers = () => {
                                     onChange={e => setFormData({ ...formData, role: e.target.value })}>
                                     <option value="ADMIN">Administrateur (Accès Total)</option>
                                     <option value="FOUNDER">Fondateur (Accès Total)</option>
+                                    <option value="DIRECTOR">Directeur</option>
+                                    <option value="CENSEUR">Censeur</option>
+                                    <option value="SURVEILLANT_GENERAL">Surveillant Général</option>
                                     <option value="ACCOUNTANT">Comptable (Finances)</option>
                                     <option value="SECRETARY">Secrétaire (Gestion)</option>
                                     <option value="TEACHER">Enseignant</option>
-                                    <option value="DIRECTOR">Directeur</option>
                                 </select>
                             </div>
                         </div>

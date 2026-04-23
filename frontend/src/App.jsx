@@ -145,16 +145,16 @@ const Layout = () => {
 
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
           <SidebarLink to="/dashboard" label="Tableau de Bord" onClick={closeSidebar} />
-          {user && (user.role === 'ADMIN' || user.role === 'FOUNDER' || user.role === 'SUPER_ADMIN') && (
+          {user && (user.role === 'ADMIN' || user.role === 'FOUNDER' || user.role === 'DIRECTOR' || user.role === 'CENSEUR' || user.role === 'SUPER_ADMIN') && (
             <SidebarLink to="/configuration" label="Configuration" onClick={closeSidebar} />
           )}
-          {user && (user.role === 'ADMIN' || user.role === 'FOUNDER' || user.role === 'SECRETARY' || user.role === 'ACCOUNTANT' || user.role === 'SUPER_ADMIN') && (
+          {user && (user.role === 'ADMIN' || user.role === 'FOUNDER' || user.role === 'DIRECTOR' || user.role === 'CENSEUR' || user.role === 'SURVEILLANT_GENERAL' || user.role === 'SECRETARY' || user.role === 'ACCOUNTANT' || user.role === 'SUPER_ADMIN') && (
             <SidebarLink to="/students" label="Gestion des Élèves" onClick={closeSidebar} />
           )}
           {user && (user.role === 'ADMIN' || user.role === 'FOUNDER' || user.role === 'ACCOUNTANT' || user.role === 'SUPER_ADMIN') && (
             <SidebarLink to="/payments" label="Paiements" onClick={closeSidebar} />
           )}
-          {user && (user.role === 'ADMIN' || user.role === 'FOUNDER' || user.role === 'SECRETARY' || user.role === 'DIRECTOR' || user.role === 'TEACHER' || user.role === 'SUPER_ADMIN') && (
+          {user && (user.role === 'ADMIN' || user.role === 'FOUNDER' || user.role === 'DIRECTOR' || user.role === 'CENSEUR' || user.role === 'SURVEILLANT_GENERAL' || user.role === 'SECRETARY' || user.role === 'TEACHER' || user.role === 'SUPER_ADMIN') && (
             <SidebarLink to="/grades" label="Notes & Bulletins" onClick={closeSidebar} />
           )}
           {user && (user.role === 'ADMIN' || user.role === 'FOUNDER' || user.role === 'ACCOUNTANT' || user.role === 'SUPER_ADMIN') && (
@@ -221,10 +221,10 @@ function App() {
                 <Route element={<ProtectedRoute roleRequired={['ADMIN', 'FOUNDER', 'ACCOUNTANT']} />}>
                   <Route path="/payments" element={<Payments />} />
                 </Route>
-                <Route element={<ProtectedRoute roleRequired={['ADMIN', 'FOUNDER']} />}>
+                <Route element={<ProtectedRoute roleRequired={['ADMIN', 'FOUNDER', 'DIRECTOR', 'CENSEUR']} />}>
                   <Route path="/configuration" element={<Configuration />} />
                 </Route>
-                <Route element={<ProtectedRoute roleRequired={['ADMIN', 'FOUNDER', 'SECRETARY', 'ACCOUNTANT']} />}>
+                <Route element={<ProtectedRoute roleRequired={['ADMIN', 'FOUNDER', 'DIRECTOR', 'CENSEUR', 'SURVEILLANT_GENERAL', 'SECRETARY', 'ACCOUNTANT']} />}>
                   <Route path="/students" element={<Students />} />
                 </Route>
                 <Route element={<ProtectedRoute roleRequired={['ADMIN', 'FOUNDER']} />}>
@@ -236,7 +236,7 @@ function App() {
                 <Route element={<ProtectedRoute roleRequired={['ADMIN', 'FOUNDER', 'ACCOUNTANT']} />}>
                   <Route path="/expenses" element={<Expenses />} />
                 </Route>
-                <Route element={<ProtectedRoute roleRequired={['ADMIN', 'FOUNDER', 'SECRETARY', 'DIRECTOR', 'TEACHER']} />}>
+                <Route element={<ProtectedRoute roleRequired={['ADMIN', 'FOUNDER', 'DIRECTOR', 'CENSEUR', 'SURVEILLANT_GENERAL', 'SECRETARY', 'TEACHER']} />}>
                   <Route path="/grades" element={<Grades />} />
                 </Route>
                 <Route element={<ProtectedRoute roleRequired="SUPER_ADMIN" />}>
