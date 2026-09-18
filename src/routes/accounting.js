@@ -192,6 +192,10 @@ router.get('/debts', protect, authorize('ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'), a
         
         const allStudents = await prisma.student.findMany({
             where,
+            orderBy: [
+                { lastName: 'asc' },
+                { firstName: 'asc' }
+            ],
             select: {
                 id: true,
                 firstName: true,
@@ -293,6 +297,10 @@ router.get('/debts/export', protect, authorize('ADMIN', 'ACCOUNTANT', 'SUPER_ADM
 
         const students = await prisma.student.findMany({
             where,
+            orderBy: [
+                { lastName: 'asc' },
+                { firstName: 'asc' }
+            ],
             include: {
                 enrollments: { include: { class: { include: { fees: true } } } },
                 payments: true
@@ -363,6 +371,10 @@ router.get('/report', protect, authorize('ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'), 
         // 2. Fetch Debts (Same logic as /debts)
         const students = await prisma.student.findMany({
             where: { status: 'ACTIF', establishmentId: req.user.establishmentId },
+            orderBy: [
+                { lastName: 'asc' },
+                { firstName: 'asc' }
+            ],
             include: {
                 enrollments: { include: { class: { include: { fees: true } } } },
                 payments: true
