@@ -106,6 +106,51 @@ router.post('/classes', protect, authorize('ADMIN', 'DIRECTOR', 'CENSEUR', 'SUPE
     }
 });
 
+// @desc    Update a class
+// @route   PATCH /api/config/classes/:id
+// @access  Private/Admin
+router.patch('/classes/:id', protect, authorize('ADMIN', 'DIRECTOR', 'CENSEUR', 'SUPER_ADMIN'), async (req, res) => {
+    const { name, level, schoolYearId } = req.body;
+    try {
+        const updated = await prisma.class.update({
+            where: { id: req.params.id },
+            data: { name, level, schoolYearId },
+            include: { schoolYear: true, fees: true }
+        });
+        res.json(updated);
+    } catch (error) {
+        res.status(500).json({ message: 'Erreur lors de la modification', error: error.message });
+    }
+});
+
+// @desc    Delete a class
+// @route   DELETE /api/config/classes/:id
+// @access  Private/Admin
+router.delete('/classes/:id', protect, authorize('ADMIN', 'DIRECTOR', 'CENSEUR', 'SUPER_ADMIN'), async (req, res) => {
+    try {
+        const classId = req.params.id;
+
+        // Check if there are students enrolled in this class
+        const enrollmentCount = await prisma.enrollment.count({ where: { classId } });
+        if (enrollmentCount > 0) {
+            return res.status(400).json({
+                message: `Impossible de supprimer : ${enrollmentCount} élève(s) inscrit(s) dans cette classe. Veuillez d'abord les désinscrire.`
+            });
+        }
+
+        await prisma.$transaction(async (tx) => {
+            await tx.grade.deleteMany({ where: { subject: { classId } } });
+            await tx.subject.deleteMany({ where: { classId } });
+            await tx.fee.deleteMany({ where: { classId } });
+            await tx.class.delete({ where: { id: classId } });
+        });
+
+        res.json({ message: 'Classe supprimée avec succès' });
+    } catch (error) {
+        res.status(500).json({ message: 'Erreur lors de la suppression', error: error.message });
+    }
+});
+
 // --- Subject Management ---
 
 // @desc    Get subjects for a class

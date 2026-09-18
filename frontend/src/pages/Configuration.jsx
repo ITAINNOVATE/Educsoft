@@ -19,7 +19,11 @@ const Configuration = () => {
     
     const [editingFee, setEditingFee] = useState(null);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [editingClass, setEditingClass] = useState(null);
+    const [showClassModal, setShowClassModal] = useState(false);
     const { user } = useAuth();
+
+    const canManageClasses = ['SUPER_ADMIN', 'ADMIN', 'DIRECTOR'].includes(user?.role);
 
     const API_URL = `${config.API_URL}/config`;
 
@@ -95,6 +99,36 @@ const Configuration = () => {
             fetchData();
         } catch (error) {
             alert('Error adding class');
+        }
+    };
+
+    const handleDeleteClass = async (id) => {
+        if (!confirm('Supprimer cette classe ? Les inscriptions et matières associées seront aussi supprimées.')) return;
+        try {
+            await axios.delete(`${API_URL}/classes/${id}`, {
+                headers: { Authorization: `Bearer ${user.token}` },
+            });
+            fetchData();
+        } catch (error) {
+            alert(error.response?.data?.message || 'Erreur lors de la suppression de la classe');
+        }
+    };
+
+    const handleUpdateClass = async (e) => {
+        e.preventDefault();
+        try {
+            await axios.patch(`${API_URL}/classes/${editingClass.id}`, {
+                name: editingClass.name,
+                level: editingClass.level,
+                schoolYearId: editingClass.schoolYearId,
+            }, {
+                headers: { Authorization: `Bearer ${user.token}` },
+            });
+            setShowClassModal(false);
+            setEditingClass(null);
+            fetchData();
+        } catch (error) {
+            alert(error.response?.data?.message || 'Erreur lors de la modification');
         }
     };
 
@@ -277,12 +311,30 @@ const Configuration = () => {
 
                     <div className="grid-resp-2" style={{ gap: '0.75rem' }}>
                         {(Array.isArray(classes) ? classes : []).map(c => (
-                            <div key={c.id} style={{ padding: '1rem', background: 'white', border: '1px solid #f1f5f9', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                                <div style={{ fontWeight: '700', color: 'var(--primary-dark)' }}>{c.name || '---'}</div>
+                            <div key={c.id} style={{ padding: '1rem', background: 'white', border: '1px solid #f1f5f9', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                <div style={{ fontWeight: '700', color: 'var(--primary-dark)', fontSize: '1.05rem' }}>{c.name || '---'}</div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <span style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem', background: '#f1f5f9', borderRadius: '4px', color: 'var(--primary)', fontWeight: '700' }}>{c.level || '---'}</span>
                                     <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{c.schoolYear?.name || '---'}</span>
                                 </div>
+                                {canManageClasses && (
+                                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem', borderTop: '1px solid #f1f5f9', paddingTop: '0.5rem' }}>
+                                        <button
+                                            onClick={() => { setEditingClass({ id: c.id, name: c.name, level: c.level, schoolYearId: c.schoolYearId }); setShowClassModal(true); }}
+                                            title="Modifier la classe"
+                                            style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem', border: 'none', background: '#f1f5f9', color: '#475569', padding: '0.4rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: '600' }}
+                                        >
+                                            <Edit size={14} /> Modifier
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteClass(c.id)}
+                                            title="Supprimer la classe"
+                                            style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem', border: 'none', background: '#fff5f5', color: '#991b1b', padding: '0.4rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: '600' }}
+                                        >
+                                            <Trash2 size={14} /> Supprimer
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>
@@ -630,6 +682,67 @@ const Configuration = () => {
                 </div>
             )}
         </div>
+
+            {/* Modal: Modifier une Classe */}
+            {showClassModal && editingClass && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000, padding: '1rem' }}>
+                    <div className="card fade-in" style={{ width: '100%', maxWidth: '450px', borderRadius: '20px', padding: '2rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '800', color: 'var(--primary-dark)' }}>Modifier la Classe</h2>
+                            <button onClick={() => { setShowClassModal(false); setEditingClass(null); }} style={{ background: '#f1f5f9', border: 'none', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer', fontSize: '1.2rem' }}>×</button>
+                        </div>
+                        <form onSubmit={handleUpdateClass}>
+                            <div className="form-group">
+                                <label className="form-label">Nom de la Classe</label>
+                                <input
+                                    type="text"
+                                    className="form-input"
+                                    style={{ height: '48px' }}
+                                    required
+                                    value={editingClass.name}
+                                    onChange={e => setEditingClass({ ...editingClass, name: e.target.value })}
+                                    placeholder="ex: CM2 B, 6ème Rouge"
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Niveau</label>
+                                <select
+                                    className="form-input"
+                                    style={{ height: '48px', fontWeight: '700' }}
+                                    required
+                                    value={editingClass.level}
+                                    onChange={e => setEditingClass({ ...editingClass, level: e.target.value })}
+                                >
+                                    <option value="">Niveau...</option>
+                                    <option value="MATERNELLE">Maternelle</option>
+                                    <option value="PRIMAIRE">Primaire</option>
+                                    <option value="COLLEGE">Collège</option>
+                                    <option value="LYCEE">Lycée</option>
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Année Académique</label>
+                                <select
+                                    className="form-input"
+                                    style={{ height: '48px', fontWeight: '700' }}
+                                    required
+                                    value={editingClass.schoolYearId}
+                                    onChange={e => setEditingClass({ ...editingClass, schoolYearId: e.target.value })}
+                                >
+                                    <option value="">Année...</option>
+                                    {(Array.isArray(schoolYears) ? schoolYears : []).map(y => (
+                                        <option key={y.id} value={y.id}>{y.name || '---'}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
+                                <button type="submit" className="btn btn-primary" style={{ flex: 1, height: '48px' }}>Enregistrer</button>
+                                <button type="button" onClick={() => { setShowClassModal(false); setEditingClass(null); }} className="btn" style={{ flex: 1, height: '48px', background: '#f8fafc', border: '1px solid #e2e8f0', color: '#64748b' }}>Annuler</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
     );
 };
 
