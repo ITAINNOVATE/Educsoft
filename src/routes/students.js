@@ -54,8 +54,25 @@ router.post('/register', protect, authorize('ADMIN', 'SECRETARY', 'DIRECTOR', 'C
     try {
         const result = await prisma.$transaction(async (tx) => {
             // 1. Generate Matricule (Unique)
-            const count = await tx.student.count({ where: { establishmentId: req.user.establishmentId } });
-            const matricule = `STU${new Date().getFullYear()}${String(count + 1).padStart(4, '0')}`;
+            const lastStudent = await tx.student.findFirst({
+                where: { establishmentId: req.user.establishmentId },
+                orderBy: { regNumber: 'desc' }
+            });
+            
+            let nextNum = 1;
+            if (lastStudent && lastStudent.regNumber && lastStudent.regNumber.startsWith(`STU${new Date().getFullYear()}`)) {
+                const lastNumStr = lastStudent.regNumber.slice(-4);
+                const lastNum = parseInt(lastNumStr, 10);
+                if (!isNaN(lastNum)) {
+                    nextNum = lastNum + 1;
+                }
+            } else if (lastStudent) {
+                // If for some reason the last student doesn't match the current year format,
+                // fallback to a robust unique string to avoid blocking
+                nextNum = Date.now() % 10000;
+            }
+            
+            const matricule = `STU${new Date().getFullYear()}${String(nextNum).padStart(4, '0')}`;
 
             // 2. Create Student
             const student = await tx.student.create({
