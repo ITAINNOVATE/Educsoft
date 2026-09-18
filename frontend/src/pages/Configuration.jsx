@@ -681,7 +681,6 @@ const Configuration = () => {
                     </div>
                 </div>
             )}
-        </div>
 
             {/* Modal: Modifier une Classe */}
             {showClassModal && editingClass && (
@@ -743,6 +742,7 @@ const Configuration = () => {
                     </div>
                 </div>
             )}
+        </div>
     );
 };
 
