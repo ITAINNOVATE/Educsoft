@@ -6,10 +6,23 @@
  * @param {Array} payments - List of payment objects for the student
  * @returns {Object} detailed financial breakdown
  */
-const calculateStudentFinancials = (fees = [], payments = []) => {
+const calculateStudentFinancials = (fees = [], payments = [], student = null) => {
+    // If student has explicit selected fees in internalNotes, filter the fees list
+    let applicableFees = fees;
+    if (student?.internalNotes && student.internalNotes.includes('[FRAIS_CHOISIS:')) {
+        try {
+            const match = student.internalNotes.match(/\[FRAIS_CHOISIS:\s*(.*?)\]/);
+            if (match && match[1]) {
+                const selectedIds = match[1].split(',').map(s => s.trim());
+                applicableFees = fees.filter(f => selectedIds.includes(f.id));
+            }
+        } catch (e) {
+            // Ignore parse errors, fallback to all fees
+        }
+    }
 
     const getCategoryStats = (category) => {
-        const catFees = fees.filter(f => f.category === category);
+        const catFees = applicableFees.filter(f => f.category === category);
 
         const detailedFees = catFees.map(f => {
             const paid = payments
@@ -67,7 +80,7 @@ const calculateStudentFinancials = (fees = [], payments = []) => {
     const optional = getCategoryStats('OPTIONAL');
     const occasional = getCategoryStats('OCCASIONAL');
 
-    const globalTotalDue = fees.reduce((acc, f) => acc + f.amount, 0);
+    const globalTotalDue = applicableFees.reduce((acc, f) => acc + f.amount, 0);
     const globalTotalPaid = payments.reduce((acc, p) => acc + p.amount, 0);
 
     return {

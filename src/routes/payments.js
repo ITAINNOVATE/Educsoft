@@ -210,7 +210,7 @@ router.get('/receipt/:paymentId', protect, async (req, res) => {
             where: { studentId: payment.studentId }
         });
 
-        const financials = calculateStudentFinancials(fees, allPayments);
+        const financials = calculateStudentFinancials(fees, allPayments, payment.student);
         payment.student.financials = financials;
 
         res.setHeader('Content-Type', 'application/pdf');
@@ -274,7 +274,7 @@ router.get('/search-students', protect, async (req, res) => {
             const fees = enrollment?.class?.fees || [];
             const payments = s.payments || [];
 
-            const financials = calculateStudentFinancials(fees, payments);
+            const financials = calculateStudentFinancials(fees, payments, s);
 
             return {
                 id: s.id,

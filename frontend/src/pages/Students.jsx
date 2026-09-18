@@ -178,9 +178,18 @@ const Students = () => {
 
         setUploading(true);
         try {
-            // Prepare payload
+            // Encode selected fees into internalNotes so we know what they owe
+            const selectedFeesArr = Array.from(selectedFees);
+            let updatedInternalNotes = formData.studentData.internalNotes || '';
+            if (selectedFeesArr.length > 0) {
+                updatedInternalNotes += `\n[FRAIS_CHOISIS: ${selectedFeesArr.join(', ')}]`;
+            }
+
             const payload = {
-                studentData: formData.studentData,
+                studentData: {
+                    ...formData.studentData,
+                    internalNotes: updatedInternalNotes.trim()
+                },
                 enrollmentData: {
                     classId: formData.enrollmentData.classId,
                     schoolYearId: formData.enrollmentData.schoolYearId
@@ -188,15 +197,15 @@ const Students = () => {
                 parents: formData.parents.filter(p => p.firstName && p.lastName)
             };
 
-            await axios.post(`${API_BASE}/students/register`, payload, {
+            const res = await axios.post(`${API_BASE}/students/register`, payload, {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
 
-            alert('Élève inscrit avec succès !');
+            alert('Élève inscrit avec succès ! (Les frais sélectionnés ont été mémorisés dans son dossier).');
             setView('LIST');
+            setRegisterStep('FORM');
             fetchData();
 
-            // Reset crucial form parts but keep context like school year
             setFormData(prev => ({
                 ...prev,
                 studentData: {
@@ -208,6 +217,8 @@ const Students = () => {
                     { firstName: '', lastName: '', phonePrimary: '', phoneSecondary: '', email: '', occupation: '', address: '', relation: 'PERE', isPrimary: true, isEmergency: true }
                 ]
             }));
+            setSelectedFees(new Set());
+            setClassFees([]);
 
         } catch (error) {
             console.error('Registration error:', error);

@@ -197,6 +197,7 @@ router.get('/debts', protect, authorize('ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'), a
                 firstName: true,
                 lastName: true,
                 regNumber: true,
+                internalNotes: true,
                 enrollments: {
                     select: {
                         class: {
@@ -223,7 +224,7 @@ router.get('/debts', protect, authorize('ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'), a
             const payments = s.payments || [];
 
             try {
-                const financials = calculateStudentFinancials(fees, payments);
+                const financials = calculateStudentFinancials(fees, payments, s);
                 const { global, OBLIGATORY, OPTIONAL, OCCASIONAL } = financials;
 
                 if (global.remaining <= 0) return null; // Only debtors
@@ -299,7 +300,7 @@ router.get('/debts/export', protect, authorize('ADMIN', 'ACCOUNTANT', 'SUPER_ADM
         const reportData = students.map(s => {
             const enrollment = s.enrollments?.[0];
             if (!enrollment || !enrollment.class) return null;
-            const financials = calculateStudentFinancials(enrollment.class.fees || [], s.payments || []);
+            const financials = calculateStudentFinancials(enrollment.class.fees || [], s.payments || [], s);
             if (financials.global.remaining <= 0) return null;
 
             return {
@@ -369,7 +370,7 @@ router.get('/report', protect, authorize('ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'), 
         const debts = students.map(s => {
             const enrollment = s.enrollments?.[0];
             if (!enrollment || !enrollment.class) return null;
-            const financials = calculateStudentFinancials(enrollment.class.fees || [], s.payments || []);
+            const financials = calculateStudentFinancials(enrollment.class.fees || [], s.payments || [], s);
             return {
                 name: `${s.firstName} ${s.lastName}`,
                 className: enrollment.class.name,

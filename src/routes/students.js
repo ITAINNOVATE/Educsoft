@@ -313,7 +313,7 @@ router.get('/:id', protect, async (req, res) => {
         const fees = student.enrollments[0]?.class.fees || [];
         const payments = student.payments || [];
 
-        const financials = calculateStudentFinancials(fees, payments);
+        const financials = calculateStudentFinancials(fees, payments, student);
 
         res.json({ ...student, financials });
     } catch (error) {
@@ -544,7 +544,7 @@ router.get('/:id/pdf', protect, async (req, res) => {
         const fees = enrollment?.class?.fees || [];
         const payments = student.payments || [];
 
-        student.financials = calculateStudentFinancials(fees, payments);
+        student.financials = calculateStudentFinancials(fees, payments, student);
 
         // Set headers for PDF download
         res.setHeader('Content-Type', 'application/pdf');
