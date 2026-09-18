@@ -22,6 +22,7 @@ const Configuration = () => {
     const [editingClass, setEditingClass] = useState(null);
     const [showClassModal, setShowClassModal] = useState(false);
     const { user } = useAuth();
+    const [activeTab, setActiveTab] = useState("YEARS");
 
     const canManageClasses = ['SUPER_ADMIN', 'ADMIN', 'DIRECTOR'].includes(user?.role);
 
@@ -225,8 +226,30 @@ const Configuration = () => {
                 </div>
             </header>
 
-            <div className="grid-resp-2" style={{ gap: '2rem' }}>
+            
+            {/* Tabs Navigation */}
+            <div style={{ display: 'flex', gap: '1rem', overflowX: 'auto', marginBottom: '2rem', borderBottom: '2px solid #f1f5f9', paddingBottom: '0.5rem' }}>
+                <button 
+                    type="button"
+                    onClick={() => setActiveTab('YEARS')}
+                    style={{ background: 'none', border: 'none', padding: '0.5rem 1rem', fontSize: '1.05rem', fontWeight: 'bold', color: activeTab === 'YEARS' ? 'var(--primary)' : 'var(--text-muted)', borderBottom: activeTab === 'YEARS' ? '3px solid var(--primary)' : '3px solid transparent', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                    <Calendar size={18} style={{ display: 'inline', verticalAlign: 'text-bottom', marginRight: '0.5rem' }}/> Années & Trimestres
+                </button>
+                <button 
+                    type="button"
+                    onClick={() => setActiveTab('CLASSES')}
+                    style={{ background: 'none', border: 'none', padding: '0.5rem 1rem', fontSize: '1.05rem', fontWeight: 'bold', color: activeTab === 'CLASSES' ? 'var(--primary)' : 'var(--text-muted)', borderBottom: activeTab === 'CLASSES' ? '3px solid var(--primary)' : '3px solid transparent', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                    <BookOpen size={18} style={{ display: 'inline', verticalAlign: 'text-bottom', marginRight: '0.5rem' }}/> Classes & Matières
+                </button>
+                <button 
+                    type="button"
+                    onClick={() => setActiveTab('FEES')}
+                    style={{ background: 'none', border: 'none', padding: '0.5rem 1rem', fontSize: '1.05rem', fontWeight: 'bold', color: activeTab === 'FEES' ? 'var(--primary)' : 'var(--text-muted)', borderBottom: activeTab === 'FEES' ? '3px solid var(--primary)' : '3px solid transparent', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                    <CheckCircle size={18} style={{ display: 'inline', verticalAlign: 'text-bottom', marginRight: '0.5rem' }}/> Frais Scolaires
+                </button>
+            </div>
 
+            {activeTab === "YEARS" && (<div className="grid-resp-2" style={{ gap: '2rem' }}>
                 {/* Academic Years Section */}
                 <section className="card">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
@@ -273,6 +296,9 @@ const Configuration = () => {
                     </div>
                 </section>
 
+                            </div>)}
+
+            {activeTab === "CLASSES" && (<div className="grid-resp-2" style={{ gap: '2rem' }}>
                 {/* Classes Section */}
                 <section className="card">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
@@ -480,6 +506,9 @@ const Configuration = () => {
                     )}
                 </section>
 
+                            </div>)}
+
+            {activeTab === "FEES" && (<div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
                 {/* ADVANCED FEE CONFIGURATION */}
                 <section className="card" style={{ gridColumn: '1 / -1' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
@@ -630,7 +659,7 @@ const Configuration = () => {
                     </div>
                 </section>
 
-            </div>
+            </div>)}
 
             {/* Edit Fee Modal - Optimized for Mobile */}
             {showEditModal && editingFee && (
