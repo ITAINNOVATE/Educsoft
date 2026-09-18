@@ -249,10 +249,12 @@ router.get('/debts', protect, authorize('ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'), a
         }).filter(r => r !== null);
 
         const total = debtors.length;
+        const globalTotalDebt = debtors.reduce((acc, curr) => acc + curr.balance, 0);
         const paginatedDebtors = debtors.slice(skip, skip + limit);
 
         res.json({
             students: paginatedDebtors,
+            globalTotalDebt,
             pagination: {
                 total,
                 page,

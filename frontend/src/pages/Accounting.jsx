@@ -24,6 +24,7 @@ import {
 const Accounting = () => {
     const [stats, setStats] = useState(null);
     const [debts, setDebts] = useState([]);
+    const [globalTotalDebt, setGlobalTotalDebt] = useState(0);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const { user } = useAuth();
@@ -110,6 +111,7 @@ const Accounting = () => {
             });
 
             const newStudents = res.data?.students || [];
+            setGlobalTotalDebt(res.data?.globalTotalDebt || 0);
             if (reset) {
                 setDebts(newStudents);
             } else {
@@ -360,19 +362,19 @@ const Accounting = () => {
                 />
                 <StatCard
                     label="Total des Arriérés"
-                    value={`${totalDebt.toLocaleString()} FCFA`}
+                    value={`${globalTotalDebt.toLocaleString()} FCFA`}
                     icon={<AlertTriangle color="#c62828" />}
                     color="#ffebee"
                 />
                 <StatCard
                     label="Recettes ce Mois"
-                    value={`${(stats?.revenueMonth || 0).toLocaleString()} FCFA`}
+                    value={`${stats?.revenueMonth?.toLocaleString() || 0} FCFA`}
                     icon={<TrendingUp color="#1565c0" />}
                     color="#e3f2fd"
                 />
                 <StatCard
                     label="Taux de Recouvrement"
-                    value={`${stats?.revenueTotal ? Math.round((stats.revenueTotal / (stats.revenueTotal + totalDebt)) * 100) : 0}%`}
+                    value={`${stats?.revenueTotal ? Math.round((stats.revenueTotal / (stats.revenueTotal + globalTotalDebt)) * 100) : 0}%`}
                     icon={<CheckCircle color="#6a1b9a" />}
                     color="#f3e5f5"
                 />
