@@ -41,31 +41,33 @@ router.get('/stats', protect, authorize('ADMIN', 'ACCOUNTANT', 'DIRECTOR', 'SUPE
         let classCount = 0;
 
         try {
-            dayPayments = await prisma.payment.aggregate({
-                _sum: { amount: true },
-                where: { 
-                    paymentDate: { gte: startOfDay },
-                    establishmentId: req.user.establishmentId
-                }
-            });
-        } catch (e) { console.error("Error fetching dayPayments:", e.message); }
+            const [dayAgg, monthAgg, totalAgg, studentCountRes, classCountRes] = await Promise.all([
+                prisma.payment.aggregate({
+                    _sum: { amount: true },
+                    where: { paymentDate: { gte: startOfDay }, establishmentId: req.user.establishmentId }
+                }),
+                prisma.payment.aggregate({
+                    _sum: { amount: true },
+                    where: { paymentDate: { gte: startOfMonth }, establishmentId: req.user.establishmentId }
+                }),
+                prisma.payment.aggregate({
+                    _sum: { amount: true },
+                    where: Object.keys(dateFilter).length > 0 
+                        ? { ...dateFilter, establishmentId: req.user.establishmentId } 
+                        : { establishmentId: req.user.establishmentId }
+                }),
+                prisma.student.count({ where: { status: 'ACTIF', establishmentId: req.user.establishmentId } }),
+                prisma.class.count({ where: { establishmentId: req.user.establishmentId } })
+            ]);
 
-        try {
-            monthPayments = await prisma.payment.aggregate({
-                _sum: { amount: true },
-                where: { 
-                    paymentDate: { gte: startOfMonth },
-                    establishmentId: req.user.establishmentId
-                }
-            });
-        } catch (e) { console.error("Error fetching monthPayments:", e.message); }
-
-        try {
-            totalPayments = await prisma.payment.aggregate({
-                _sum: { amount: true },
-                where: { establishmentId: req.user.establishmentId } 
-            });
-        } catch (e) { console.error("Error fetching totalPayments:", e.message); }
+            dayPayments = dayAgg;
+            monthPayments = monthAgg;
+            totalPayments = totalAgg;
+            studentCount = studentCountRes;
+            classCount = classCountRes;
+        } catch (e) { 
+            console.error("Error fetching accounting stats:", e.message); 
+        }
 
         if (startDate && endDate) {
             try {
@@ -190,9 +192,26 @@ router.get('/debts', protect, authorize('ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'), a
         
         const allStudents = await prisma.student.findMany({
             where,
-            include: {
-                enrollments: { include: { class: { include: { fees: true } } } },
-                payments: true
+            select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                regNumber: true,
+                enrollments: {
+                    select: {
+                        class: {
+                            select: {
+                                name: true,
+                                fees: { select: { id: true, amount: true, category: true, type: true } }
+                            }
+                        }
+                    },
+                    where: { status: 'VALIDATED' },
+                    take: 1
+                },
+                payments: {
+                    select: { amount: true, feeId: true }
+                }
             }
         });
 

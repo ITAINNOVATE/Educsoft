@@ -63,7 +63,7 @@ const SuperAdmin = () => {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Êtes-vous sûr de vouloir supprimer cet établissement ? Cette action est irréversible et ne fonctionnera que si l\'établissement est vide de données (élèves/agents).')) {
+        if (!window.confirm('Êtes-vous sûr de vouloir supprimer cet établissement ? Cette action est irréversible et supprimera toutes les données associées (élèves, agents, classes, etc.).')) {
             return;
         }
 

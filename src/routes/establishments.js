@@ -82,29 +82,61 @@ router.patch('/:id', protect, authorize('SUPER_ADMIN'), async (req, res) => {
 // @access  Private (SUPER_ADMIN only)
 router.delete('/:id', protect, authorize('SUPER_ADMIN'), async (req, res) => {
     try {
-        // Check if there are any students or users linked to this establishment
-        const count = await prisma.establishment.findUnique({
-            where: { id: req.params.id },
-            include: {
-                _count: {
-                    select: { students: true, users: true }
-                }
-            }
-        });
+        const estId = req.params.id;
 
-        if (count._count.students > 0 || count._count.users > 0) {
-            return res.status(400).json({ 
-                message: "Impossible de supprimer cet établissement car il contient encore des données (élèves ou agents).",
-                details: `Veuillez d'abord supprimer les ${count._count.students} élèves et ${count._count.users} agents liés.`
+        await prisma.$transaction(async (tx) => {
+            // Grades (depend on student, subject, term)
+            await tx.grade.deleteMany({ where: { student: { establishmentId: estId } } });
+            
+            // Documents, SchoolHistory, ParentStudent, Enrollments, Payments (depend on student or establishment)
+            await tx.document.deleteMany({ where: { student: { establishmentId: estId } } });
+            await tx.schoolHistory.deleteMany({ where: { student: { establishmentId: estId } } });
+            await tx.parentStudent.deleteMany({ where: { student: { establishmentId: estId } } });
+            await tx.enrollment.deleteMany({ where: { student: { establishmentId: estId } } });
+            await tx.payment.deleteMany({ where: { establishmentId: estId } });
+            
+            // Fees (depend on class)
+            await tx.fee.deleteMany({ where: { class: { establishmentId: estId } } });
+            
+            // AuditLogs (depend on establishment or user in establishment)
+            await tx.auditLog.deleteMany({ 
+                where: { 
+                    OR: [
+                        { establishmentId: estId }, 
+                        { user: { establishmentId: estId } }
+                    ] 
+                } 
             });
-        }
-
-        await prisma.establishment.delete({
-            where: { id: req.params.id }
+            
+            // TeacherPayments & Expenses (depend on establishment)
+            await tx.teacherPayment.deleteMany({ where: { establishmentId: estId } });
+            // NOTE: expense table in DB doesn't have establishment_id column, so we skip it to prevent Prisma errors
+            // await tx.expense.deleteMany({ where: { establishmentId: estId } });
+            
+            // Subjects & Terms (depend on establishment or schoolYear)
+            await tx.subject.deleteMany({ where: { establishmentId: estId } });
+            await tx.term.deleteMany({ where: { schoolYear: { establishmentId: estId } } });
+            
+            // Classes & SchoolYears (depend on establishment)
+            await tx.class.deleteMany({ where: { establishmentId: estId } });
+            await tx.schoolYear.deleteMany({ where: { establishmentId: estId } });
+            
+            // Students, Parents & Users (depend on establishment)
+            await tx.student.deleteMany({ where: { establishmentId: estId } });
+            await tx.parent.deleteMany({ where: { establishmentId: estId } });
+            await tx.user.deleteMany({ where: { establishmentId: estId } });
+            
+            // Finally, delete the establishment itself
+            await tx.establishment.delete({ where: { id: estId } });
+        }, {
+            maxWait: 5000,
+            timeout: 30000 // 30 seconds to prevent timeout on slow connections
         });
-        res.json({ message: 'Établissement supprimé avec succès' });
+
+        res.json({ message: 'Établissement et toutes ses données associées ont été supprimés avec succès' });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error("Delete establishment error:", error);
+        res.status(500).json({ message: 'Erreur lors de la suppression de l\'établissement', details: error.message });
     }
 });
 

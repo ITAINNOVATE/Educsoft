@@ -1,8 +1,11 @@
 const express = require('express');
 const { prisma } = require('../context');
 const { protect } = require('../middleware/auth');
+const NodeCache = require('node-cache');
 
 const router = express.Router();
+// Cache dashboard for 2 minutes
+const dashboardCache = new NodeCache({ stdTTL: 120, checkperiod: 120 });
 
 // @desc    Get dashboard summary statistics based on user role
 // @route   GET /api/dashboard/summary
@@ -12,6 +15,12 @@ router.get('/summary', protect, async (req, res) => {
 
         if (!establishmentId && role !== 'SUPER_ADMIN') {
             return res.status(400).json({ message: 'Établissement non spécifié.' });
+        }
+
+        const cacheKey = `dashboard_${establishmentId || 'SA'}_${role}`;
+        const cachedData = dashboardCache.get(cacheKey);
+        if (cachedData) {
+            return res.json(cachedData);
         }
 
         // --- COMMON DATA (for everyone) ---
@@ -52,8 +61,8 @@ router.get('/summary', protect, async (req, res) => {
                 })
             ]);
 
-            // Chart data (last 7 days)
-            const chartData = [];
+            // Chart data (last 7 days) - PARALLELIZED
+            const chartDataPromises = [];
             for (let i = 6; i >= 0; i--) {
                 const date = new Date();
                 date.setDate(date.getDate() - i);
@@ -61,16 +70,17 @@ router.get('/summary', protect, async (req, res) => {
                 const nextDate = new Date(date);
                 nextDate.setDate(nextDate.getDate() + 1);
 
-                const daySum = await prisma.payment.aggregate({
-                    _sum: { amount: true },
-                    where: { establishmentId, paymentDate: { gte: date, lt: nextDate } }
-                });
-
-                chartData.push({
-                    day: date.toLocaleDateString('fr-FR', { weekday: 'short' }),
-                    amount: Number(daySum._sum.amount) || 0
-                });
+                chartDataPromises.push(
+                    prisma.payment.aggregate({
+                        _sum: { amount: true },
+                        where: { establishmentId, paymentDate: { gte: date, lt: nextDate } }
+                    }).then(daySum => ({
+                        day: date.toLocaleDateString('fr-FR', { weekday: 'short' }),
+                        amount: Number(daySum._sum.amount) || 0
+                    }))
+                );
             }
+            const chartData = await Promise.all(chartDataPromises);
 
             responseData.management = {
                 revenueMonth: Number(revenueMonth._sum.amount) || 0,
@@ -80,9 +90,8 @@ router.get('/summary', protect, async (req, res) => {
             };
         }
 
-        // 2. ADMINISTRATIVE ROLES (Secretary, Director, Censeur, Surveillant Général, Founder, Admin)
+        // 2. ADMINISTRATIVE ROLES (Secretary, Director, Censeur, Surveillant Général, Founder, Admin, Super Admin)
         if (['SECRETARY', 'DIRECTOR', 'CENSEUR', 'SURVEILLANT_GENERAL', 'FOUNDER', 'ADMIN', 'SUPER_ADMIN'].includes(role)) {
-            const now = new Date();
             const thirtyDaysAgo = new Date();
             thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
@@ -97,7 +106,7 @@ router.get('/summary', protect, async (req, res) => {
                     where: { establishmentId },
                     take: 5,
                     orderBy: { createdAt: 'desc' },
-                    include: { enrollments: { include: { class: true }, take: 1 } }
+                    include: { enrollments: { include: { class: { select: { name: true } } }, take: 1 } }
                 })
             ]);
 
@@ -140,6 +149,7 @@ router.get('/summary', protect, async (req, res) => {
             };
         }
 
+        dashboardCache.set(cacheKey, responseData);
         res.json(responseData);
     } catch (error) {
         console.error('Dashboard Summary Error:', error);
