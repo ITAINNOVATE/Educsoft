@@ -62,7 +62,9 @@ router.post('/register', protect, authorize('ADMIN', 'SECRETARY', 'DIRECTOR', 'C
                 data: {
                     ...finalStudentData,
                     regNumber: matricule,
-                    dob: new Date(finalStudentData.dob),
+                    dob: finalStudentData.dob ? new Date(finalStudentData.dob) : new Date('2000-01-01'),
+                    pob: finalStudentData.pob || '-',
+                    address: finalStudentData.address || '-',
                     status: finalStudentData.status || 'ACTIF',
                     establishmentId: req.user.establishmentId
                 }

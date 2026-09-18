@@ -194,7 +194,7 @@ const Students = () => {
                     classId: formData.enrollmentData.classId,
                     schoolYearId: formData.enrollmentData.schoolYearId
                 },
-                parents: formData.parents.filter(p => p.firstName && p.lastName)
+                parents: formData.parents.filter(p => p.firstName || p.lastName)
             };
 
             const res = await axios.post(`${API_BASE}/students/register`, payload, {
@@ -575,8 +575,8 @@ const Students = () => {
                                 </div>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                     <div className="form-group">
-                                        <label className="form-label">Date de Naissance</label>
-                                        <input type="date" className="form-input" value={formData.studentData.dob} onChange={e => setFormData({ ...formData, studentData: { ...formData.studentData, dob: e.target.value } })} required />
+                                        <label className="form-label">Date de Naissance (Optionnel)</label>
+                                        <input type="date" className="form-input" value={formData.studentData.dob} onChange={e => setFormData({ ...formData, studentData: { ...formData.studentData, dob: e.target.value } })} />
                                     </div>
                                     <div className="form-group">
                                         <label className="form-label">Sexe</label>
@@ -587,12 +587,12 @@ const Students = () => {
                                     </div>
                                 </div>
                                 <div className="form-group">
-                                    <label className="form-label">Lieu de Naissance</label>
-                                    <input type="text" className="form-input" value={formData.studentData.pob} onChange={e => setFormData({ ...formData, studentData: { ...formData.studentData, pob: e.target.value } })} required />
+                                    <label className="form-label">Lieu de Naissance (Optionnel)</label>
+                                    <input type="text" className="form-input" value={formData.studentData.pob} onChange={e => setFormData({ ...formData, studentData: { ...formData.studentData, pob: e.target.value } })} />
                                 </div>
                                 <div className="form-group">
-                                    <label className="form-label">Adresse Complète</label>
-                                    <input type="text" className="form-input" value={formData.studentData.address} onChange={e => setFormData({ ...formData, studentData: { ...formData.studentData, address: e.target.value } })} required />
+                                    <label className="form-label">Adresse Complète (Optionnel)</label>
+                                    <input type="text" className="form-input" value={formData.studentData.address} onChange={e => setFormData({ ...formData, studentData: { ...formData.studentData, address: e.target.value } })} />
                                 </div>
                             </section>
 
@@ -603,29 +603,29 @@ const Students = () => {
                                 </h3>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                     <div className="form-group">
-                                        <label className="form-label">Nom du Parent</label>
+                                        <label className="form-label">Nom du Parent (Optionnel)</label>
                                         <input type="text" className="form-input" value={formData.parents[0].lastName} onChange={e => {
                                             const newParents = [...formData.parents];
                                             newParents[0].lastName = e.target.value.toUpperCase();
                                             setFormData({ ...formData, parents: newParents });
-                                        }} required />
+                                        }} />
                                     </div>
                                     <div className="form-group">
-                                        <label className="form-label">Prénom du Parent</label>
+                                        <label className="form-label">Prénom du Parent (Optionnel)</label>
                                         <input type="text" className="form-input" value={formData.parents[0].firstName} onChange={e => {
                                             const newParents = [...formData.parents];
                                             newParents[0].firstName = e.target.value;
                                             setFormData({ ...formData, parents: newParents });
-                                        }} required />
+                                        }} />
                                     </div>
                                 </div>
                                 <div className="form-group">
-                                    <label className="form-label">Téléphone Principal</label>
+                                    <label className="form-label">Téléphone Principal (Optionnel)</label>
                                     <input type="tel" className="form-input" value={formData.parents[0].phonePrimary} onChange={e => {
                                         const newParents = [...formData.parents];
                                         newParents[0].phonePrimary = e.target.value;
                                         setFormData({ ...formData, parents: newParents });
-                                    }} required />
+                                    }} />
                                 </div>
                                 <div className="form-group">
                                     <label className="form-label">Lien avec l'élève</label>
