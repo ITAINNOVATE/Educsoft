@@ -167,37 +167,18 @@ const Students = () => {
         }
     };
 
-    const handleGoToFees = (e) => {
+    const handleRegister = async (e) => {
         e.preventDefault();
+
+        // Basic Validation
         if (!formData.studentData.firstName || !formData.studentData.lastName || !formData.enrollmentData.classId) {
             alert("Veuillez remplir les champs obligatoires (Nom, Prénoms, Classe).");
             return;
         }
-        // Load fees from the selected class
-        const selectedClass = classes.find(c => c.id === formData.enrollmentData.classId);
-        const fees = selectedClass?.fees || [];
-        setClassFees(fees);
-        // Pre-select all ANNUAL_OBLIGATORY fees by default
-        const defaultSelected = new Set(
-            fees.filter(f => f.category === 'ANNUAL_OBLIGATORY').map(f => f.id)
-        );
-        setSelectedFees(defaultSelected);
-        setRegisterStep('FEES');
-    };
 
-    const toggleFee = (feeId) => {
-        setSelectedFees(prev => {
-            const next = new Set(prev);
-            if (next.has(feeId)) next.delete(feeId);
-            else next.add(feeId);
-            return next;
-        });
-    };
-
-    const handleRegister = async (e) => {
-        e.preventDefault();
         setUploading(true);
         try {
+            // Prepare payload
             const payload = {
                 studentData: formData.studentData,
                 enrollmentData: {
@@ -207,38 +188,15 @@ const Students = () => {
                 parents: formData.parents.filter(p => p.firstName && p.lastName)
             };
 
-            const res = await axios.post(`${API_BASE}/students/register`, payload, {
+            await axios.post(`${API_BASE}/students/register`, payload, {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
 
-            const newStudentId = res.data?.student?.id;
-
-            // Create payments for selected fees
-            if (newStudentId && selectedFees.size > 0) {
-                const feesToPay = classFees.filter(f => selectedFees.has(f.id));
-                for (const fee of feesToPay) {
-                    try {
-                        await axios.post(`${API_BASE}/payments`, {
-                            studentId: newStudentId,
-                            feeId: fee.id,
-                            feeName: fee.name,
-                            amount: fee.amount,
-                            method: feesPaymentMethod,
-                            notes: 'Frais appliqués lors de l\'inscription'
-                        }, {
-                            headers: { Authorization: `Bearer ${user.token}` }
-                        });
-                    } catch (payErr) {
-                        console.warn(`Paiement pour "${fee.name}" non créé:`, payErr.message);
-                    }
-                }
-            }
-
-            alert('Élève inscrit avec succès !' + (selectedFees.size > 0 ? ` ${selectedFees.size} frais enregistré(s).` : ''));
+            alert('Élève inscrit avec succès !');
             setView('LIST');
-            setRegisterStep('FORM');
             fetchData();
 
+            // Reset crucial form parts but keep context like school year
             setFormData(prev => ({
                 ...prev,
                 studentData: {
@@ -250,8 +208,6 @@ const Students = () => {
                     { firstName: '', lastName: '', phonePrimary: '', phoneSecondary: '', email: '', occupation: '', address: '', relation: 'PERE', isPrimary: true, isEmergency: true }
                 ]
             }));
-            setSelectedFees(new Set());
-            setClassFees([]);
 
         } catch (error) {
             console.error('Registration error:', error);
@@ -588,218 +544,114 @@ const Students = () => {
 
             {view === 'REGISTER' && (
                 <div className="card" style={{ border: '1px solid var(--primary-light)' }}>
-                    {/* Step indicator */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.4rem 1rem', borderRadius: '20px', background: registerStep === 'FORM' ? 'var(--primary)' : 'var(--primary-light)', color: registerStep === 'FORM' ? 'white' : 'var(--primary)', fontWeight: '700', fontSize: '0.85rem' }}>
-                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: registerStep === 'FORM' ? 'white' : 'var(--primary)', color: registerStep === 'FORM' ? 'var(--primary)' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: '900' }}>1</span>
-                            Informations
-                        </div>
-                        <div style={{ flex: 1, height: '2px', background: registerStep === 'FEES' ? 'var(--primary)' : '#e2e8f0', borderRadius: '2px' }} />
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.4rem 1rem', borderRadius: '20px', background: registerStep === 'FEES' ? 'var(--primary)' : '#f1f5f9', color: registerStep === 'FEES' ? 'white' : '#94a3b8', fontWeight: '700', fontSize: '0.85rem' }}>
-                            <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: registerStep === 'FEES' ? 'white' : '#cbd5e1', color: registerStep === 'FEES' ? 'var(--primary)' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: '900' }}>2</span>
-                            Frais Scolaires
-                        </div>
-                    </div>
+                    <h2 style={{ marginBottom: '2rem', color: 'var(--primary)', borderBottom: '2px solid #f0f0f0', paddingBottom: '0.5rem' }}>Nouvelle Fiche d'Inscription</h2>
+                    <form onSubmit={handleRegister}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '3rem' }}>
+                            {/* ÉLÈVE SECTION */}
+                            <section>
+                                <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', color: 'var(--text-main)', fontSize: '1.1rem' }}>
+                                    <User size={18} /> Identité de l'Élève
+                                </h3>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div className="form-group">
+                                        <label className="form-label">Nom</label>
+                                        <input type="text" className="form-input" value={formData.studentData.lastName} onChange={e => setFormData({ ...formData, studentData: { ...formData.studentData, lastName: e.target.value.toUpperCase() } })} required />
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label">Prénoms</label>
+                                        <input type="text" className="form-input" value={formData.studentData.firstName} onChange={e => setFormData({ ...formData, studentData: { ...formData.studentData, firstName: e.target.value } })} required />
+                                    </div>
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div className="form-group">
+                                        <label className="form-label">Date de Naissance</label>
+                                        <input type="date" className="form-input" value={formData.studentData.dob} onChange={e => setFormData({ ...formData, studentData: { ...formData.studentData, dob: e.target.value } })} required />
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label">Sexe</label>
+                                        <select className="form-input" value={formData.studentData.gender} onChange={e => setFormData({ ...formData, studentData: { ...formData.studentData, gender: e.target.value } })}>
+                                            <option value="M">Masculin</option>
+                                            <option value="F">Féminin</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Lieu de Naissance</label>
+                                    <input type="text" className="form-input" value={formData.studentData.pob} onChange={e => setFormData({ ...formData, studentData: { ...formData.studentData, pob: e.target.value } })} required />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Adresse Complète</label>
+                                    <input type="text" className="form-input" value={formData.studentData.address} onChange={e => setFormData({ ...formData, studentData: { ...formData.studentData, address: e.target.value } })} required />
+                                </div>
+                            </section>
 
-                    {/* STEP 1: Formulaire */}
-                    {registerStep === 'FORM' && (
-                        <>
-                        <h2 style={{ marginBottom: '2rem', color: 'var(--primary)', borderBottom: '2px solid #f0f0f0', paddingBottom: '0.5rem' }}>Nouvelle Fiche d'Inscription</h2>
-                        <form onSubmit={handleGoToFees}>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '3rem' }}>
-                                {/* ÉLÈVE SECTION */}
-                                <section>
-                                    <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', color: 'var(--text-main)', fontSize: '1.1rem' }}>
-                                        <User size={18} /> Identité de l'Élève
-                                    </h3>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                        <div className="form-group">
-                                            <label className="form-label">Nom</label>
-                                            <input type="text" className="form-input" value={formData.studentData.lastName} onChange={e => setFormData({ ...formData, studentData: { ...formData.studentData, lastName: e.target.value.toUpperCase() } })} required />
-                                        </div>
-                                        <div className="form-group">
-                                            <label className="form-label">Prénoms</label>
-                                            <input type="text" className="form-input" value={formData.studentData.firstName} onChange={e => setFormData({ ...formData, studentData: { ...formData.studentData, firstName: e.target.value } })} required />
-                                        </div>
-                                    </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                        <div className="form-group">
-                                            <label className="form-label">Date de Naissance</label>
-                                            <input type="date" className="form-input" value={formData.studentData.dob} onChange={e => setFormData({ ...formData, studentData: { ...formData.studentData, dob: e.target.value } })} required />
-                                        </div>
-                                        <div className="form-group">
-                                            <label className="form-label">Sexe</label>
-                                            <select className="form-input" value={formData.studentData.gender} onChange={e => setFormData({ ...formData, studentData: { ...formData.studentData, gender: e.target.value } })}>
-                                                <option value="M">Masculin</option>
-                                                <option value="F">Féminin</option>
-                                            </select>
-                                        </div>
-                                    </div>
+                            {/* PARENT SECTION */}
+                            <section>
+                                <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', color: 'var(--text-main)', fontSize: '1.1rem' }}>
+                                    <Phone size={18} /> Responsable Légal (Principal)
+                                </h3>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                     <div className="form-group">
-                                        <label className="form-label">Lieu de Naissance</label>
-                                        <input type="text" className="form-input" value={formData.studentData.pob} onChange={e => setFormData({ ...formData, studentData: { ...formData.studentData, pob: e.target.value } })} required />
-                                    </div>
-                                    <div className="form-group">
-                                        <label className="form-label">Adresse Complète</label>
-                                        <input type="text" className="form-input" value={formData.studentData.address} onChange={e => setFormData({ ...formData, studentData: { ...formData.studentData, address: e.target.value } })} required />
-                                    </div>
-                                </section>
-
-                                {/* PARENT SECTION */}
-                                <section>
-                                    <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', color: 'var(--text-main)', fontSize: '1.1rem' }}>
-                                        <Phone size={18} /> Responsable Légal (Principal)
-                                    </h3>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                        <div className="form-group">
-                                            <label className="form-label">Nom du Parent</label>
-                                            <input type="text" className="form-input" value={formData.parents[0].lastName} onChange={e => {
-                                                const newParents = [...formData.parents];
-                                                newParents[0].lastName = e.target.value.toUpperCase();
-                                                setFormData({ ...formData, parents: newParents });
-                                            }} required />
-                                        </div>
-                                        <div className="form-group">
-                                            <label className="form-label">Prénom du Parent</label>
-                                            <input type="text" className="form-input" value={formData.parents[0].firstName} onChange={e => {
-                                                const newParents = [...formData.parents];
-                                                newParents[0].firstName = e.target.value;
-                                                setFormData({ ...formData, parents: newParents });
-                                            }} required />
-                                        </div>
-                                    </div>
-                                    <div className="form-group">
-                                        <label className="form-label">Téléphone Principal</label>
-                                        <input type="tel" className="form-input" value={formData.parents[0].phonePrimary} onChange={e => {
+                                        <label className="form-label">Nom du Parent</label>
+                                        <input type="text" className="form-input" value={formData.parents[0].lastName} onChange={e => {
                                             const newParents = [...formData.parents];
-                                            newParents[0].phonePrimary = e.target.value;
+                                            newParents[0].lastName = e.target.value.toUpperCase();
                                             setFormData({ ...formData, parents: newParents });
                                         }} required />
                                     </div>
                                     <div className="form-group">
-                                        <label className="form-label">Lien avec l'élève</label>
-                                        <select className="form-input" value={formData.parents[0].relation} onChange={e => {
+                                        <label className="form-label">Prénom du Parent</label>
+                                        <input type="text" className="form-input" value={formData.parents[0].firstName} onChange={e => {
                                             const newParents = [...formData.parents];
-                                            newParents[0].relation = e.target.value;
+                                            newParents[0].firstName = e.target.value;
                                             setFormData({ ...formData, parents: newParents });
-                                        }}>
-                                            <option value="PERE">Père</option>
-                                            <option value="MERE">Mère</option>
-                                            <option value="TUTEUR">Tuteur / Tutrice</option>
-                                        </select>
+                                        }} required />
                                     </div>
-                                </section>
-
-                                {/* SCOLARITÉ SECTION */}
-                                <section>
-                                    <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', color: 'var(--text-main)', fontSize: '1.1rem' }}>
-                                        <GraduationCap size={18} /> Scolarité
-                                    </h3>
-                                    <div className="form-group">
-                                        <label className="form-label">Classe d'Affectation</label>
-                                        <select className="form-input" value={formData.enrollmentData.classId} onChange={e => setFormData({ ...formData, enrollmentData: { ...formData.enrollmentData, classId: e.target.value } })} required>
-                                            <option value="">Sélectionner une classe</option>
-                                            {classes.map(c => <option key={c.id} value={c.id}>{c.name} ({c.level})</option>)}
-                                        </select>
-                                    </div>
-                                </section>
-                            </div>
-
-                            <div style={{ marginTop: '3rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }} className="stack-on-mobile">
-                                <button type="button" className="btn btn-block" style={{ backgroundColor: '#eee' }} onClick={() => setView('LIST')}>Annuler</button>
-                                <button type="submit" className="btn btn-primary btn-block" style={{ padding: '1rem' }}>
-                                    Continuer → Frais Scolaires
-                                </button>
-                            </div>
-                        </form>
-                        </>
-                    )}
-
-                    {/* STEP 2: Sélection des frais */}
-                    {registerStep === 'FEES' && (
-                        <>
-                        <h2 style={{ marginBottom: '0.5rem', color: 'var(--primary)', borderBottom: '2px solid #f0f0f0', paddingBottom: '0.5rem' }}>Frais Scolaires</h2>
-                        <p style={{ color: '#64748b', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
-                            Élève : <strong>{formData.studentData.firstName} {formData.studentData.lastName}</strong> — Classe : <strong>{classes.find(c => c.id === formData.enrollmentData.classId)?.name}</strong>
-                        </p>
-
-                        <form onSubmit={handleRegister}>
-                            {classFees.length === 0 ? (
-                                <div style={{ padding: '2rem', textAlign: 'center', background: '#f8fafc', borderRadius: '12px', color: '#64748b' }}>
-                                    <CreditCard size={32} style={{ opacity: 0.4, marginBottom: '0.5rem' }} />
-                                    <p style={{ margin: 0 }}>Aucun frais configuré pour cette classe.<br/>L'inscription sera validée sans frais.</p>
                                 </div>
-                            ) : (
-                                <>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
-                                    {classFees.map(fee => {
-                                        const isChecked = selectedFees.has(fee.id);
-                                        const isObligatory = fee.category === 'ANNUAL_OBLIGATORY';
-                                        return (
-                                            <label key={fee.id} onClick={() => toggleFee(fee.id)} style={{
-                                                display: 'flex', alignItems: 'center', gap: '1rem',
-                                                padding: '1rem 1.25rem', borderRadius: '12px', cursor: 'pointer',
-                                                border: `2px solid ${isChecked ? 'var(--primary)' : '#e2e8f0'}`,
-                                                background: isChecked ? 'var(--primary-light)' : 'white',
-                                                transition: 'all 0.15s ease'
-                                            }}>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={isChecked}
-                                                    onChange={() => toggleFee(fee.id)}
-                                                    style={{ width: '18px', height: '18px', accentColor: 'var(--primary)', cursor: 'pointer', flexShrink: 0 }}
-                                                />
-                                                <div style={{ flex: 1 }}>
-                                                    <div style={{ fontWeight: '700', color: 'var(--primary-dark)', fontSize: '0.95rem' }}>{fee.name}</div>
-                                                    <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.2rem', flexWrap: 'wrap' }}>
-                                                        <span style={{ fontSize: '0.7rem', padding: '0.15rem 0.4rem', borderRadius: '4px', background: isObligatory ? '#fef3c7' : '#f0fdf4', color: isObligatory ? '#92400e' : '#166534', fontWeight: '700' }}>
-                                                            {isObligatory ? '★ Obligatoire' : 'Optionnel'}
-                                                        </span>
-                                                        <span style={{ fontSize: '0.7rem', padding: '0.15rem 0.4rem', borderRadius: '4px', background: '#f1f5f9', color: '#475569', fontWeight: '600' }}>
-                                                            {fee.type}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                <div style={{ fontWeight: '900', fontSize: '1.05rem', color: isChecked ? 'var(--primary)' : '#64748b', whiteSpace: 'nowrap' }}>
-                                                    {fee.amount.toLocaleString('fr-FR')} FCFA
-                                                </div>
-                                            </label>
-                                        );
-                                    })}
+                                <div className="form-group">
+                                    <label className="form-label">Téléphone Principal</label>
+                                    <input type="tel" className="form-input" value={formData.parents[0].phonePrimary} onChange={e => {
+                                        const newParents = [...formData.parents];
+                                        newParents[0].phonePrimary = e.target.value;
+                                        setFormData({ ...formData, parents: newParents });
+                                    }} required />
                                 </div>
-
-                                {/* Mode de paiement */}
-                                <div className="form-group" style={{ maxWidth: '300px' }}>
-                                    <label className="form-label">Mode de paiement</label>
-                                    <select className="form-input" style={{ height: '45px' }} value={feesPaymentMethod} onChange={e => setFeesPaymentMethod(e.target.value)}>
-                                        <option value="CASH">Espèces</option>
-                                        <option value="MOBILE_MONEY">Mobile Money</option>
-                                        <option value="TRANSFER">Virement</option>
-                                        <option value="CARD">Carte</option>
+                                <div className="form-group">
+                                    <label className="form-label">Lien avec l'élève</label>
+                                    <select className="form-input" value={formData.parents[0].relation} onChange={e => {
+                                        const newParents = [...formData.parents];
+                                        newParents[0].relation = e.target.value;
+                                        setFormData({ ...formData, parents: newParents });
+                                    }}>
+                                        <option value="PERE">Père</option>
+                                        <option value="MERE">Mère</option>
+                                        <option value="TUTEUR">Tuteur / Tutrice</option>
                                     </select>
                                 </div>
+                            </section>
 
-                                {/* Total */}
-                                <div style={{ padding: '1rem 1.25rem', borderRadius: '12px', background: selectedFees.size > 0 ? 'var(--primary-light)' : '#f8fafc', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                                    <span style={{ fontWeight: '700', color: 'var(--primary-dark)' }}>
-                                        {selectedFees.size} frais sélectionné(s)
-                                    </span>
-                                    <span style={{ fontWeight: '900', fontSize: '1.2rem', color: 'var(--primary)' }}>
-                                        {classFees.filter(f => selectedFees.has(f.id)).reduce((sum, f) => sum + f.amount, 0).toLocaleString('fr-FR')} FCFA
-                                    </span>
+                            {/* SCOLARITÉ SECTION */}
+                            <section>
+                                <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', color: 'var(--text-main)', fontSize: '1.1rem' }}>
+                                    <GraduationCap size={18} /> Scolarité
+                                </h3>
+                                <div className="form-group">
+                                    <label className="form-label">Classe d'Affectation</label>
+                                    <select className="form-input" value={formData.enrollmentData.classId} onChange={e => setFormData({ ...formData, enrollmentData: { ...formData.enrollmentData, classId: e.target.value } })} required>
+                                        <option value="">Sélectionner une classe</option>
+                                        {classes.map(c => <option key={c.id} value={c.id}>{c.name} ({c.level})</option>)}
+                                    </select>
                                 </div>
-                                </>
-                            )}
+                            </section>
+                        </div>
 
-                            <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }} className="stack-on-mobile">
-                                <button type="button" className="btn btn-block" style={{ backgroundColor: '#eee' }} onClick={() => setRegisterStep('FORM')}>← Retour</button>
-                                <button type="submit" disabled={uploading} className="btn btn-primary btn-block" style={{ padding: '1rem' }}>
-                                    {uploading ? 'Inscription en cours...' : `✓ Valider l'Inscription${selectedFees.size > 0 ? ` (${selectedFees.size} frais)` : ''}`}
-                                </button>
-                            </div>
-                        </form>
-                        </>
-                    )}
+                        <div style={{ marginTop: '3rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }} className="stack-on-mobile">
+                            <button type="button" className="btn btn-block" style={{ backgroundColor: '#eee' }} onClick={() => setView('LIST')}>Annuler</button>
+                            <button type="submit" disabled={uploading} className="btn btn-primary btn-block" style={{ padding: '1rem' }}>
+                                {uploading ? 'Inscription en cours...' : "Valider l'Inscription"}
+                            </button>
+                        </div>
+                    </form>
                 </div>
             )}
 
