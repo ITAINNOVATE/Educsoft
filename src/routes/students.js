@@ -98,6 +98,9 @@ router.post('/register', protect, authorize('ADMIN', 'SECRETARY', 'DIRECTOR', 'C
             // 4. Create Enrollment
             let enrollment = null;
             if (finalEnrollmentData?.classId) {
+                if (!finalEnrollmentData.schoolYearId) {
+                    throw new Error("L'année scolaire (schoolYearId) est manquante pour l'inscription.");
+                }
                 enrollment = await tx.enrollment.create({
                     data: {
                         studentId: student.id,

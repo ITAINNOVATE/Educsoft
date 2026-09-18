@@ -158,7 +158,7 @@ const Students = () => {
             setSchoolYears(yearsRes.data);
             setClasses(classesRes.data);
 
-            const currentYear = yearsRes.data.find(y => y.current);
+            const currentYear = yearsRes.data.find(y => y.current) || yearsRes.data[0];
             if (currentYear) {
                 setFormData(prev => ({
                     ...prev,
@@ -225,7 +225,9 @@ const Students = () => {
 
         } catch (error) {
             console.error('Registration error:', error);
-            alert(`Erreur lors de l'inscription: ${error.response?.data?.message || error.message}`);
+            const msg = error.response?.data?.message || '';
+            const detail = error.response?.data?.error || error.message;
+            alert(`Erreur lors de l'inscription: ${msg}\nDétails: ${detail}`);
         } finally {
             setUploading(false);
         }
