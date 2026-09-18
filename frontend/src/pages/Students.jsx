@@ -437,23 +437,21 @@ const Students = () => {
                             >
                                 <Download size={18} /> <span className="hide-mobile">Exporter Excel</span><span className="show-mobile">Export</span>
                             </button>
-                            {user && (user.role === 'ADMIN' || user.role === 'SECRETARY' || user.role === 'SUPER_ADMIN') && (
-                                <button 
-                                    className="btn btn-primary" 
-                                    onClick={() => setView('REGISTER')} 
-                                    style={{ 
-                                        display: 'flex', 
-                                        alignItems: 'center', 
-                                        gap: '0.5rem',
-                                        padding: '0.75rem 1.25rem',
-                                        borderRadius: '12px',
-                                        fontSize: '0.9rem',
-                                        fontWeight: '700'
-                                    }}
-                                >
-                                    <UserPlus size={20} /> <span className="hide-mobile">Inscrire un Élève</span><span className="show-mobile">Inscrire</span>
-                                </button>
-                            )}
+                            <button 
+                                className="btn btn-primary" 
+                                onClick={() => setView('REGISTER')} 
+                                style={{ 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    gap: '0.5rem',
+                                    padding: '0.75rem 1.25rem',
+                                    borderRadius: '12px',
+                                    fontSize: '0.9rem',
+                                    fontWeight: '700'
+                                }}
+                            >
+                                <UserPlus size={20} /> <span className="hide-mobile">Inscrire un Élève</span><span className="show-mobile">Inscrire</span>
+                            </button>
                         </>
                     ) : (
                         <button className="btn" onClick={() => setView('LIST')} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1.5rem', borderRadius: '12px', fontWeight: '700' }}>
