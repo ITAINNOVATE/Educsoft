@@ -607,7 +607,6 @@ router.delete('/:id', protect, authorize('SUPER_ADMIN', 'ADMIN', 'FOUNDER'), asy
             prisma.document.deleteMany({ where: { studentId } }),
             prisma.schoolHistory.deleteMany({ where: { studentId } }),
             prisma.grade.deleteMany({ where: { studentId } }),
-            prisma.studentFee.deleteMany({ where: { studentId } }),
             prisma.enrollment.deleteMany({ where: { studentId } }),
             prisma.student.delete({ where: { id: studentId } })
         ]);
