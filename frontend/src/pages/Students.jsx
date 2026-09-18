@@ -17,7 +17,8 @@ import {
     Download,
     CheckCircle,
     Camera,
-    CreditCard
+    CreditCard,
+    Trash2
 } from 'lucide-react';
 
 const Students = () => {
@@ -373,6 +374,23 @@ const Students = () => {
         }
     };
 
+    const handleDeleteStudent = async (studentId) => {
+        if (!window.confirm("Êtes-vous sûr de vouloir supprimer cet élève ? TOUTES ses données (paiements, inscriptions, documents, historique) seront effacées définitivement !")) {
+            return;
+        }
+        try {
+            await axios.delete(`${API_BASE}/students/${studentId}`, {
+                headers: { Authorization: `Bearer ${user.token}` }
+            });
+            alert("Élève et toutes ses données supprimés avec succès.");
+            if (view === 'DETAILS') setView('LIST');
+            fetchData();
+        } catch (error) {
+            console.error('Erreur lors de la suppression:', error);
+            alert(`Erreur: ${error.response?.data?.message || 'Impossible de supprimer l\'élève'}`);
+        }
+    };
+
     return (
         <div className="responsive-container" style={{ maxWidth: '1400px', margin: '0 auto' }}>
             <header className="stack-on-mobile" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2.5rem', gap: '1.5rem', background: 'white', padding: '1.5rem', borderRadius: '20px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', border: '1px solid #f1f5f9' }}>
@@ -512,9 +530,21 @@ const Students = () => {
                                                 }}>{student.status || 'INCONNU'}</span>
                                             </td>
                                             <td data-label="Action" style={{ padding: '1rem' }}>
-                                                <button className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => openDetails(student)}>
-                                                    Détails
-                                                </button>
+                                                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                                    <button className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => openDetails(student)}>
+                                                        Détails
+                                                    </button>
+                                                    {user && ['SUPER_ADMIN', 'ADMIN', 'DIRECTOR', 'CENSEUR'].includes(user.role) && (
+                                                        <>
+                                                            <button className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', borderColor: '#eab308', color: '#eab308' }} onClick={() => openDetails(student)} title="Modifier">
+                                                                <Edit size={14} />
+                                                            </button>
+                                                            <button className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', borderColor: '#ef4444', color: '#ef4444' }} onClick={() => handleDeleteStudent(student.id)} title="Supprimer">
+                                                                <Trash2 size={14} />
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}

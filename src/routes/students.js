@@ -586,4 +586,37 @@ router.get('/:id/card', protect, async (req, res) => {
     }
 });
 
+// @desc    Delete a student completely
+// @route   DELETE /api/students/:id
+router.delete('/:id', protect, authorize('SUPER_ADMIN', 'ADMIN'), async (req, res) => {
+    try {
+        const studentId = req.params.id;
+
+        const student = await prisma.student.findFirst({
+            where: { id: studentId, establishmentId: req.user.establishmentId }
+        });
+
+        if (!student) {
+            return res.status(404).json({ message: 'Élève introuvable' });
+        }
+
+        // Delete all related data in a transaction
+        await prisma.$transaction([
+            prisma.parentStudent.deleteMany({ where: { studentId } }),
+            prisma.payment.deleteMany({ where: { studentId } }),
+            prisma.document.deleteMany({ where: { studentId } }),
+            prisma.schoolHistory.deleteMany({ where: { studentId } }),
+            prisma.grade.deleteMany({ where: { studentId } }),
+            prisma.studentFee.deleteMany({ where: { studentId } }),
+            prisma.enrollment.deleteMany({ where: { studentId } }),
+            prisma.student.delete({ where: { id: studentId } })
+        ]);
+
+        res.json({ message: 'Élève et toutes ses données associées supprimés avec succès.' });
+    } catch (error) {
+        console.error('Delete Student Error:', error);
+        res.status(500).json({ message: 'Erreur lors de la suppression de l\'élève', error: error.message });
+    }
+});
+
 module.exports = router;
