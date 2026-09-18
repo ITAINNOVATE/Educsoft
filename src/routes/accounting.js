@@ -235,7 +235,7 @@ router.get('/debts', protect, authorize('ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'), a
 
                 return {
                     id: s.id,
-                    name: `${s.firstName} ${s.lastName}`,
+                    name: `${s.lastName.toUpperCase()} ${s.firstName}`,
                     regNumber: s.regNumber,
                     className: enrollment.class.name,
                     totalFees: global.totalDue,
@@ -386,7 +386,7 @@ router.get('/report', protect, authorize('ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'), 
             if (!enrollment || !enrollment.class) return null;
             const financials = calculateStudentFinancials(enrollment.class.fees || [], s.payments || [], s);
             return {
-                name: `${s.firstName} ${s.lastName}`,
+                name: `${s.lastName.toUpperCase()} ${s.firstName}`,
                 className: enrollment.class.name,
                 paid: financials.global.totalPaid,
                 balance: financials.global.remaining
