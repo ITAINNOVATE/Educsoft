@@ -37,6 +37,8 @@ const Students = () => {
     const [pagination, setPagination] = useState({ total: 0, pages: 0 });
     const [hasMore, setHasMore] = useState(false);
     const [whatsappModal, setWhatsappModal] = useState(null); // { parent: ps, student }
+    const [feesEditMode, setFeesEditMode] = useState(false);
+    const [selectedStudentFees, setSelectedStudentFees] = useState(new Set());
 
     // Registration 2-step flow
     const [registerStep, setRegisterStep] = useState('FORM'); // 'FORM' | 'FEES'
@@ -263,6 +265,33 @@ const Students = () => {
             fetchData();
         } catch (error) {
             alert('Erreur lors de la mise à jour');
+        }
+    };
+
+    const handleSaveStudentFees = async () => {
+        try {
+            const selectedFeesArr = Array.from(selectedStudentFees);
+            let updatedInternalNotes = selectedStudent.internalNotes || '';
+            
+            // Remove old [FRAIS_CHOISIS: ...] block
+            updatedInternalNotes = updatedInternalNotes.replace(/\[FRAIS_CHOISIS:\s*.*?\]/g, '').trim();
+            
+            if (selectedFeesArr.length > 0) {
+                updatedInternalNotes += `\n[FRAIS_CHOISIS: ${selectedFeesArr.join(', ')}]`;
+            }
+
+            await axios.put(`${API_BASE}/students/${selectedStudent.id}`, {
+                studentData: { internalNotes: updatedInternalNotes.trim() }
+            }, {
+                headers: { Authorization: `Bearer ${user.token}` }
+            });
+
+            alert('Frais applicables mis à jour !');
+            setFeesEditMode(false);
+            openDetails(selectedStudent); // Refresh
+        } catch (error) {
+            console.error('Error updating fees:', error);
+            alert(`Erreur: ${error.response?.data?.message || 'Impossible de mettre à jour'}`);
         }
     };
 
@@ -801,13 +830,65 @@ const Students = () => {
 
                                     {/* DETAILED BREAKDOWNS */}
                                     <div style={{ backgroundColor: '#fcfcfc', border: '1px solid #eee', borderRadius: '12px', padding: '1.5rem', marginBottom: '2.5rem' }}>
-                                        <h4 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--primary-dark)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                            <FileText size={18} /> Détails de la Scolarité et des Frais
-                                        </h4>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                            <h4 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--primary-dark)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <FileText size={18} /> Détails de la Scolarité et des Frais
+                                            </h4>
+                                            {user && ['SUPER_ADMIN', 'ADMIN', 'DIRECTOR'].includes(user.role) && !feesEditMode && (
+                                                <button className="btn btn-outline" onClick={() => {
+                                                    let currentSelectedFees = new Set();
+                                                    if (selectedStudent.internalNotes && selectedStudent.internalNotes.includes('[FRAIS_CHOISIS:')) {
+                                                        try {
+                                                            const match = selectedStudent.internalNotes.match(/\[FRAIS_CHOISIS:\s*(.*?)\]/);
+                                                            if (match && match[1]) {
+                                                                const selectedIds = match[1].split(',').map(s => s.trim());
+                                                                selectedIds.forEach(id => currentSelectedFees.add(id));
+                                                            }
+                                                        } catch (e) {}
+                                                    } else {
+                                                        // If no custom selection, all fees are selected by default
+                                                        selectedStudent.enrollments?.[0]?.class?.fees?.forEach(f => currentSelectedFees.add(f.id));
+                                                    }
+                                                    setSelectedStudentFees(currentSelectedFees);
+                                                    setFeesEditMode(true);
+                                                }}>
+                                                    Modifier les frais applicables
+                                                </button>
+                                            )}
+                                        </div>
 
-                                        {[
-                                            { data: selectedStudent.financials.OBLIGATORY, title: 'FRAIS OBLIGATOIRES', color: '#2e7d32' },
-                                            { data: selectedStudent.financials.OPTIONAL, title: 'FRAIS OPTIONNELS', color: '#ef6c00' },
+                                        {feesEditMode ? (
+                                            <div>
+                                                <div style={{ marginBottom: '1rem', fontSize: '0.85rem', color: '#666' }}>Cochez uniquement les frais que cet élève doit réellement payer.</div>
+                                                <div style={{ display: 'grid', gap: '1rem' }}>
+                                                    {selectedStudent.enrollments?.[0]?.class?.fees?.map(f => (
+                                                        <label key={f.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem', border: '1px solid #eee', borderRadius: '8px', cursor: 'pointer', background: selectedStudentFees.has(f.id) ? '#f0f9ff' : '#fff' }}>
+                                                            <input 
+                                                                type="checkbox" 
+                                                                checked={selectedStudentFees.has(f.id)}
+                                                                onChange={(e) => {
+                                                                    const newSelected = new Set(selectedStudentFees);
+                                                                    if (e.target.checked) newSelected.add(f.id);
+                                                                    else newSelected.delete(f.id);
+                                                                    setSelectedStudentFees(newSelected);
+                                                                }}
+                                                                style={{ width: '1.2rem', height: '1.2rem' }}
+                                                            />
+                                                            <span style={{ fontWeight: '600' }}>{f.name}</span>
+                                                            <span style={{ marginLeft: 'auto', fontWeight: 'bold' }}>{f.amount.toLocaleString()} FCFA</span>
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                                <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+                                                    <button className="btn btn-outline" onClick={() => setFeesEditMode(false)}>Annuler</button>
+                                                    <button className="btn btn-primary" onClick={handleSaveStudentFees}>Sauvegarder</button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                {[
+                                                    { data: selectedStudent.financials.OBLIGATORY, title: 'FRAIS OBLIGATOIRES', color: '#2e7d32' },
+                                                    { data: selectedStudent.financials.OPTIONAL, title: 'FRAIS OPTIONNELS', color: '#ef6c00' },
                                             { data: selectedStudent.financials.OCCASIONAL, title: 'FRAIS OCCASIONNELS', color: '#616161' }
                                         ].map((cat, i) => (
                                             cat.data.details && cat.data.details.length > 0 && (
@@ -845,6 +926,8 @@ const Students = () => {
                                                 </div>
                                             )
                                         ))}
+                                            </>
+                                        )}
                                     </div>
 
                                     <h4 style={{ fontSize: '1rem', marginBottom: '1.5rem', fontWeight: '700' }}>Historique des Paiements</h4>
