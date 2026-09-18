@@ -413,7 +413,7 @@ const Students = () => {
             });
             alert("Élève et toutes ses données supprimés avec succès.");
             if (view === 'DETAILS') setView('LIST');
-            fetchData();
+            fetchData(1, true);
         } catch (error) {
             console.error('Erreur lors de la suppression:', error);
             alert(`Erreur: ${error.response?.data?.message || 'Impossible de supprimer l\'élève'}`);
