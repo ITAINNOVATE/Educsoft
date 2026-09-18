@@ -39,7 +39,7 @@ const generateReceiptPDF = (payment, student, res) => {
     doc.rect(40, doc.y, doc.page.width - 80, 60).fill('#f9f9f9').stroke('#eee');
     const studentY = doc.y + 10;
     doc.fontSize(10).fillColor('#666').text('ÉLÈVE:', 50, studentY);
-    doc.fontSize(12).fillColor('#000').text(`${student.firstName} ${student.lastName}`, 50, studentY + 15, { weight: 'bold' });
+    doc.fontSize(12).fillColor('#000').text(`${student.lastName?.toUpperCase() || student.lastName} ${student.firstName}`, 50, studentY + 15, { weight: 'bold' });
     doc.fontSize(10).text(`MATRICULE: ${student.regNumber}`, 50, studentY + 32);
 
     const enrollment = student.enrollments[0];

@@ -143,7 +143,7 @@ const generateBulletinPDF = (data, res) => {
 
     // Student Info Left
     doc.fillColor('#000000').fontSize(10).font('Helvetica-Bold').text(`ÉLÈVE :`, 40, midY);
-    doc.font('Helvetica').text(`${student.firstName} ${student.lastName}`, 100, midY);
+    doc.font('Helvetica').text(`${student.lastName?.toUpperCase() || student.lastName} ${student.firstName}`, 100, midY);
     doc.font('Helvetica-Bold').text(`MATRICULE :`, 40, midY + 15);
     doc.font('Helvetica').text(student.regNumber, 120, midY + 15);
     doc.font('Helvetica-Bold').text(`NÉ(E) LE :`, 40, midY + 30);

@@ -54,7 +54,7 @@ const generateStudentDossierPDF = async (student, res) => {
 
     // Info (Right)
     const infoX = 170;
-    doc.fontSize(14).fillColor('#000').text(`${student.firstName} ${student.lastName}`, infoX, startY).moveDown(0.5);
+    doc.fontSize(14).fillColor('#000').text(`${student.lastName?.toUpperCase() || student.lastName} ${student.firstName}`, infoX, startY).moveDown(0.5);
 
     doc.fontSize(10).fillColor('#444');
     doc.text(`Matricule: ${student.regNumber}`, infoX, doc.y);
@@ -75,7 +75,7 @@ const generateStudentDossierPDF = async (student, res) => {
     if (student.parents && student.parents.length > 0) {
         student.parents.forEach((p, index) => {
             const parent = p.parent;
-            doc.fontSize(11).fillColor('#000').text(`${parent.firstName} ${parent.lastName} (${p.relation})`, { weight: 'bold' });
+            doc.fontSize(11).fillColor('#000').text(`${parent.lastName?.toUpperCase() || parent.lastName} ${parent.firstName} (${p.relation})`, { weight: 'bold' });
             doc.fontSize(10).fillColor('#555');
             doc.text(`Tel: ${parent.phonePrimary} ${parent.phoneSecondary ? '/ ' + parent.phoneSecondary : ''}`);
             doc.text(`Email: ${parent.email || '-'}`);

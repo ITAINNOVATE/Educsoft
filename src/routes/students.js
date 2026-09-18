@@ -276,7 +276,7 @@ router.get('/export', protect, async (req, res) => {
                 'Niveau': enrollment?.class?.level || '---',
                 'Nationalité': s.nationality || '---',
                 'Statut': s.status,
-                'Parent': primaryParent ? `${primaryParent.lastName} ${primaryParent.firstName}` : '---',
+                'Parent': primaryParent ? `${primaryParent.lastName?.toUpperCase() || primaryParent.lastName} ${primaryParent.firstName}` : '---',
                 'Téléphone Parent': primaryParent?.phonePrimary || '---',
                 'Adresse': s.address || '---'
             };

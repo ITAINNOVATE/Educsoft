@@ -250,7 +250,7 @@ const EstablishmentUsers = () => {
                                                         <UserCheck size={20} />
                                                     </div>
                                                     <div>
-                                                        <div style={{ fontWeight: '800', color: 'var(--primary-dark)' }}>{u.firstName} {u.lastName}</div>
+                                                        <div style={{ fontWeight: '800', color: 'var(--primary-dark)' }}>{u.lastName?.toUpperCase() || u.lastName} {u.firstName}</div>
                                                         <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{u.email}</div>
                                                     </div>
                                                 </div>

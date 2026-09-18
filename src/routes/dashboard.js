@@ -115,7 +115,7 @@ router.get('/summary', protect, async (req, res) => {
                 pendingEnrollments,
                 latestStudents: latestStudents.map(s => ({
                     id: s.id,
-                    name: `${s.firstName} ${s.lastName}`,
+                    name: `${s.lastName?.toUpperCase() || s.lastName} ${s.firstName}`,
                     class: s.enrollments[0]?.class?.name || '---',
                     date: s.createdAt
                 }))
@@ -141,7 +141,7 @@ router.get('/summary', protect, async (req, res) => {
                 subjectCount,
                 recentGrades: recentGrades.map(g => ({
                     id: g.id,
-                    studentName: `${g.student.firstName} ${g.student.lastName}`,
+                    studentName: `${g.student.lastName?.toUpperCase() || g.student.lastName} ${g.student.firstName}`,
                     subject: g.subject.name,
                     value: g.value,
                     date: g.createdAt

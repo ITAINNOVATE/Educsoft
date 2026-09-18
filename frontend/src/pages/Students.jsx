@@ -430,7 +430,7 @@ const Students = () => {
                         {view === 'DETAILS' ? 'Dossier Élève' : 'Gestion des Élèves'}
                     </h1>
                     <p style={{ color: 'var(--text-muted)', fontSize: '1rem', marginTop: '0.4rem' }}>
-                        {view === 'DETAILS' ? `${selectedStudent?.firstName} ${selectedStudent?.lastName} • ${selectedStudent?.regNumber}` : 'Base de données centrale des élèves et tuteurs.'}
+                        {view === 'DETAILS' ? `${selectedStudent?.lastName?.toUpperCase() || selectedStudent?.lastName} ${selectedStudent?.firstName} • ${selectedStudent?.regNumber}` : 'Base de données centrale des élèves et tuteurs.'}
                     </p>
                 </div>
                 <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
@@ -489,7 +489,7 @@ const Students = () => {
                                 <div style={{ flex: 1 }}>
                                     <div style={{ fontWeight: '800', color: '#92400e', fontSize: '0.95rem' }}>Anniversaire(s) aujourd'hui !</div>
                                     <div style={{ fontSize: '0.85rem', color: '#b45309' }}>
-                                        {todayBirthdays.map(s => `${s.firstName} ${s.lastName}`).join(' • ')}
+                                        {todayBirthdays.map(s => `${s.lastName?.toUpperCase() || s.lastName} ${s.firstName}`).join(' • ')}
                                     </div>
                                 </div>
                                 <button onClick={() => openDetails(todayBirthdays[0])} style={{ background: '#f59e0b', color: 'white', border: 'none', borderRadius: '10px', padding: '0.5rem 1rem', fontWeight: '700', cursor: 'pointer', fontSize: '0.85rem' }}>Envoyer un vœu 📱</button>
@@ -751,7 +751,7 @@ const Students = () => {
                                     </label>
                                 )}
                             </div>
-                            <h2 style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>{selectedStudent.lastName} {selectedStudent.firstName}</h2>
+                            <h2 style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>{selectedStudent.lastName?.toUpperCase() || selectedStudent.lastName} {selectedStudent.firstName}</h2>
                             <span style={{ display: 'inline-block', padding: '0.25rem 0.75rem', borderRadius: '20px', backgroundColor: selectedStudent.status === 'ACTIF' ? '#e8f5e9' : '#ffebee', color: selectedStudent.status === 'ACTIF' ? '#2e7d32' : '#c62828', fontSize: '0.75rem', fontWeight: 'bold', marginBottom: '1.5rem' }}>
                                 {selectedStudent.status}
                             </span>
@@ -1081,7 +1081,7 @@ const Students = () => {
                                                     )}
                                                 </div>
                                             </div>
-                                            <p><strong>Nom:</strong> {ps.parent.lastName} {ps.parent.firstName}</p>
+                                            <p><strong>Nom:</strong> {ps.parent.lastName?.toUpperCase() || ps.parent.lastName} {ps.parent.firstName}</p>
                                             <p><strong>Téléphone:</strong> {ps.parent.phonePrimary}</p>
                                             {ps.parent.phoneSecondary && <p><strong>Tél. 2:</strong> {ps.parent.phoneSecondary}</p>}
                                             <p><strong>Email:</strong> {ps.parent.email || '---'}</p>
@@ -1222,8 +1222,8 @@ const Students = () => {
 // ══════════════════════════════════════════════════════
 const WhatsAppNotificationModal = ({ student, parentStudent, financials, establishmentName, onClose, formatPhone, getAge }) => {
     const ps = parentStudent;
-    const parentName = `${ps.parent.firstName} ${ps.parent.lastName}`;
-    const studentName = `${student.firstName} ${student.lastName}`;
+    const parentName = `${ps.parent.lastName?.toUpperCase() || ps.parent.lastName} ${ps.parent.firstName}`;
+    const studentName = `${student.lastName?.toUpperCase() || student.lastName} ${student.firstName}`;
     const className = student.enrollments?.[0]?.class?.name || '---';
     const remaining = financials?.global?.remaining || 0;
     const age = getAge(student.dob);

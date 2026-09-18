@@ -42,7 +42,7 @@ router.get('/', protect, async (req, res) => {
             const grade = grades.find(g => g.studentId === e.studentId);
             return {
                 studentId: e.studentId,
-                studentName: `${e.student.lastName} ${e.student.firstName}`,
+                studentName: `${e.student.lastName?.toUpperCase() || e.student.lastName} ${e.student.firstName}`,
                 regNumber: e.student.regNumber,
                 gradeId: grade?.id || null,
                 value: grade?.value ?? '',

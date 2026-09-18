@@ -156,7 +156,7 @@ const Teachers = () => {
                                         teachers.map(t => (
                                             <tr key={t.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                                                 <td data-label="Enseignant" style={{ padding: '1rem 1.5rem' }}>
-                                                    <div style={{ fontWeight: '700', color: 'var(--primary-dark)' }}>{t.lastName || '---'} {t.firstName || ''}</div>
+                                                    <div style={{ fontWeight: '700', color: 'var(--primary-dark)' }}>{t.lastName?.toUpperCase() || '---'} {t.firstName || ''}</div>
                                                 </td>
                                                 <td data-label="Contact" style={{ padding: '1rem 1.5rem' }}>
                                                     <div style={{ fontSize: '0.9rem' }}>{t.email}</div>
@@ -229,7 +229,7 @@ const Teachers = () => {
                                         <tr key={p.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                                             <td data-label="Date" style={{ padding: '1rem 1.5rem' }}>{p.paymentDate ? new Date(p.paymentDate).toLocaleDateString('fr-FR') : '---'}</td>
                                             <td data-label="Bénéficiaire" style={{ padding: '1rem 1.5rem' }}>
-                                                <div style={{ fontWeight: '700', color: 'var(--primary-dark)' }}>{p.teacher?.lastName || '---'} {p.teacher?.firstName || ''}</div>
+                                                <div style={{ fontWeight: '700', color: 'var(--primary-dark)' }}>{p.teacher?.lastName?.toUpperCase() || '---'} {p.teacher?.firstName || ''}</div>
                                             </td>
                                             <td data-label="Type" style={{ padding: '1rem 1.5rem' }}>
                                                 <span style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--primary)' }}>{p.type}</span>
@@ -297,7 +297,7 @@ const Teachers = () => {
                                 <label className="form-label">Professeur</label>
                                 <select className="form-input" style={{ height: '48px', fontWeight: '700' }} value={newPayment.teacherId} onChange={e => setNewPayment({ ...newPayment, teacherId: e.target.value })} required>
                                     <option value="">-- Choisir un enseignant --</option>
-                                    {(Array.isArray(teachers) ? teachers : []).map(t => <option key={t.id} value={t.id}>{t.lastName} {t.firstName}</option>)}
+                                    {(Array.isArray(teachers) ? teachers : []).map(t => <option key={t.id} value={t.id}>{t.lastName?.toUpperCase() || t.lastName} {t.firstName}</option>)}
                                 </select>
                             </div>
                             <div className="grid-resp-2" style={{ gap: '1rem' }}>

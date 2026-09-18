@@ -252,7 +252,7 @@ const Accounting = () => {
         setSelectedPayment({
             id: p.id,
             amount: p.amount,
-            studentName: `${p.student.firstName} ${p.student.lastName}`,
+            studentName: `${p.student.lastName?.toUpperCase() || p.student.lastName} ${p.student.firstName}`,
             studentClass: enrollment?.class?.name || 'N/A',
             studentReg: p.student.regNumber,
             receiptNumber: p.receiptNumber,
@@ -475,7 +475,7 @@ const Accounting = () => {
                                         <td data-label="Date" style={{ padding: '1rem', fontSize: '0.85rem' }}>{p.paymentDate ? new Date(p.paymentDate).toLocaleDateString('fr-FR') : '---'}</td>
                                         <td data-label="Reçu" style={{ padding: '1rem', fontWeight: '700', color: 'var(--primary-dark)' }}>{p.receiptNumber || '---'}</td>
                                         <td data-label="Élève" style={{ padding: '1rem' }}>
-                                            <div style={{ fontWeight: '500' }}>{p.student?.lastName || '---'} {p.student?.firstName || ''}</div>
+                                            <div style={{ fontWeight: '500' }}>{p.student?.lastName?.toUpperCase() || '---'} {p.student?.firstName || ''}</div>
                                             <div className="desktop-only" style={{ fontSize: '0.75rem', color: '#666' }}>{p.student?.regNumber || '---'}</div>
                                         </td>
                                         <td data-label="Motif" style={{ padding: '1rem', fontSize: '0.9rem' }}>{p.feeName || '---'}</td>

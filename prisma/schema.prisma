@@ -13,56 +13,56 @@ datasource db {
 }
 
 model Establishment {
-  id            String    @id @default(uuid())
-  platformId    String?   // Multi-tenant isolation
-  name          String
-  code          String    @unique // e.g., ITA2026
-  address       String?
-  phone         String?
-  email         String?
-  logoUrl       String?
-  isActive      Boolean   @default(true)
-  type          String?   // Maternelle, Primaire, etc.
-  typeOther     String?   // Specific description if 'Autre' is selected
-  directorName  String?   // Full name of the school Director
-  authorizationNum String?   // N° d'autorisation
-  educmasterNum    String?   // N° Educmaster
-  
-  users             User[]
-  students          Student[]
-  parents           Parent[]
-  schoolYears       SchoolYear[]
-  classes           Class[]
-  payments          Payment[]
-  teacherPayments   TeacherPayment[]
-  expenses          Expense[]
-  subjects          Subject[]
-  auditLogs         AuditLog[]
-  
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id               String  @id @default(uuid())
+  platformId       String? // Multi-tenant isolation
+  name             String
+  code             String  @unique // e.g., ITA2026
+  address          String?
+  phone            String?
+  email            String?
+  logoUrl          String?
+  isActive         Boolean @default(true)
+  type             String? // Maternelle, Primaire, etc.
+  typeOther        String? // Specific description if 'Autre' is selected
+  directorName     String? // Full name of the school Director
+  authorizationNum String? // N° d'autorisation
+  educmasterNum    String? // N° Educmaster
+
+  users           User[]
+  students        Student[]
+  parents         Parent[]
+  schoolYears     SchoolYear[]
+  classes         Class[]
+  payments        Payment[]
+  teacherPayments TeacherPayment[]
+  expenses        Expense[]
+  subjects        Subject[]
+  auditLogs       AuditLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([platformId])
 }
 
 model User {
-  id            String    @id @default(uuid())
-  platformId    String?   // Multi-tenant isolation
-  email         String    // No longer globally unique — unique per establishment
-  password      String
-  firstName     String
-  lastName      String
-  role          String    // SUPER_ADMIN, ADMIN, FOUNDER, DIRECTOR, CENSEUR, SURVEILLANT_GENERAL, ACCOUNTANT, SECRETARY, TEACHER, PARENT
-  lastLogin     DateTime?
-  
+  id         String    @id @default(uuid())
+  platformId String? // Multi-tenant isolation
+  email      String // No longer globally unique — unique per establishment
+  password   String
+  firstName  String
+  lastName   String
+  role       String // SUPER_ADMIN, ADMIN, FOUNDER, DIRECTOR, CENSEUR, SURVEILLANT_GENERAL, ACCOUNTANT, SECRETARY, TEACHER, PARENT
+  lastLogin  DateTime?
+
   establishmentId String?
   establishment   Establishment? @relation(fields: [establishmentId], references: [id])
 
   auditLogs       AuditLog[]
   teacherPayments TeacherPayment[]
 
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([email, establishmentId]) // Same email allowed in different establishments
   @@index([establishmentId])
@@ -70,38 +70,39 @@ model User {
 }
 
 model Student {
-  id                String      @id @default(uuid())
-  platformId        String?     // Multi-tenant isolation
-  regNumber         String      // Unique per establishment (handled in logic or compound index)
-  firstName         String
-  lastName          String
-  dob               DateTime
-  pob               String      // Place of Birth
-  gender            String
-  nationality       String?     @default("Béninoise")
-  birthCertNumber   String?
-  address           String
-  photoUrl          String?
-  bloodGroup        String?     // A+, A-, B+, B-, AB+, AB-, O+, O-
-  medicalInfo       String?     // Allergies, disabilities, etc.
-  handicap          String?
-  adminObservations String?
-  internalNotes     String?
+  id                 String   @id @default(uuid())
+  platformId         String? // Multi-tenant isolation
+  regNumber          String // Unique per establishment (handled in logic or compound index)
+  firstName          String
+  lastName           String
+  dob                DateTime
+  pob                String // Place of Birth
+  gender             String
+  nationality        String?  @default("Béninoise")
+  birthCertNumber    String?
+  address            String
+  photoUrl           String?
+  bloodGroup         String? // A+, A-, B+, B-, AB+, AB-, O+, O-
+  medicalInfo        String? // Allergies, disabilities, etc.
+  handicap           String?
+  adminObservations  String?
+  internalNotes      String?
   disciplinaryRecord String?
-  status            String      @default("ACTIF") // ACTIF, SUSPENDU, TRANSFERE, ABANDON, DIPLOME, ARCHIVE
-  
-  establishmentId   String
-  establishment     Establishment @relation(fields: [establishmentId], references: [id])
-  
-  enrollments       Enrollment[]
-  parents           ParentStudent[]
-  payments          Payment[]
-  documents         Document[]
-  schoolHistory     SchoolHistory[]
-  grades            Grade[]
-  
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
+  status             String   @default("ACTIF") // ACTIF, SUSPENDU, TRANSFERE, ABANDON, DIPLOME, ARCHIVE
+
+  establishmentId String
+  establishment   Establishment @relation(fields: [establishmentId], references: [id])
+
+  enrollments   Enrollment[]
+  parents       ParentStudent[]
+  payments      Payment[]
+  documents     Document[]
+  schoolHistory SchoolHistory[]
+  grades        Grade[]
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  studentFees StudentFee[]
 
   @@unique([regNumber, establishmentId]) // regNumber is unique per school
   @@index([establishmentId])
@@ -110,37 +111,37 @@ model Student {
 }
 
 model Parent {
-  id              String      @id @default(uuid())
-  platformId      String?     // Multi-tenant isolation
-  firstName       String
-  lastName        String
-  phonePrimary    String
-  phoneSecondary  String?
-  email           String?
-  address         String
-  occupation      String?
-  
+  id             String  @id @default(uuid())
+  platformId     String? // Multi-tenant isolation
+  firstName      String
+  lastName       String
+  phonePrimary   String
+  phoneSecondary String?
+  email          String?
+  address        String
+  occupation     String?
+
   establishmentId String
   establishment   Establishment @relation(fields: [establishmentId], references: [id])
-  
-  students        ParentStudent[]
-  
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+
+  students ParentStudent[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([establishmentId])
   @@index([platformId])
 }
 
 model ParentStudent {
-  id          String   @id @default(uuid())
+  id          String  @id @default(uuid())
   studentId   String
   parentId    String
-  relation    String   // MERE, PERE, TUTEUR, etc.
-  isPrimary   Boolean  @default(true)
-  isEmergency Boolean  @default(false)
-  student     Student  @relation(fields: [studentId], references: [id])
-  parent      Parent   @relation(fields: [parentId], references: [id])
+  relation    String // MERE, PERE, TUTEUR, etc.
+  isPrimary   Boolean @default(true)
+  isEmergency Boolean @default(false)
+  student     Student @relation(fields: [studentId], references: [id])
+  parent      Parent  @relation(fields: [parentId], references: [id])
 
   @@unique([studentId, parentId])
   @@index([studentId])
@@ -148,19 +149,19 @@ model ParentStudent {
 }
 
 model Enrollment {
-  id            String      @id @default(uuid())
-  platformId    String?     // Multi-tenant isolation
-  studentId     String
-  classId       String
-  schoolYearId  String
-  status        String      @default("PENDING") // PENDING, VALIDATED, REJECTED
-  
-  student       Student     @relation(fields: [studentId], references: [id])
-  class         Class       @relation(fields: [classId], references: [id])
-  schoolYear    SchoolYear  @relation(fields: [schoolYearId], references: [id])
+  id           String  @id @default(uuid())
+  platformId   String? // Multi-tenant isolation
+  studentId    String
+  classId      String
+  schoolYearId String
+  status       String  @default("PENDING") // PENDING, VALIDATED, REJECTED
 
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  student    Student    @relation(fields: [studentId], references: [id])
+  class      Class      @relation(fields: [classId], references: [id])
+  schoolYear SchoolYear @relation(fields: [schoolYearId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([studentId])
   @@index([classId])
@@ -169,16 +170,16 @@ model Enrollment {
 }
 
 model SchoolYear {
-  id          String       @id @default(uuid())
-  platformId  String?      // Multi-tenant isolation
-  name        String       // e.g., 2025-2026
-  startDate   DateTime
-  endDate     DateTime
-  current     Boolean      @default(false)
-  
+  id         String   @id @default(uuid())
+  platformId String? // Multi-tenant isolation
+  name       String // e.g., 2025-2026
+  startDate  DateTime
+  endDate    DateTime
+  current    Boolean  @default(false)
+
   establishmentId String
   establishment   Establishment @relation(fields: [establishmentId], references: [id])
-  
+
   enrollments Enrollment[]
   classes     Class[]
   terms       Term[]
@@ -189,20 +190,20 @@ model SchoolYear {
 }
 
 model Class {
-  id          String       @id @default(uuid())
-  platformId  String?      // Multi-tenant isolation
-  name        String       // e.g., CP1, 6eme, Terminale
-  level       String       // MATERNELLE, PRIMAIRE, COLLEGE, LYCEE
-  
+  id         String  @id @default(uuid())
+  platformId String? // Multi-tenant isolation
+  name       String // e.g., CP1, 6eme, Terminale
+  level      String // MATERNELLE, PRIMAIRE, COLLEGE, LYCEE
+
   establishmentId String
   establishment   Establishment @relation(fields: [establishmentId], references: [id])
-  
-  enrollments Enrollment[]
+
+  enrollments  Enrollment[]
   schoolYearId String
-  schoolYear   SchoolYear  @relation(fields: [schoolYearId], references: [id])
-  
-  fees        Fee[]
-  subjects    Subject[]
+  schoolYear   SchoolYear   @relation(fields: [schoolYearId], references: [id])
+
+  fees     Fee[]
+  subjects Subject[]
 
   @@index([establishmentId])
   @@index([schoolYearId])
@@ -210,33 +211,49 @@ model Class {
 }
 
 model Fee {
-  id          String   @id @default(uuid())
-  name        String   // e.g., Registration, Tuition, Transport, etc.
-  amount      Float
-  category    String   @default("ANNUAL_OBLIGATORY") // ANNUAL_OBLIGATORY, OPTIONAL, OCCASIONAL
-  type        String   @default("TUITION") // TUITION, REGISTRATION, TRANSPORT, CANTEEN, UNIFORM, BOOKS, EXAM, ACTIVITY, HEALTH, INTERNAT, PENALTY, DIPLOMA, OTHER
-  classId     String
-  class       Class    @relation(fields: [classId], references: [id])
+  id       String @id @default(uuid())
+  name     String // e.g., Registration, Tuition, Transport, etc.
+  amount   Float
+  category String @default("ANNUAL_OBLIGATORY") // ANNUAL_OBLIGATORY, OPTIONAL, OCCASIONAL
+  type     String @default("TUITION") // TUITION, REGISTRATION, TRANSPORT, CANTEEN, UNIFORM, BOOKS, EXAM, ACTIVITY, HEALTH, INTERNAT, PENALTY, DIPLOMA, OTHER
+  classId  String
+  class    Class  @relation(fields: [classId], references: [id])
+
+  studentFees StudentFee[]
 
   @@index([classId])
 }
 
+model StudentFee {
+  id        String   @id @default(uuid())
+  studentId String
+  feeId     String
+  createdAt DateTime @default(now())
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  fee     Fee     @relation(fields: [feeId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, feeId])
+  @@index([studentId])
+  @@index([feeId])
+}
+
 model Payment {
   id            String   @id @default(uuid())
-  platformId    String?  // Multi-tenant isolation
+  platformId    String? // Multi-tenant isolation
   studentId     String
-  feeId         String?  // Optional: Link to a specific fee
-  feeName       String?  // e.g., Scolarité 1ère Tranche
+  feeId         String? // Optional: Link to a specific fee
+  feeName       String? // e.g., Scolarité 1ère Tranche
   amount        Float
-  method        String   // CASH, MOBILE_MONEY, CARD, TRANSFER
-  receiptNumber String   // Unique per establishment handled by logic
+  method        String // CASH, MOBILE_MONEY, CARD, TRANSFER
+  receiptNumber String // Unique per establishment handled by logic
   paymentDate   DateTime @default(now())
   notes         String?
-  
+
   establishmentId String
   establishment   Establishment @relation(fields: [establishmentId], references: [id])
-  
-  student       Student  @relation(fields: [studentId], references: [id])
+
+  student Student @relation(fields: [studentId], references: [id])
 
   @@unique([receiptNumber, establishmentId])
   @@index([establishmentId])
@@ -246,43 +263,43 @@ model Payment {
 }
 
 model Document {
-  id        String   @id @default(uuid())
-  name      String   // Birth Certificate, Photo, etc.
-  type      String
-  url       String
-  status    String   @default("VALID") // VALID, EXPIRED, PENDING
+  id         String    @id @default(uuid())
+  name       String // Birth Certificate, Photo, etc.
+  type       String
+  url        String
+  status     String    @default("VALID") // VALID, EXPIRED, PENDING
   expiryDate DateTime?
-  studentId String
-  student   Student  @relation(fields: [studentId], references: [id])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  studentId  String
+  student    Student   @relation(fields: [studentId], references: [id])
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 
   @@index([studentId])
 }
 
 model SchoolHistory {
-  id           String   @id @default(uuid())
-  studentId    String
-  schoolYear   String   // e.g., 2023-2024
-  className    String
-  schoolName   String   @default("EDUSOFT")
-  result       String   // ADMIS, REDOUBLANT, EXCLU, TRANSFERE
-  average      Float?
-  student      Student  @relation(fields: [studentId], references: [id])
+  id         String  @id @default(uuid())
+  studentId  String
+  schoolYear String // e.g., 2023-2024
+  className  String
+  schoolName String  @default("EDUSOFT")
+  result     String // ADMIS, REDOUBLANT, EXCLU, TRANSFERE
+  average    Float?
+  student    Student @relation(fields: [studentId], references: [id])
 
   @@index([studentId])
 }
 
 model AuditLog {
-  id        String   @id @default(uuid())
-  action    String
-  userId    String
-  details   String?  @db.Text
-  ip        String?
-  
+  id      String  @id @default(uuid())
+  action  String
+  userId  String
+  details String? @db.Text
+  ip      String?
+
   establishmentId String?
   establishment   Establishment? @relation(fields: [establishmentId], references: [id])
-  
+
   user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
 
@@ -291,20 +308,20 @@ model AuditLog {
 }
 
 model TeacherPayment {
-  id            String   @id @default(uuid())
-  platformId    String?  // Multi-tenant isolation
-  teacherId     String
-  amount        Float
-  paymentDate   DateTime @default(now())
-  period        String   // e.g., "2025-10" for October 2025
-  type          String   @default("SALARY") // SALARY, HOURLY, ADVANCE, BONUS
-  notes         String?
-  reference     String?  // Check No, Transaction ID
-  
+  id          String   @id @default(uuid())
+  platformId  String? // Multi-tenant isolation
+  teacherId   String
+  amount      Float
+  paymentDate DateTime @default(now())
+  period      String // e.g., "2025-10" for October 2025
+  type        String   @default("SALARY") // SALARY, HOURLY, ADVANCE, BONUS
+  notes       String?
+  reference   String? // Check No, Transaction ID
+
   establishmentId String
   establishment   Establishment @relation(fields: [establishmentId], references: [id])
-  
-  teacher       User     @relation(fields: [teacherId], references: [id])
+
+  teacher User @relation(fields: [teacherId], references: [id])
 
   @@index([establishmentId])
   @@index([teacherId])
@@ -312,64 +329,64 @@ model TeacherPayment {
 }
 
 model Subject {
-  id              String      @id @default(uuid())
-  name            String
-  code            String?     // e.g., MATH, PHYS, ENG
-  coefficient     Float       @default(1.0)
-  
+  id          String  @id @default(uuid())
+  name        String
+  code        String? // e.g., MATH, PHYS, ENG
+  coefficient Float   @default(1.0)
+
   establishmentId String
   establishment   Establishment @relation(fields: [establishmentId], references: [id])
-  
-  classId         String
-  class           Class       @relation(fields: [classId], references: [id])
-  
-  grades          Grade[]
-  
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+
+  classId String
+  class   Class  @relation(fields: [classId], references: [id])
+
+  grades Grade[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([establishmentId])
   @@index([classId])
 }
 
 model Term {
-  id              String      @id @default(uuid())
-  name            String      // e.g., 1er Trimestre, 2ème Trimestre, 3ème Trimestre
-  startDate       DateTime?
-  endDate         DateTime?
-  
-  schoolYearId    String
-  schoolYear      SchoolYear  @relation(fields: [schoolYearId], references: [id])
-  
-  grades          Grade[]
-  
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  
+  id        String    @id @default(uuid())
+  name      String // e.g., 1er Trimestre, 2ème Trimestre, 3ème Trimestre
+  startDate DateTime?
+  endDate   DateTime?
+
+  schoolYearId String
+  schoolYear   SchoolYear @relation(fields: [schoolYearId], references: [id])
+
+  grades Grade[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@unique([name, schoolYearId])
   @@index([schoolYearId])
 }
 
 model Grade {
-  id              String      @id @default(uuid())
-  value           Float       // The grade itself (e.g., 15.5)
-  weight          Float       @default(1.0) // For specific test weight
-  type            String      @default("TEST") // TEST (Interro), EXAM (Composition)
-  date            DateTime    @default(now())
-  
-  studentId       String
-  student         Student     @relation(fields: [studentId], references: [id])
-  
-  subjectId       String
-  subject         Subject     @relation(fields: [subjectId], references: [id])
-  
-  termId          String
-  term            Term        @relation(fields: [termId], references: [id])
-  
-  teacherId       String?
-  
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  id     String   @id @default(uuid())
+  value  Float // The grade itself (e.g., 15.5)
+  weight Float    @default(1.0) // For specific test weight
+  type   String   @default("TEST") // TEST (Interro), EXAM (Composition)
+  date   DateTime @default(now())
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id])
+
+  subjectId String
+  subject   Subject @relation(fields: [subjectId], references: [id])
+
+  termId String
+  term   Term   @relation(fields: [termId], references: [id])
+
+  teacherId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([studentId])
   @@index([subjectId])
@@ -377,25 +394,25 @@ model Grade {
 }
 
 model Expense {
-  id              String   @id @default(uuid())
-  platformId      String?  @map("platform_id")
-  description     String
-  amount          Float
-  category        String   // ACHAT, SALAIRE, LOYRE, MAINTENANCE, TRANSPORT, DIVERS
-  date            DateTime @default(now())
-  notes           String?
-  spentBy         String?  // Person who made the expense
-  receiptUrl      String?  @map("receipt_url")
-  method          String   @default("CASH") // CASH, MOBILE_MONEY, TRANSFER
-  
-  establishmentId String   @map("establishment_id")
-  establishment   Establishment @relation(fields: [establishmentId], references: [id])
-  
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  id          String   @id @default(uuid())
+  platformId  String?  @map("platform_id")
+  description String
+  amount      Float
+  category    String // ACHAT, SALAIRE, LOYRE, MAINTENANCE, TRANSPORT, DIVERS
+  date        DateTime @default(now())
+  notes       String?
+  spentBy     String? // Person who made the expense
+  receiptUrl  String?  @map("receipt_url")
+  method      String   @default("CASH") // CASH, MOBILE_MONEY, TRANSFER
 
-  @@map("expenses")
+  establishmentId String        @map("establishment_id")
+  establishment   Establishment @relation(fields: [establishmentId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
   @@index([establishmentId])
   @@index([platformId])
   @@index([date])
+  @@map("expenses")
 }

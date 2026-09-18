@@ -185,7 +185,7 @@ const ManagementDashboard = ({ data, navigate }) => {
                         <tbody>
                             {management.recentPayments.map(p => (
                                 <tr key={p.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                                    <td data-label="Élève" style={{ padding: '1rem 1.5rem', fontWeight: '700' }}>{p.student.lastName} {p.student.firstName}</td>
+                                    <td data-label="Élève" style={{ padding: '1rem 1.5rem', fontWeight: '700' }}>{p.student.lastName?.toUpperCase() || p.student.lastName} {p.student.firstName}</td>
                                     <td data-label="Date" style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: '#64748b' }}>{new Date(p.paymentDate).toLocaleDateString()}</td>
                                     <td data-label="Montant" style={{ padding: '1rem 1.5rem', textAlign: 'right', fontWeight: '900', color: 'var(--primary)' }}>{p.amount.toLocaleString()} FCFA</td>
                                 </tr>

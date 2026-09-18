@@ -121,7 +121,7 @@ const Payments = () => {
 
     const selectStudent = (student) => {
         setSelectedStudent(student);
-        setSearchTerm(`${student.firstName} ${student.lastName}`);
+        setSearchTerm(`${student.lastName?.toUpperCase() || student.lastName} ${student.firstName}`);
         setShowResults(false);
         // Default to first obligatory fee if available
         if (student.groupedFees?.OBLIGATORY?.length > 0) {
@@ -148,7 +148,7 @@ const Payments = () => {
             amount: parseFloat(amount),
             method,
             notes,
-            studentName: `${selectedStudent.firstName} ${selectedStudent.lastName}`,
+            studentName: `${selectedStudent.lastName?.toUpperCase() || selectedStudent.lastName} ${selectedStudent.firstName}`,
             studentClass: selectedStudent.class,
             feeCategory: selectedFee?.category
         });
@@ -319,7 +319,7 @@ const Payments = () => {
                                                 className="search-item"
                                             >
                                                 <div>
-                                                    <div style={{ fontWeight: '700', color: 'var(--primary-dark)' }}>{s.firstName} {s.lastName}</div>
+                                                    <div style={{ fontWeight: '700', color: 'var(--primary-dark)' }}>{s.lastName?.toUpperCase() || s.lastName} {s.firstName}</div>
                                                     <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{s.regNumber} • {s.class}</div>
                                                 </div>
                                                 <div style={{ textAlign: 'right' }}>
@@ -345,7 +345,7 @@ const Payments = () => {
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
                                             <User size={16} color="var(--primary)" />
                                             <span style={{ fontWeight: '800', color: 'var(--primary-dark)', fontSize: '1.1rem' }}>
-                                                {selectedStudent.firstName} {selectedStudent.lastName}
+                                                {selectedStudent.lastName?.toUpperCase() || selectedStudent.lastName} {selectedStudent.firstName}
                                             </span>
                                         </div>
                                         <div style={{ display: 'flex', gap: '1rem', fontSize: '0.9rem', color: '#666' }}>
@@ -518,7 +518,7 @@ const Payments = () => {
                                             <FileText size={20} />
                                         </div>
                                         <div>
-                                            <div style={{ fontWeight: '700', fontSize: '0.95rem' }}>{p.student?.lastName || '---'} {p.student?.firstName || ''}</div>
+                                            <div style={{ fontWeight: '700', fontSize: '0.95rem' }}>{p.student?.lastName?.toUpperCase() || '---'} {p.student?.firstName || ''}</div>
                                             <div style={{ fontSize: '0.75rem', color: '#666' }}>
                                                 {(p.receiptNumber || '---')} • {p.paymentDate ? new Date(p.paymentDate).toLocaleDateString('fr-FR') : '---'}
                                             </div>
