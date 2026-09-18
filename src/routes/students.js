@@ -588,7 +588,7 @@ router.get('/:id/card', protect, async (req, res) => {
 
 // @desc    Delete a student completely
 // @route   DELETE /api/students/:id
-router.delete('/:id', protect, authorize('SUPER_ADMIN', 'ADMIN'), async (req, res) => {
+router.delete('/:id', protect, authorize('SUPER_ADMIN', 'ADMIN', 'FOUNDER'), async (req, res) => {
     try {
         const studentId = req.params.id;
 

@@ -563,7 +563,7 @@ const Students = () => {
                                                     <button className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => openDetails(student)}>
                                                         Détails
                                                     </button>
-                                                    {user && ['SUPER_ADMIN', 'ADMIN', 'DIRECTOR', 'CENSEUR'].includes(user.role) && (
+                                                    {user && ['SUPER_ADMIN', 'ADMIN', 'FOUNDER', 'DIRECTOR', 'CENSEUR'].includes(user.role) && (
                                                         <>
                                                             <button className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', borderColor: '#eab308', color: '#eab308' }} onClick={() => openDetails(student)} title="Modifier">
                                                                 <Edit size={14} />
@@ -834,7 +834,7 @@ const Students = () => {
                                             <h4 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--primary-dark)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                                 <FileText size={18} /> Détails de la Scolarité et des Frais
                                             </h4>
-                                            {user && ['SUPER_ADMIN', 'ADMIN', 'DIRECTOR'].includes(user.role) && !feesEditMode && (
+                                            {user && ['SUPER_ADMIN', 'ADMIN', 'FOUNDER', 'DIRECTOR'].includes(user.role) && !feesEditMode && (
                                                 <button className="btn btn-outline" onClick={() => {
                                                     let currentSelectedFees = new Set();
                                                     if (selectedStudent.internalNotes && selectedStudent.internalNotes.includes('[FRAIS_CHOISIS:')) {
