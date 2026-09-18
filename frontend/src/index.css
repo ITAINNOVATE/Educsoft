@@ -258,6 +258,10 @@ input {
 }
 
 @media (max-width: 768px) {
+    .app-container {
+        flex-direction: column;
+    }
+    
     .sidebar {
         position: fixed;
         height: 100vh;
@@ -290,6 +294,7 @@ input {
     .main-content {
         width: 100% !important;
         padding-top: 0;
+        height: calc(100vh - 60px); /* Adjust based on mobile header height */
     }
 
     .grid-resp-2, .grid-resp-3 {

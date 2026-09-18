@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ProductProvider } from './context/ProductContext';
-import Login from './pages/Login';
-import Configuration from './pages/Configuration';
-import Students from './pages/Students';
-import Payments from './pages/Payments';
-import Dashboard from './pages/Dashboard';
-import Users from './pages/Users';
-import Accounting from './pages/Accounting';
-import SuperAdmin from './pages/SuperAdmin';
-import EstablishmentUsers from './pages/EstablishmentUsers';
-import Grades from './pages/Grades';
-import Expenses from './pages/Expenses';
+const Login = React.lazy(() => import('./pages/Login'));
+const Configuration = React.lazy(() => import('./pages/Configuration'));
+const Students = React.lazy(() => import('./pages/Students'));
+const Payments = React.lazy(() => import('./pages/Payments'));
+const Dashboard = React.lazy(() => import('./pages/Dashboard'));
+const Users = React.lazy(() => import('./pages/Users'));
+const Accounting = React.lazy(() => import('./pages/Accounting'));
+const SuperAdmin = React.lazy(() => import('./pages/SuperAdmin'));
+const EstablishmentUsers = React.lazy(() => import('./pages/EstablishmentUsers'));
+const Grades = React.lazy(() => import('./pages/Grades'));
+const Expenses = React.lazy(() => import('./pages/Expenses'));
 import axios from 'axios';
 import config from './config';
 import './index.css';
@@ -214,7 +214,8 @@ function App() {
       <Router>
         <AuthProvider>
           <ProductProvider>
-            <Routes>
+            <Suspense fallback={<div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", color: "var(--primary)", backgroundColor: "var(--bg-main)" }}><h2>Chargement de la plateforme...</h2></div>}>
+          <Routes>
               <Route path="/login" element={<Login />} />
               <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
                 <Route path="/dashboard" element={<Dashboard />} />
@@ -249,6 +250,7 @@ function App() {
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
+          </Suspense>
           </ProductProvider>
         </AuthProvider>
       </Router>
